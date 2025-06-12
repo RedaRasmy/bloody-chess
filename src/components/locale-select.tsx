@@ -29,7 +29,7 @@ export function LocaleSelect() {
         <Select
             onValueChange={handleChange}
         >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="sm:w-[180px] w-[120px] ">
                 <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent>

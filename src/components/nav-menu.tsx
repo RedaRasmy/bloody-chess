@@ -3,25 +3,31 @@
 import { signIn , signOut , useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { LocaleSelect } from "./locale-select";
-// import Image from "next/image";
+import Image from "next/image";
 
 export default function NavMenu() {
     const {data : session} = useSession()
     return (
-        <div className="flex gap-4 py-2 px-4 bg-accent justify-between">
-            {/* <Image alt="chess-piece" src="public/red-chess-piece.ico" width={20} height={20}/> */}
+        <div className="flex items-center gap-4 md:py-3 py-2 md:px-4 px-2 bg-accent justify-between">
 
-            <LocaleSelect/>
-            {
-                session 
-                ?
-                    <>
-                        {/* {session.user?.name}  */}
-                        <Button className="cursor-pointer" onClick={()=> signOut()}>Sign out</Button>
-                    </>
-                :
-                    <Button className="cursor-pointer" onClick={()=> signIn()}>Sign in</Button>
-            }
+            <div className="flex items-center gap-2 ">
+                <Image alt="chess-piece" src="/images/red-rook.png" width={40} height={40}/>
+                <h1 className="font-bold md:text-2xl text-xl font-serif tracking-tighter ">Bloody Chess</h1>
+            </div>
+
+            <div className="flex gap-2 md:gap-4">
+                <LocaleSelect/>
+                {
+                    session 
+                    ?
+                        <>
+                            {/* {session.user?.name}  */}
+                            <Button className="cursor-pointer" onClick={()=> signOut()}>Sign out</Button>
+                        </>
+                    :
+                        <Button className="cursor-pointer" onClick={()=> signIn()}>Sign in</Button>
+                }
+            </div>
         </div>
     )
 }
