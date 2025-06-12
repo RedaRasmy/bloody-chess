@@ -43,7 +43,7 @@ export default async function RootLayout({
     return (
         <html lang={locale} >
         <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex-col flex`}
         >
             <StoreProvider>
                 <NextIntlClientProvider>
