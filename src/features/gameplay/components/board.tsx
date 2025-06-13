@@ -1,11 +1,13 @@
 'use client'
 import Square  from "./square"
 import { useAppSelector } from "@/redux/hooks"
-import { selectBoard } from "@/redux/slices/game-slice"
+import { selectAllowedSquares, selectBoard } from "@/redux/slices/game-slice"
+import { indexToSquare } from "../utils/index-to-square"
 
 export default function Board() {
 
     const board = useAppSelector(selectBoard).flat()
+    const allowedSquares = useAppSelector(selectAllowedSquares)
 
   return (
     <div className="lg:w-130 w-90 md:portrait:w-140 not-sm:m-5 relative after:[content:''] after:block after:pt-[100%] ">
@@ -14,7 +16,7 @@ export default function Board() {
             {
                 board.map((p,i) => {
                     const squareColor = getSquareColor(i)
-                   return <Square color={squareColor} piece={p} key={i} />
+                   return <Square name={indexToSquare(i)} color={squareColor} piece={p} key={i} isToMove={allowedSquares.includes(indexToSquare(i))} />
                 })
             }
         </div>
