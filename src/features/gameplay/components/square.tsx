@@ -5,9 +5,10 @@ import { getPieceName } from '../utils/getPieceName';
 import Image from 'next/image';
 import { BoardElement } from '../types';
 
-export default function Square({color,piece}:{
+export default function Square({color,piece,toMove=false}:{
     color : Color,
-    piece : BoardElement
+    piece : BoardElement,
+    toMove?: boolean,
 }) {
   return (
     <div className={cn("bg-amber-100 flex justify-center items-center" , {
@@ -15,6 +16,7 @@ export default function Square({color,piece}:{
         'bg-red-700' : color === 'b'
     } )}>
         {piece  && <Piece type={piece.type} color={piece.color} /> }
+        {toMove && <div className='size-8 bg-gray-500/60 rounded-full z-10 absolute'/>}
     </div>
   )
 }
