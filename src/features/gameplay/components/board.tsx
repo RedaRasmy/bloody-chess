@@ -1,34 +1,27 @@
+'use client'
 import Image from "next/image"
 import { getPieceName } from "../utils/getPieceName"
-import { Square } from "../types"
+import { useAppSelector } from "@/redux/hooks"
+import { selectBoard } from "@/redux/slices/game-slice"
 
-export default function Board({state}:{
-    state : string
-}) {
-    const squares : Square[] = Array.from({length:64},(_,i)=> {
-        const row = Math.floor(i/8)
-        const col = i % 8
-        return {
-            index : i,
-            color : (row+col) % 2 === 0 ? 'white' : 'black',
-            content : 'b',
-            name : 'f3'
-        }
-    })
+export default function Board() {
+
+    const board = useAppSelector(selectBoard).flat()
 
   return (
     <div className="lg:w-130 w-90 md:portrait:w-140 not-sm:m-5 relative after:[content:''] after:block after:pt-[100%] ">
 
         <div className="absolute w-full h-full bg-black grid grid-cols-8 grid-rows-8">
             {
-                squares.map(sq => {
-                    if (sq.color == 'white') {
-                        return <div key={sq.index} className="bg-amber-100 flex justify-center items-center">
-                            {sq.content && <Piece char={sq.content} /> }
+                board.map((p,i) => {
+                    const squareColor = getSquareColor(i)
+                   if (squareColor == 'w') {
+                        return <div key={i} className="bg-amber-100 flex justify-center items-center">
+                            {p  && <Piece type={p.type} color={p.color} /> }
                         </div>
                     } else {
-                        return <div key={sq.index} className="bg-red-700 flex justify-center items-center">
-                            {sq.content && <Piece char={sq.content} /> }
+                        return <div key={i} className="bg-red-700 flex justify-center items-center">
+                            {p && <Piece type={p.type} color={p.color} /> }
                         </div>
                     }
                 })
@@ -38,14 +31,23 @@ export default function Board({state}:{
   )
 }
 
-
-
-function Piece({char}:{
-    char : string // example : p , P , N , n , ...
+function Piece({type,color}:{
+    type : string // example : p , n , ...
+    color : 'w' | 'b'
 }) {
     /// black is uppercase , white is lowercase
-    const color = char.toUpperCase() === char ? "black" : "white"
-    const name = getPieceName(char)
+    const colorName = color == 'b' ? "black" : "white"
+    const name = getPieceName(type)
 
-    return <Image alt={char} width={55} height={55} src={`/images/chess-pieces/${color}-${name}.png`} />
+    return <Image 
+        alt={type} width={55} height={55} src={`/images/chess-pieces/${colorName}-${name}.png`}
+        className="cursor-grab"
+    />
+}
+
+function getSquareColor(index:number): "w" | 'b' {
+    const row = Math.floor(index/8)
+    const col = index % 8
+
+    return (row+col) % 2 === 0 ? 'w' : 'b'
 }

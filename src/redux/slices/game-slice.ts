@@ -1,22 +1,17 @@
 // import type { PayloadAction } from "@reduxjs/toolkit"
-// import { Move, Square } from "@/features/gameplay/types"
 import { createSlice } from "@reduxjs/toolkit"
+import {Chess} from 'chess.js'
+import { RootState } from "../store"
 
-export type  GameState = {
-    color : 'black' | 'white'
-    // board : Square[]
 
-}
+const initialState = new Chess()
 
-const initialState = {
-    color : 'white'
-}
 
 const gameSlice = createSlice({
     name: "game-state",
     initialState,
     reducers: {
-        // move : (state,{payload}:PayloadAction<Move>) => {
+        // move : (state,{payload}) => {
 
         // }
     },
@@ -26,3 +21,9 @@ const gameSlice = createSlice({
 export const {} = gameSlice.actions
 
 export default gameSlice.reducer
+
+
+// Selectors 
+
+export const selectBoard = (state:RootState) => state.game.board() 
+

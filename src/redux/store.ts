@@ -4,7 +4,7 @@ import gameSlice from "./slices/game-slice"
 export const makeStore = () => {
     return configureStore({
         reducer: {
-            example: gameSlice,
+            game: gameSlice,
         },
     })
 }
