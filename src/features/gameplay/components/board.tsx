@@ -1,6 +1,5 @@
 'use client'
-import Image from "next/image"
-import { getPieceName } from "../utils/getPieceName"
+import Square  from "./square"
 import { useAppSelector } from "@/redux/hooks"
 import { selectBoard } from "@/redux/slices/game-slice"
 
@@ -15,15 +14,7 @@ export default function Board() {
             {
                 board.map((p,i) => {
                     const squareColor = getSquareColor(i)
-                   if (squareColor == 'w') {
-                        return <div key={i} className="bg-amber-100 flex justify-center items-center">
-                            {p  && <Piece type={p.type} color={p.color} /> }
-                        </div>
-                    } else {
-                        return <div key={i} className="bg-red-700 flex justify-center items-center">
-                            {p && <Piece type={p.type} color={p.color} /> }
-                        </div>
-                    }
+                   return <Square color={squareColor} piece={p} key={i} />
                 })
             }
         </div>
@@ -31,19 +22,7 @@ export default function Board() {
   )
 }
 
-function Piece({type,color}:{
-    type : string // example : p , n , ...
-    color : 'w' | 'b'
-}) {
-    /// black is uppercase , white is lowercase
-    const colorName = color == 'b' ? "black" : "white"
-    const name = getPieceName(type)
 
-    return <Image 
-        alt={type} width={55} height={55} src={`/images/chess-pieces/${colorName}-${name}.png`}
-        className="cursor-grab"
-    />
-}
 
 function getSquareColor(index:number): "w" | 'b' {
     const row = Math.floor(index/8)
