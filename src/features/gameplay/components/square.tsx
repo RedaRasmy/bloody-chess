@@ -1,16 +1,13 @@
 import { cn } from '@/lib/utils';
-import type { Color, PieceSymbol, Square } from 'chess.js';
+import type { Color, Square } from 'chess.js';
 import React from 'react'
 import { getPieceName } from '../utils/getPieceName';
 import Image from 'next/image';
+import { BoardElement } from '../types';
 
 export default function Square({color,piece}:{
     color : Color,
-    piece : {
-        square: Square;
-        type: PieceSymbol;
-        color: Color;
-    } | null
+    piece : BoardElement
 }) {
   return (
     <div className={cn("bg-amber-100 flex justify-center items-center" , {
@@ -32,6 +29,6 @@ function Piece({type,color}:{
 
     return <Image
         alt={type} width={55} height={55} src={`/images/chess-pieces/${colorName}-${name}.png`}
-        className="cursor-grab"
+        className="cursor-pointer"
     />
 }
