@@ -33,7 +33,6 @@ export default function Square({name , color,piece,isToMove=false}:{
         >
         {piece  && <Piece type={piece.type} color={piece.color} /> }
         {isToMove && <div className='md:size-7 size-5 bg-gray-500/60 rounded-full z-10 absolute'/>}
-        {/* {piece?.square} */}
     </div>
   )
 }
