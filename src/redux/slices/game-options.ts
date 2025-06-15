@@ -12,7 +12,7 @@ type GameOptions = {
 
 const initialState:GameOptions = {
     bot : {
-        level : 0,
+        level : 1,
         color : 'white'
     }
 }
@@ -23,7 +23,7 @@ const gameOptions = createSlice({
     reducers: {
         changeLevel : (state,action: PayloadAction<number>)=> {
             const lvl = action.payload
-            if (lvl < 0 || lvl > 15) return;
+            if (lvl < 1 || lvl > 15) return;
             state.bot.level = lvl
         },
         changeColor : (state,action: PayloadAction<ColorOption>)=> {

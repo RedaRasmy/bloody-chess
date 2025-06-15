@@ -7,3 +7,14 @@ export type BoardElement = {
         type: PieceSymbol;
         color: Color;
 } | null
+
+export type EngineResponse = {
+        success : true
+        bestmove : string
+        eval : number | null
+        mate : number | null
+        continuation : string
+} | {
+        success : false
+        data : string
+}

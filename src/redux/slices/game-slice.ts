@@ -6,7 +6,8 @@ import { RootState } from "../store"
 const initialState = {
     fen : new Chess().fen(),
     allowedSquares : [] as Square[] ,
-    activePiece : undefined as Square | undefined
+    activePiece : undefined as Square | undefined,
+    playerTurn : true
 }
 
 const gameSlice = createSlice({
@@ -15,7 +16,7 @@ const gameSlice = createSlice({
     reducers: {
         move : (state,{payload:destination}:PayloadAction<Square>) => {
             const pieceToMove = state.activePiece
-            if (!pieceToMove) return;
+            if (!pieceToMove) throw new Error("No active piece");
             const chess = new Chess(state.fen)
 
             chess.move({
@@ -27,6 +28,25 @@ const gameSlice = createSlice({
             // clear moving states
             state.activePiece = undefined
             state.allowedSquares = []
+
+            // change currentPlayer
+            state.playerTurn = !state.playerTurn
+
+        },
+        opponentMove : (state,action:PayloadAction<{from:Square,to:Square}>) => {
+            const {from,to} = action.payload
+            const chess = new Chess(state.fen)
+            chess.move({
+                from,
+                to 
+            })
+            state.fen = chess.fen()
+            // clear moving states
+            state.activePiece = undefined
+            state.allowedSquares = []
+
+            // change currentPlayer
+            state.playerTurn = !state.playerTurn
 
         },
         toMove : (state,{payload:pieceSquare}:PayloadAction<Square>) => {
@@ -42,7 +62,7 @@ const gameSlice = createSlice({
 })
 
 
-export const {toMove, move} = gameSlice.actions
+export const {toMove, move,opponentMove} = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -51,4 +71,6 @@ export default gameSlice.reducer
 
 export const selectBoard = (state:RootState) => new Chess(state.game.fen).board()
 export const selectAllowedSquares = (state:RootState) => state.game.allowedSquares
+export const selectFEN = (state:RootState) => state.game.fen
+export const selectPlayerTurn = (state:RootState) => state.game.playerTurn
 
