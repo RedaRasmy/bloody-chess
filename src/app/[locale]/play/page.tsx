@@ -1,4 +1,4 @@
-import Board from "@/features/gameplay/components/board";
+import Board from "@/features/gameplay/components/board"
 
 export default function page() {
     return (
