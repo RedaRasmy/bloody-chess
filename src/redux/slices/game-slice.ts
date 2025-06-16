@@ -1,13 +1,22 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
-import {Chess, Square} from 'chess.js'
+import {Chess, Color, Square} from 'chess.js'
 import { RootState } from "../store"
 
 const initialState = {
     fen : new Chess().fen(),
     allowedSquares : [] as Square[] ,
     activePiece : undefined as Square | undefined,
-    playerTurn : true
+    playerTurn : true,
+    isCheckmate : false,
+    isDraw : false ,
+    isStalemate : false,
+    isCheck : false,
+    isInsufficientMaterial : false,
+    isThreefoldRepetition : false,
+    isDrawByFiftyMoves : false,
+    isGameOver : false ,
+    winner : undefined as undefined | Color,
 }
 
 const gameSlice = createSlice({
@@ -31,7 +40,18 @@ const gameSlice = createSlice({
 
             // change currentPlayer
             state.playerTurn = !state.playerTurn
-
+            state.isCheckmate = chess.isCheckmate() 
+            state.isCheck = chess.isCheck() 
+            state.isDraw = chess.isDraw() 
+            state.isStalemate = chess.isStalemate() 
+            state.isInsufficientMaterial = chess.isInsufficientMaterial()
+            state.isThreefoldRepetition = chess.isThreefoldRepetition()
+            state.isDrawByFiftyMoves = chess.isDrawByFiftyMoves()
+            state.isGameOver = chess.isGameOver()
+            if (chess.isCheckmate()) {
+                state.winner = chess.turn() === 'w' ? 'b' : 'w'
+            }
+        
         },
         opponentMove : (state,action:PayloadAction<{from:Square,to:Square}>) => {
             const {from,to} = action.payload
