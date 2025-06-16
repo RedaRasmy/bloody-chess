@@ -9,7 +9,8 @@ import {
     move,
     opponentMove,
     selectFEN,
-    selectPlayerTurn,
+    selectIsPlayerTurn,
+    selectPlayerColor,
     toMove,
 } from "@/redux/slices/game-slice"
 import { getEngineResponse } from "../server-actions/chess-engine"
@@ -29,10 +30,11 @@ export default function Square({
     const dispatch = useAppDispatch()
     const fen = useAppSelector(selectFEN)
     const { level } = useAppSelector(selectBotOptions)
-    const playerTurn = useAppSelector(selectPlayerTurn)
+    const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
+    
 
     useEffect(() => {
-        if (!playerTurn) {
+        if (!isPlayerTurn) {
             // after player moves, it’s opponent's turn
             async function fetchBestMove() {
                 const res = await getEngineResponse(fen, level)
@@ -48,7 +50,7 @@ export default function Square({
             }
             fetchBestMove()
         }
-    }, [fen, playerTurn])
+    }, [fen, isPlayerTurn])
 
     async function handleClick() {
         if (isToMove) {
@@ -84,6 +86,8 @@ function Piece({
     /// black is uppercase , white is lowercase
     const colorName = color == "b" ? "black" : "white"
     const name = getPieceName(type)
+    const playerColor = useAppSelector(selectPlayerColor)
+
 
     return (
         <Image
@@ -91,7 +95,9 @@ function Piece({
             width={55}
             height={55}
             src={`/images/chess-pieces/${colorName}-${name}.png`}
-            className="cursor-pointer"
+            className={cn("cursor-pointer",{
+                'rotate-180' : playerColor === 'b'
+            })}
         />
     )
 }

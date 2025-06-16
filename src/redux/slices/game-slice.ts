@@ -2,12 +2,13 @@ import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
 import {Chess, Color, Square} from 'chess.js'
 import { RootState } from "../store"
+import { changeColor } from "./game-options"
 
 const initialState = {
     fen : new Chess().fen(),
     allowedSquares : [] as Square[] ,
     activePiece : undefined as Square | undefined,
-    playerTurn : true,
+    isPlayerTurn : true,
     isCheckmate : false,
     isDraw : false ,
     isStalemate : false,
@@ -17,6 +18,7 @@ const initialState = {
     isDrawByFiftyMoves : false,
     isGameOver : false ,
     winner : undefined as undefined | Color,
+    playerColor : 'w' as Color
 }
 
 const gameSlice = createSlice({
@@ -39,7 +41,7 @@ const gameSlice = createSlice({
             state.allowedSquares = []
 
             // change currentPlayer
-            state.playerTurn = !state.playerTurn
+            state.isPlayerTurn = !state.isPlayerTurn
             state.isCheckmate = chess.isCheckmate() 
             state.isCheck = chess.isCheck() 
             state.isDraw = chess.isDraw() 
@@ -66,7 +68,7 @@ const gameSlice = createSlice({
             state.allowedSquares = []
 
             // change currentPlayer
-            state.playerTurn = !state.playerTurn
+            state.isPlayerTurn = !state.isPlayerTurn
 
         },
         toMove : (state,{payload:pieceSquare}:PayloadAction<Square>) => {
@@ -79,6 +81,22 @@ const gameSlice = createSlice({
             state.activePiece = pieceSquare
         }
     },
+    extraReducers : (builder) => {
+        builder 
+            .addCase(changeColor,(state,action)=>{
+                const color = action.payload
+                // const chess = new Chess(state.fen)
+
+                if (color == 'black') {
+                    state.isPlayerTurn = false
+                    state.playerColor = 'b'
+                } else if (color == 'random') {
+                    const randomColor:Color = Math.random() > 0.5 ? 'w' : 'b'
+                    state.isPlayerTurn = randomColor == 'w'
+                    state.playerColor = randomColor
+                }
+            })
+    }
 })
 
 
@@ -92,5 +110,6 @@ export default gameSlice.reducer
 export const selectBoard = (state:RootState) => new Chess(state.game.fen).board()
 export const selectAllowedSquares = (state:RootState) => state.game.allowedSquares
 export const selectFEN = (state:RootState) => state.game.fen
-export const selectPlayerTurn = (state:RootState) => state.game.playerTurn
+export const selectIsPlayerTurn = (state:RootState) => state.game.isPlayerTurn
+export const selectPlayerColor = (state:RootState) => state.game.playerColor
 
