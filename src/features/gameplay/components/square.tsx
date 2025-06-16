@@ -7,7 +7,7 @@ import { BoardElement } from "../types"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
     move,
-    opponentMove,
+    selectActivePieceSquare,
     selectFEN,
     selectIsPlayerTurn,
     selectPlayerColor,
@@ -31,6 +31,7 @@ export default function Square({
     const fen = useAppSelector(selectFEN)
     const { level } = useAppSelector(selectBotOptions)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
+    const activePieceSquare = useAppSelector(selectActivePieceSquare)
     
 
     useEffect(() => {
@@ -41,7 +42,7 @@ export default function Square({
                 if (res.success) {
                     const bestMove = res.bestmove.split(" ")[1]
                     dispatch(
-                        opponentMove({
+                        move({
                             from: bestMove.slice(0, 2) as Square,
                             to: bestMove.slice(2) as Square,
                         })
@@ -55,7 +56,8 @@ export default function Square({
 
     async function handleClick() {
         if (isToMove) {
-            dispatch(move(name as Square))
+            if (!activePieceSquare) throw new Error("activePieceSquare shouldn't be undefined while isToMove is true ")
+            dispatch(move({from:activePieceSquare,to:name as Square}))
         } else {
             if (piece) dispatch(toMove(piece.square))
         }

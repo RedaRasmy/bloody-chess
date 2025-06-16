@@ -1,118 +1,104 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
-import {Chess, Color, Square} from 'chess.js'
+import { Chess, Color, Square } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
 
 const initialState = {
-    fen : new Chess().fen(),
-    allowedSquares : [] as Square[] ,
-    activePiece : undefined as Square | undefined,
-    isPlayerTurn : true,
-    isCheckmate : false,
-    isDraw : false ,
-    isStalemate : false,
-    isCheck : false,
-    isInsufficientMaterial : false,
-    isThreefoldRepetition : false,
-    isDrawByFiftyMoves : false,
-    isGameOver : false ,
-    winner : undefined as undefined | Color,
-    playerColor : 'w' as Color
+    fen: new Chess().fen(),
+    allowedSquares: [] as Square[],
+    activePieceSquare: undefined as Square | undefined,
+    isPlayerTurn: true,
+    isCheckmate: false,
+    isDraw: false,
+    isStalemate: false,
+    isCheck: false,
+    isInsufficientMaterial: false,
+    isThreefoldRepetition: false,
+    isDrawByFiftyMoves: false,
+    isGameOver: false,
+    winner: undefined as undefined | Color,
+    playerColor: "w" as Color,
 }
 
 const gameSlice = createSlice({
     name: "game-state",
     initialState,
     reducers: {
-        move : (state,{payload:destination}:PayloadAction<Square>) => {
-            const pieceToMove = state.activePiece
-            if (!pieceToMove) throw new Error("No active piece");
+        move: (state, action: PayloadAction<{ from: Square; to: Square }>) => {
+            const { from, to } = action.payload
+
             const chess = new Chess(state.fen)
 
             chess.move({
-                from : pieceToMove,
-                to : destination
+                from,
+                to,
             })
 
             state.fen = chess.fen()
             // clear moving states
-            state.activePiece = undefined
+            state.activePieceSquare = undefined
             state.allowedSquares = []
 
             // change currentPlayer
             state.isPlayerTurn = !state.isPlayerTurn
-            state.isCheckmate = chess.isCheckmate() 
-            state.isCheck = chess.isCheck() 
-            state.isDraw = chess.isDraw() 
-            state.isStalemate = chess.isStalemate() 
+
+            state.isCheckmate = chess.isCheckmate()
+            state.isCheck = chess.isCheck()
+            state.isDraw = chess.isDraw()
+            state.isStalemate = chess.isStalemate()
             state.isInsufficientMaterial = chess.isInsufficientMaterial()
             state.isThreefoldRepetition = chess.isThreefoldRepetition()
             state.isDrawByFiftyMoves = chess.isDrawByFiftyMoves()
             state.isGameOver = chess.isGameOver()
             if (chess.isCheckmate()) {
-                state.winner = chess.turn() === 'w' ? 'b' : 'w'
+                state.winner = chess.turn() === "w" ? "b" : "w"
             }
-        
         },
-        opponentMove : (state,action:PayloadAction<{from:Square,to:Square}>) => {
-            const {from,to} = action.payload
+        toMove: (state, { payload: pieceSquare }: PayloadAction<Square>) => {
             const chess = new Chess(state.fen)
-            chess.move({
-                from,
-                to 
-            })
-            state.fen = chess.fen()
-            // clear moving states
-            state.activePiece = undefined
-            state.allowedSquares = []
-
-            // change currentPlayer
-            state.isPlayerTurn = !state.isPlayerTurn
-
-        },
-        toMove : (state,{payload:pieceSquare}:PayloadAction<Square>) => {
-            const chess = new Chess(state.fen)
-            state.allowedSquares = chess.moves({
-                square : pieceSquare , verbose: true
-            }).map(m=>m.to)
+            state.allowedSquares = chess
+                .moves({
+                    square: pieceSquare,
+                    verbose: true,
+                })
+                .map((m) => m.to)
 
             console.log(state.allowedSquares)
-            state.activePiece = pieceSquare
-        }
+            state.activePieceSquare = pieceSquare
+        },
     },
-    extraReducers : (builder) => {
-        builder 
-            .addCase(changeColor,(state,action)=>{
-                const color = action.payload
-                // const chess = new Chess(state.fen)
+    extraReducers: (builder) => {
+        builder.addCase(changeColor, (state, action) => {
+            const color = action.payload
+            // const chess = new Chess(state.fen)
 
-                if (color == 'black') {
-                    state.isPlayerTurn = false
-                    state.playerColor = 'b'
-                } else if (color == 'random') {
-                    const randomColor:Color = Math.random() < 0.5 ? 'w' : 'b'
-                    state.isPlayerTurn = randomColor == 'w'
-                    state.playerColor = randomColor
-                } else {
-                    state.isPlayerTurn = true
-                    state.playerColor = 'w'
-                }
-            })
-    }
+            if (color == "black") {
+                state.isPlayerTurn = false
+                state.playerColor = "b"
+            } else if (color == "random") {
+                const randomColor: Color = Math.random() < 0.5 ? "w" : "b"
+                state.isPlayerTurn = randomColor == "w"
+                state.playerColor = randomColor
+            } else {
+                state.isPlayerTurn = true
+                state.playerColor = "w"
+            }
+        })
+    },
 })
 
-
-export const {toMove, move,opponentMove} = gameSlice.actions
+export const { toMove, move,  } = gameSlice.actions
 
 export default gameSlice.reducer
 
+// Selectors
 
-// Selectors 
-
-export const selectBoard = (state:RootState) => new Chess(state.game.fen).board()
-export const selectAllowedSquares = (state:RootState) => state.game.allowedSquares
-export const selectFEN = (state:RootState) => state.game.fen
-export const selectIsPlayerTurn = (state:RootState) => state.game.isPlayerTurn
-export const selectPlayerColor = (state:RootState) => state.game.playerColor
-
+export const selectBoard = (state: RootState) =>
+    new Chess(state.game.fen).board()
+export const selectAllowedSquares = (state: RootState) =>
+    state.game.allowedSquares
+export const selectFEN = (state: RootState) => state.game.fen
+export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
+export const selectPlayerColor = (state: RootState) => state.game.playerColor
+export const selectActivePieceSquare = (state: RootState) => state.game.activePieceSquare
