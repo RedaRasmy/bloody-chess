@@ -55,6 +55,7 @@ export default function Square({
     }, [fen, isPlayerTurn])
 
     async function handleClick() {
+        if (!isPlayerTurn) return;
         if (isToMove) {
             if (!activePieceSquare) throw new Error("activePieceSquare shouldn't be undefined while isToMove is true ")
             dispatch(move({from:activePieceSquare,to:name as Square}))
