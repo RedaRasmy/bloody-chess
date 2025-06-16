@@ -91,9 +91,12 @@ const gameSlice = createSlice({
                     state.isPlayerTurn = false
                     state.playerColor = 'b'
                 } else if (color == 'random') {
-                    const randomColor:Color = Math.random() > 0.5 ? 'w' : 'b'
+                    const randomColor:Color = Math.random() < 0.5 ? 'w' : 'b'
                     state.isPlayerTurn = randomColor == 'w'
                     state.playerColor = randomColor
+                } else {
+                    state.isPlayerTurn = true
+                    state.playerColor = 'w'
                 }
             })
     }

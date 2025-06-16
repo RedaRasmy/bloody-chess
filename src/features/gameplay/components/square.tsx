@@ -50,6 +50,7 @@ export default function Square({
             }
             fetchBestMove()
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fen, isPlayerTurn])
 
     async function handleClick() {
