@@ -3,13 +3,15 @@ export function getGameoverCause({
     isDrawByFiftyMoves,
     isInsufficientMaterial,
     isStalemate,
-    isThreefoldRepetition
+    isThreefoldRepetition,
+    isResign
 }:{
     isCheckmate : boolean,
     isDrawByFiftyMoves : boolean,
     isInsufficientMaterial : boolean,
     isStalemate : boolean,
-    isThreefoldRepetition : boolean
+    isThreefoldRepetition : boolean,
+    isResign : boolean
 }) {
     if (isCheckmate) {
         return 'Checkmate'
@@ -21,5 +23,7 @@ export function getGameoverCause({
         return "Stalemate"
     } else if (isThreefoldRepetition) {
         return "Threefold repetition"
+    } else if (isResign) {
+        return "Resignation"
     }
 }

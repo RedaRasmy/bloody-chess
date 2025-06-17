@@ -20,12 +20,18 @@ const initialState = {
     isGameOver: false,
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
+    isResign : false 
 }
 
 const gameSlice = createSlice({
     name: "game-state",
     initialState,
     reducers: {
+        resign : (state) => {
+            state.isResign = true
+            state.isGameOver = true
+            state.winner = state.playerColor === 'w' ? 'b' : 'w'
+        },
         replay : (state) => ({
             ...initialState,
             playerColor : state.playerColor,
@@ -95,7 +101,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { toMove, move , replay} = gameSlice.actions
+export const { toMove, move , replay , resign} = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -120,5 +126,6 @@ export const selectGameOverData = (state: RootState) => ({
         isInsufficientMaterial: state.game.isInsufficientMaterial,
         isStalemate: state.game.isStalemate,
         isThreefoldRepetition: state.game.isThreefoldRepetition,
+        isResign : state.game.isResign
     }),
 })
