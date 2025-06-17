@@ -48,6 +48,8 @@ const gameSlice = createSlice({
                 to,
             })
 
+            
+
             state.fen = chess.fen()
             // clear moving states
             state.activePieceSquare = undefined
