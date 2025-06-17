@@ -20,8 +20,8 @@ export default function BotOptionsDialog() {
     const botOptions = useAppSelector(selectBotOptions)
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>
+        <Dialog >
+            <DialogTrigger asChild >
                 <Button className="lg:w-sm w-50 py-6 cursor-pointer">
                     Play Bot
                 </Button>

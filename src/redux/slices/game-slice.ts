@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit"
 import { Chess, Color, Square } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
+import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
 
 const initialState = {
     fen: new Chess().fen(),
@@ -88,7 +89,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { toMove, move,  } = gameSlice.actions
+export const { toMove, move } = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -101,4 +102,17 @@ export const selectAllowedSquares = (state: RootState) =>
 export const selectFEN = (state: RootState) => state.game.fen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
-export const selectActivePieceSquare = (state: RootState) => state.game.activePieceSquare
+export const selectActivePieceSquare = (state: RootState) =>
+    state.game.activePieceSquare
+export const selectGameOverData = (state: RootState) => ({
+    isGameOver: state.game.isGameOver,
+    isDraw: state.game.isDraw,
+    isWin: state.game.winner === state.game.playerColor,
+    cause: getGameoverCause({
+        isCheckmate: state.game.isCheckmate,
+        isDrawByFiftyMoves: state.game.isDrawByFiftyMoves,
+        isInsufficientMaterial: state.game.isInsufficientMaterial,
+        isStalemate: state.game.isStalemate,
+        isThreefoldRepetition: state.game.isThreefoldRepetition,
+    }),
+})
