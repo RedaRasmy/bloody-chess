@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils"
 import { type Color, type Square } from "chess.js"
-import React, { useEffect } from "react"
 import { getPieceName } from "../utils/getPieceName"
 import Image from "next/image"
 import { BoardElement } from "../types"
@@ -8,13 +7,10 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
     move,
     selectActivePieceSquare,
-    selectFEN,
     selectIsPlayerTurn,
     selectPlayerColor,
     toMove,
 } from "@/redux/slices/game-slice"
-import { getEngineResponse } from "../server-actions/chess-engine"
-import { selectBotOptions } from "@/redux/slices/game-options"
 
 export default function Square({
     name,
@@ -28,32 +24,9 @@ export default function Square({
     isToMove?: boolean
 }) {
     const dispatch = useAppDispatch()
-    const fen = useAppSelector(selectFEN)
-    const { level } = useAppSelector(selectBotOptions)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const activePieceSquare = useAppSelector(selectActivePieceSquare)
     
-
-    useEffect(() => {
-        if (!isPlayerTurn) {
-            // after player moves, it’s opponent's turn
-            async function fetchBestMove() {
-                const res = await getEngineResponse(fen, level)
-                if (res.success) {
-                    const bestMove = res.bestmove.split(" ")[1]
-                    dispatch(
-                        move({
-                            from: bestMove.slice(0, 2) as Square,
-                            to: bestMove.slice(2) as Square,
-                        })
-                    )
-                }
-            }
-            fetchBestMove()
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fen, isPlayerTurn])
-
     async function handleClick() {
         if (!isPlayerTurn) return;
         if (isToMove) {
