@@ -26,6 +26,12 @@ const gameSlice = createSlice({
     name: "game-state",
     initialState,
     reducers: {
+        replay : (state) => ({
+            ...initialState,
+            playerColor : state.playerColor,
+            isPlayerTurn : state.playerColor === 'w',
+        })
+        ,
         move: (state, action: PayloadAction<{ from: Square; to: Square }>) => {
             const { from, to } = action.payload
 
@@ -89,7 +95,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { toMove, move } = gameSlice.actions
+export const { toMove, move , replay} = gameSlice.actions
 
 export default gameSlice.reducer
 
