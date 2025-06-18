@@ -20,3 +20,5 @@ export type EngineResponse = {
 }
 
 export type PromotionPiece = 'q' | 'n' | 'r' | 'b'
+
+export type Sound = 'move' | "check" | 'castle' | 'promote' | 'capture'

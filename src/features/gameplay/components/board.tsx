@@ -16,7 +16,7 @@ import { useEffect } from "react"
 import { getEngineResponse } from "../server-actions/chess-engine"
 import { selectBotOptions } from "@/redux/slices/game-options"
 import { Chess, Square as SquareType } from "chess.js"
-import playSound from "../utils/play-sound"
+import { playMoveSound } from "../utils/play-move-sound"
 
 export default function Board() {
     const board = useAppSelector(selectBoard).flat()
@@ -29,7 +29,6 @@ export default function Board() {
     const chess = new Chess(fen)
     const lastMove = useAppSelector(selectLastMove)
 
-
     useEffect(() => {
         if (!isPlayerTurn) {
             // after player moves, it’s opponent's turn
@@ -41,11 +40,7 @@ export default function Board() {
                     const to = bestMove.slice(2) as SquareType
                     dispatch(move({ from, to }))
                     const theMove = chess.move({ from, to })
-                    if (theMove.isCapture()) {
-                        playSound("capture")
-                    } else {
-                        playSound("move")
-                    }
+                    playMoveSound(theMove, chess.inCheck())
                 }
             }
             fetchBestMove()
@@ -73,7 +68,10 @@ export default function Board() {
                             piece={p}
                             key={i}
                             isToMove={allowedSquares.includes(name)}
-                            isLastMove={!!lastMove && (lastMove.from == name || lastMove.to == name )}
+                            isLastMove={
+                                !!lastMove &&
+                                (lastMove.from == name || lastMove.to == name)
+                            }
                         />
                     )
                 })}

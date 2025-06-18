@@ -10,10 +10,10 @@ import {
     selectPlayerColor,
     toMove,
 } from "@/redux/slices/game-slice"
-import playSound from "../utils/play-sound"
 import SelectPromotion from "./select-promotion"
 import { useState } from "react"
 import { Piece } from "./piece"
+import { playMoveSound } from "../utils/play-move-sound"
 
 export default function Square({
     name,
@@ -40,15 +40,18 @@ export default function Square({
     // const [, setPromotionPiece] = useState<null | PromotionPiece>(null)
     const [isOpen, setIsOpen] = useState(false)
 
+    const chess = new Chess(fen)
 
     function handlePromotion(promotion: string) {
         if (!activePieceSquare) return;
-        dispatch(move({ from: activePieceSquare, to: name as Square ,promotion }))
+        const moveDetails = {from:activePieceSquare , to : name as Square , promotion}
+        dispatch(move(moveDetails))
+        const theMove = chess.move(moveDetails)
+        playMoveSound(theMove,chess.inCheck())
         setIsOpen(false)
     }
 
 
-    const chess = new Chess(fen)
 
     async function handleClick() {
         console.log('square clicked')
@@ -65,15 +68,8 @@ export default function Square({
                 setIsOpen(true)
             } else {
                 dispatch(move({ from: activePieceSquare, to: name as Square }))
-                const theMove = chess.move({
-                    from: activePieceSquare,
-                    to: name as Square,
-                })
-                if (theMove.isCapture()) {
-                    playSound("capture")
-                } else {
-                    playSound("move")
-                }
+                const theMove = chess.move({from:activePieceSquare,to:name})
+                playMoveSound(theMove,chess.inCheck())
             }
         } else {
             if (piece) dispatch(toMove(piece.square))
