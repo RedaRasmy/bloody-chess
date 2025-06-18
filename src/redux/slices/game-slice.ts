@@ -6,8 +6,8 @@ import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
 
 const initialState = {
-    fen: "8/5P2/4K2k/8/6p1/6Pp/7P/8 w - - 1 59",
-    // fen: new Chess().fen(),
+    // fen: "8/5P2/4K2k/8/6p1/6Pp/7P/8 w - - 1 59",
+    fen: new Chess().fen(),
     allowedSquares: [] as Square[],
     activePieceSquare: undefined as Square | undefined,
     isPlayerTurn: true,
@@ -21,36 +21,40 @@ const initialState = {
     isGameOver: false,
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
-    isResign : false 
+    isResign: false,
 }
 
 const gameSlice = createSlice({
     name: "game-state",
     initialState,
     reducers: {
-        resign : (state) => {
+        resign: (state) => {
             state.isResign = true
             state.isGameOver = true
-            state.winner = state.playerColor === 'w' ? 'b' : 'w'
+            state.winner = state.playerColor === "w" ? "b" : "w"
         },
-        replay : (state) => ({
+        replay: (state) => ({
             ...initialState,
-            playerColor : state.playerColor,
-            isPlayerTurn : state.playerColor === 'w',
-        })
-        ,
-        move: (state, action: PayloadAction<{ from: Square; to: Square , promotion?:string }>) => {
-            const { from, to , promotion } = action.payload
+            playerColor: state.playerColor,
+            isPlayerTurn: state.playerColor === "w",
+        }),
+        move: (
+            state,
+            action: PayloadAction<{
+                from: Square
+                to: Square
+                promotion?: string
+            }>
+        ) => {
+            const { from, to, promotion } = action.payload
 
             const chess = new Chess(state.fen)
 
             chess.move({
                 from,
                 to,
-                promotion
+                promotion,
             })
-
-            
 
             state.fen = chess.fen()
             // clear moving states
@@ -105,7 +109,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { toMove, move , replay , resign} = gameSlice.actions
+export const { toMove, move, replay, resign } = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -130,6 +134,6 @@ export const selectGameOverData = (state: RootState) => ({
         isInsufficientMaterial: state.game.isInsufficientMaterial,
         isStalemate: state.game.isStalemate,
         isThreefoldRepetition: state.game.isThreefoldRepetition,
-        isResign : state.game.isResign
+        isResign: state.game.isResign,
     }),
 })
