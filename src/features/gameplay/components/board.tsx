@@ -7,6 +7,7 @@ import {
     selectBoard,
     selectFEN,
     selectIsPlayerTurn,
+    selectLastMove,
     selectPlayerColor,
 } from "@/redux/slices/game-slice"
 import { indexToSquare } from "../utils/index-to-square"
@@ -26,6 +27,8 @@ export default function Board() {
     const { level } = useAppSelector(selectBotOptions)
     const dispatch = useAppDispatch()
     const chess = new Chess(fen)
+    const lastMove = useAppSelector(selectLastMove)
+
 
     useEffect(() => {
         if (!isPlayerTurn) {
@@ -62,13 +65,15 @@ export default function Board() {
             >
                 {board.map((p, i) => {
                     const squareColor = getSquareColor(i)
+                    const name = indexToSquare(i)
                     return (
                         <Square
-                            name={indexToSquare(i)}
+                            name={name}
                             color={squareColor}
                             piece={p}
                             key={i}
-                            isToMove={allowedSquares.includes(indexToSquare(i))}
+                            isToMove={allowedSquares.includes(name)}
+                            isLastMove={!!lastMove && (lastMove.from == name || lastMove.to == name )}
                         />
                     )
                 })}

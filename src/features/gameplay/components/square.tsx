@@ -20,11 +20,13 @@ export default function Square({
     color,
     piece,
     isToMove = false,
+    isLastMove 
 }: {
     name: string
     color: Color
     piece: BoardElement
     isToMove?: boolean
+    isLastMove : boolean
 }) {
     const dispatch = useAppDispatch()
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
@@ -37,6 +39,7 @@ export default function Square({
 
     // const [, setPromotionPiece] = useState<null | PromotionPiece>(null)
     const [isOpen, setIsOpen] = useState(false)
+
 
     function handlePromotion(promotion: string) {
         if (!activePieceSquare) return;
@@ -82,6 +85,8 @@ export default function Square({
             className={cn("bg-amber-100 flex justify-center items-center", {
                 "bg-amber-100": color === "w",
                 "bg-red-700": color === "b",
+                "bg-amber-400" : isLastMove && color == 'w' ,
+                "bg-amber-300" : isLastMove && color == 'b' ,
             })}
             onClick={handleClick}
         >

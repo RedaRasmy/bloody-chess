@@ -22,6 +22,7 @@ const initialState = {
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
     isResign: false,
+    lastMove : undefined as undefined | {from:Square,to:Square}
 }
 
 const gameSlice = createSlice({
@@ -75,6 +76,9 @@ const gameSlice = createSlice({
             if (chess.isCheckmate()) {
                 state.winner = chess.turn() === "w" ? "b" : "w"
             }
+            state.lastMove = {
+                from, to
+            } 
         },
         toMove: (state, { payload: pieceSquare }: PayloadAction<Square>) => {
             const chess = new Chess(state.fen)
@@ -137,3 +141,4 @@ export const selectGameOverData = (state: RootState) => ({
         isResign: state.game.isResign,
     }),
 })
+export const selectLastMove = (state:RootState) => state.game.lastMove
