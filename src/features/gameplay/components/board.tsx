@@ -37,9 +37,10 @@ export default function Board() {
                 if (res.success) {
                     const bestMove = res.bestmove.split(" ")[1]
                     const from = bestMove.slice(0, 2) as SquareType
-                    const to = bestMove.slice(2) as SquareType
-                    dispatch(move({ from, to }))
-                    const theMove = chess.move({ from, to })
+                    const to = bestMove.slice(2,4) as SquareType
+                    const promotion = bestMove.length === 5 ? bestMove.slice(5) : undefined
+                    dispatch(move({ from, to , promotion}))
+                    const theMove = chess.move({ from, to , promotion })
                     playMoveSound(theMove, chess.inCheck())
                 }
             }
