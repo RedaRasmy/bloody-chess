@@ -24,8 +24,7 @@ export default function GameOverPopUp() {
             <DialogContent className="">
                 <DialogHeader>
                     <DialogTitle>
-                        {isWin ? "You won" : "You lost"}
-                        {isDraw && "Draw"}
+                        {isDraw ? "You Draw" : isWin ? 'You Won' : 'You Lost'}
                     </DialogTitle>
                     <DialogDescription>By {cause}</DialogDescription>
                 </DialogHeader>

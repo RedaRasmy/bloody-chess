@@ -6,7 +6,8 @@ import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
 
 const initialState = {
-    fen: new Chess().fen(),
+    fen: "8/5P2/4K2k/8/6p1/6Pp/7P/8 w - - 1 59",
+    // fen: new Chess().fen(),
     allowedSquares: [] as Square[],
     activePieceSquare: undefined as Square | undefined,
     isPlayerTurn: true,
@@ -38,14 +39,15 @@ const gameSlice = createSlice({
             isPlayerTurn : state.playerColor === 'w',
         })
         ,
-        move: (state, action: PayloadAction<{ from: Square; to: Square }>) => {
-            const { from, to } = action.payload
+        move: (state, action: PayloadAction<{ from: Square; to: Square , promotion?:string }>) => {
+            const { from, to , promotion } = action.payload
 
             const chess = new Chess(state.fen)
 
             chess.move({
                 from,
                 to,
+                promotion
             })
 
             

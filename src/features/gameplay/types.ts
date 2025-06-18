@@ -18,3 +18,5 @@ export type EngineResponse = {
         success : false
         data : string
 }
+
+export type PromotionPiece = 'q' | 'n' | 'r' | 'b'
