@@ -1,29 +1,44 @@
+import { Color, PieceSymbol, Square } from "chess.js"
 
-import { Color, PieceSymbol, Square } from "chess.js";
+export type BoardElement =
+    | {
+          square: Square
+          type: PieceSymbol
+          color: Color
+      }
+    | undefined
+
+export type EngineResponse =
+    | {
+          success: true
+          bestmove: string
+          eval: number | null
+          mate: number | null
+          continuation: string
+      }
+    | {
+          success: false
+          data: string
+      }
+
+export type PromotionPiece = "q" | "n" | "r" | "b"
+
+export type Sound = "move" | "check" | "castle" | "promote" | "capture"
 
 
-export type BoardElement = {
-        square: Square;
-        type: PieceSymbol;
-        color: Color;
-} | undefined
-
-export type EngineResponse = {
-        success : true
-        bestmove : string
-        eval : number | null
-        mate : number | null
-        continuation : string
-} | {
-        success : false
-        data : string
-}
-
-export type PromotionPiece = 'q' | 'n' | 'r' | 'b'
-
-export type Sound = 'move' | "check" | 'castle' | 'promote' | 'capture'
-
-// export type ActivePiece = {
-//         attributes : Piece
-//         square : Square
-// } | undefined
+export type CapturedPieces = {
+    w: {
+        p: number
+        b: number
+        n: number
+        r: number
+        q: number
+    }
+    b: {
+        p: number
+        b: number
+        n: number
+        r: number
+        q: number
+    }
+} 

@@ -5,9 +5,9 @@ import { RootState } from "../store"
 import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
 import { BoardElement } from "@/features/gameplay/types"
+import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 
 const initialState = {
-    // fen: "8/5P2/4K2k/8/6p1/6Pp/7P/8 w - - 1 59",
     fen: new Chess().fen(),
     allowedSquares: [] as Square[],
     activePiece : undefined as BoardElement,
@@ -23,7 +23,9 @@ const initialState = {
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
     isResign: false,
-    lastMove : undefined as undefined | {from:Square,to:Square}
+    lastMove : undefined as undefined | {from:Square,to:Square},
+    score : 0 ,
+    capturedPieces : initialCaputeredPieces
 }
 
 const gameSlice = createSlice({
@@ -52,11 +54,42 @@ const gameSlice = createSlice({
 
             const chess = new Chess(state.fen)
 
-            chess.move({
+            const theMove = chess.move({
                 from,
                 to,
                 promotion,
             })
+
+            if (theMove.isCapture()) {
+                const playerColor = state.playerColor
+                const isPlayer = theMove.color === playerColor
+                const pieceColor = isPlayer ? (playerColor === 'w' ? 'b' : 'w') : playerColor // maybe i should i add opponentColor in state
+                const factor = isPlayer ? 1 : -1
+
+                switch (theMove.captured) {
+                    case "p" : 
+                        state.score =+ factor
+                        state.capturedPieces[pieceColor].p++
+                        break
+                    case "b" : 
+                        state.score =+ factor*3
+                        state.capturedPieces[pieceColor].b++
+                        break
+                    case "n" : 
+                        state.score =+ factor*3
+                        state.capturedPieces[pieceColor].n++
+                        break
+                    case "r" : 
+                        state.score =+ factor*5
+                        state.capturedPieces[pieceColor].r++
+                        break
+                    case "q" : 
+                        state.score =+ factor*9
+                        state.capturedPieces[pieceColor].q++
+                        break
+                }
+                
+            }
 
             state.fen = chess.fen()
             // clear moving states
