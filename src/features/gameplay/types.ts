@@ -6,7 +6,7 @@ export type BoardElement = {
         square: Square;
         type: PieceSymbol;
         color: Color;
-} | null
+} | undefined
 
 export type EngineResponse = {
         success : true
@@ -22,3 +22,8 @@ export type EngineResponse = {
 export type PromotionPiece = 'q' | 'n' | 'r' | 'b'
 
 export type Sound = 'move' | "check" | 'castle' | 'promote' | 'capture'
+
+// export type ActivePiece = {
+//         attributes : Piece
+//         square : Square
+// } | undefined

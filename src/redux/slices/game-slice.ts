@@ -4,12 +4,13 @@ import { Chess, Color, Square } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
+import { BoardElement } from "@/features/gameplay/types"
 
 const initialState = {
     // fen: "8/5P2/4K2k/8/6p1/6Pp/7P/8 w - - 1 59",
     fen: new Chess().fen(),
     allowedSquares: [] as Square[],
-    activePieceSquare: undefined as Square | undefined,
+    activePiece : undefined as BoardElement,
     isPlayerTurn: true,
     isCheckmate: false,
     isDraw: false,
@@ -59,7 +60,7 @@ const gameSlice = createSlice({
 
             state.fen = chess.fen()
             // clear moving states
-            state.activePieceSquare = undefined
+            state.activePiece = undefined
             state.allowedSquares = []
 
             // change currentPlayer
@@ -80,17 +81,16 @@ const gameSlice = createSlice({
                 from, to
             } 
         },
-        toMove: (state, { payload: pieceSquare }: PayloadAction<Square>) => {
+        toMove: (state, { payload: activePiece }: PayloadAction<Exclude<BoardElement , undefined>>) => {
             const chess = new Chess(state.fen)
             state.allowedSquares = chess
                 .moves({
-                    square: pieceSquare,
+                    square: activePiece.square,
                     verbose: true,
                 })
                 .map((m) => m.to)
 
-            console.log(state.allowedSquares)
-            state.activePieceSquare = pieceSquare
+            state.activePiece = activePiece
         },
     },
     extraReducers: (builder) => {
@@ -126,8 +126,8 @@ export const selectAllowedSquares = (state: RootState) =>
 export const selectFEN = (state: RootState) => state.game.fen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
-export const selectActivePieceSquare = (state: RootState) =>
-    state.game.activePieceSquare
+export const selectActivePiece = (state: RootState) =>
+    state.game.activePiece
 export const selectGameOverData = (state: RootState) => ({
     isGameOver: state.game.isGameOver,
     isDraw: state.game.isDraw,

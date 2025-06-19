@@ -4,7 +4,7 @@ import { BoardElement,  } from "../types"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
     move,
-    selectActivePieceSquare,
+    selectActivePiece,
     selectFEN,
     selectIsPlayerTurn,
     selectPlayerColor,
@@ -30,21 +30,20 @@ export default function Square({
 }) {
     const dispatch = useAppDispatch()
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
-    const activePieceSquare = useAppSelector(selectActivePieceSquare)
+    const activePiece = useAppSelector(selectActivePiece)
     const fen = useAppSelector(selectFEN)
     const playerColor = useAppSelector(selectPlayerColor)
     const isPromotionSquare =
         (playerColor === "w" && name.slice(1) === "8") ||
         (playerColor === "b" && name.slice(1) === "1")
 
-    // const [, setPromotionPiece] = useState<null | PromotionPiece>(null)
     const [isOpen, setIsOpen] = useState(false)
 
     const chess = new Chess(fen)
 
     function handlePromotion(promotion: string) {
-        if (!activePieceSquare) return;
-        const moveDetails = {from:activePieceSquare , to : name as Square , promotion}
+        if (!activePiece) return;
+        const moveDetails = {from: activePiece.square , to : name as Square , promotion}
         dispatch(move(moveDetails))
         const theMove = chess.move(moveDetails)
         playMoveSound(theMove,chess.inCheck())
@@ -54,25 +53,23 @@ export default function Square({
 
 
     async function handleClick() {
-        console.log('square clicked')
         if (!isPlayerTurn) return
         if (isToMove) {
-            console.log('is to move square')
-            if (!activePieceSquare)
+            if (!activePiece)
                 throw new Error(
                     "activePieceSquare shouldn't be undefined while isToMove is true "
                 )
 
-            if (isPromotionSquare) {
+            if (isPromotionSquare && activePiece.type === 'p') {
                 // open choose promotion piece
                 setIsOpen(true)
             } else {
-                dispatch(move({ from: activePieceSquare, to: name as Square }))
-                const theMove = chess.move({from:activePieceSquare,to:name})
+                dispatch(move({ from: activePiece.square, to: name as Square }))
+                const theMove = chess.move({from:activePiece.square,to:name})
                 playMoveSound(theMove,chess.inCheck())
             }
         } else {
-            if (piece) dispatch(toMove(piece.square))
+            if (piece) dispatch(toMove(piece))
         }
     }
 
