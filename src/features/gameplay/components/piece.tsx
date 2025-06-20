@@ -19,8 +19,7 @@ export function Piece({
     return (
         <Image
             alt={type}
-            width={55}
-            height={55}
+            fill
             src={`/images/chess-pieces/${colorName}-${name}.png`}
             className={cn("cursor-pointer", {
                 "rotate-180": playerColor === "b",

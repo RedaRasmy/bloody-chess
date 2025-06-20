@@ -75,7 +75,7 @@ export default function Square({
 
     return (
         <div
-            className={cn("bg-amber-100 flex justify-center items-center", {
+            className={cn("bg-amber-100 flex justify-center items-center relative", {
                 "bg-amber-100": color === "w",
                 "bg-red-700": color === "b",
                 "bg-amber-400" : isLastMove && color == 'w' ,
