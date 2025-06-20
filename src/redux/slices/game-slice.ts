@@ -10,7 +10,7 @@ import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 const initialState = {
     fen: new Chess().fen(),
     allowedSquares: [] as Square[],
-    activePiece : undefined as BoardElement,
+    activePiece : null as BoardElement,
     isPlayerTurn: true,
     isCheckmate: false,
     isDraw: false,
@@ -63,7 +63,8 @@ const gameSlice = createSlice({
             if (theMove.isCapture()) {
                 const playerColor = state.playerColor
                 const isPlayer = theMove.color === playerColor
-                const pieceColor = isPlayer ? (playerColor === 'w' ? 'b' : 'w') : playerColor // maybe i should i add opponentColor in state
+                // maybe i should i add opponentColor in state
+                const pieceColor = isPlayer ? (playerColor === 'w' ? 'b' : 'w') : playerColor 
                 const factor = isPlayer ? 1 : -1
 
                 switch (theMove.captured) {
@@ -93,7 +94,7 @@ const gameSlice = createSlice({
 
             state.fen = chess.fen()
             // clear moving states
-            state.activePiece = undefined
+            state.activePiece = null
             state.allowedSquares = []
 
             // change currentPlayer
@@ -114,7 +115,7 @@ const gameSlice = createSlice({
                 from, to
             } 
         },
-        toMove: (state, { payload: activePiece }: PayloadAction<Exclude<BoardElement , undefined>>) => {
+        toMove: (state, { payload: activePiece }: PayloadAction<Exclude<BoardElement , null>>) => {
             const chess = new Chess(state.fen)
             state.allowedSquares = chess
                 .moves({

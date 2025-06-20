@@ -6,7 +6,7 @@ export type BoardElement =
           type: PieceSymbol
           color: Color
       }
-    | undefined
+    | null
 
 export type EngineResponse =
     | {
