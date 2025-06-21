@@ -9,6 +9,7 @@ import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 
 const initialState = {
     fen: new Chess().fen(),
+    history : new Chess().history(),
     allowedSquares: [] as Square[],
     activePiece : null as BoardElement,
     isPlayerTurn: true,
