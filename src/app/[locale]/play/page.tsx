@@ -5,9 +5,9 @@ import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 
 export default function page() {
     return (
-        <div className="flex lg:flex-row flex-col w-full flex-1">
+        <div className="flex landscape:flex-row portrait:flex-col w-full flex-1 xl:px-20 gap-3 lg:gap-5 xl:gap-8">
             <GameOverPopUp/>
-            <div className="bg-gray-200 lg:w-[60%] not-lg:h-[60%] flex justify-center items-center">
+            <div className=" flex-auto flex justify-center items-center ">
                 <Board />
             </div>
             <GameDetails/>

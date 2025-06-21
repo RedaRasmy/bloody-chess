@@ -50,32 +50,38 @@ export default function Board() {
     }, [isPlayerTurn])
 
     return (
-        <div className="lg:w-130 w-90 md:portrait:w-140 not-sm:m-5 relative after:[content:''] after:block after:pt-[100%] ">
-            <div
-                className={cn(
-                    "absolute w-full h-full bg-black grid grid-cols-8 grid-rows-8",
-                    {
-                        "rotate-180": playerColor === "b",
-                    }
-                )}
-            >
-                {board.map((p, i) => {
-                    const squareColor = getSquareColor(i)
-                    const name = indexToSquare(i)
-                    return (
-                        <Square
-                            name={name}
-                            color={squareColor}
-                            piece={p}
-                            key={i}
-                            isToMove={allowedSquares.includes(name)}
-                            isLastMove={
-                                !!lastMove &&
-                                (lastMove.from == name || lastMove.to == name)
+        <div className="flex flex-col w-full h-full gap-2 items-center justify-center">
+            <div className="flex flex-col w-full max-w-[80vh] gap-2">
+                <div className="border-1 border-black  bg-amber-200 h-fit w-full"> 
+                </div>
+                    <div
+                        className={cn(
+                            "aspect-square w-full bg-black grid grid-cols-8 grid-rows-8",
+                            {
+                                "rotate-180": playerColor === "b",
                             }
-                        />
-                    )
-                })}
+                        )}
+                    >
+                        {board.map((p, i) => {
+                            const squareColor = getSquareColor(i)
+                            const name = indexToSquare(i)
+                            return (
+                                <Square
+                                    name={name}
+                                    color={squareColor}
+                                    piece={p}
+                                    key={i}
+                                    isToMove={allowedSquares.includes(name)}
+                                    isLastMove={
+                                        !!lastMove &&
+                                        (lastMove.from == name || lastMove.to == name)
+                                    }
+                                />
+                            )
+                        })}
+                    </div>
+                <div className="border-1 border-black  bg-amber-200 h-fit w-full">
+                </div>
             </div>
         </div>
     )
