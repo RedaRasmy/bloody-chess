@@ -80,23 +80,23 @@ const gameSlice = createSlice({
 
                 switch (theMove.captured) {
                     case "p" : 
-                        state.score =+ factor
+                        state.score = state.score + factor
                         state.capturedPieces[pieceColor].p++
                         break
                     case "b" : 
-                        state.score =+ factor*3
+                        state.score = state.score + factor*3
                         state.capturedPieces[pieceColor].b++
                         break
                     case "n" : 
-                        state.score =+ factor*3
+                        state.score = state.score + factor*3
                         state.capturedPieces[pieceColor].n++
                         break
                     case "r" : 
-                        state.score =+ factor*5
+                        state.score = state.score + factor*5
                         state.capturedPieces[pieceColor].r++
                         break
                     case "q" : 
-                        state.score =+ factor*9
+                        state.score = state.score + factor*9
                         state.capturedPieces[pieceColor].q++
                         break
                 }
@@ -188,3 +188,5 @@ export const selectGameOverData = (state: RootState) => ({
 })
 export const selectLastMove = (state:RootState) => state.game.lastMove
 export const selectIsGameOver = (state:RootState) => state.game.isGameOver
+export const selectCapturedPieces = (state:RootState) => state.game.capturedPieces 
+export const selectScore = (state:RootState) => state.game.score 

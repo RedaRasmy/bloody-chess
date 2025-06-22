@@ -37,7 +37,10 @@ export default function ChessBoard() {
 
     const [isPromotion, setIsPromotion] = useState(false)
 
+    const promotionRank = playerColor === 'w' ? 8 : 1
+
     const chess = new Chess(fen)
+    console.log(fen)
 
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
@@ -74,6 +77,7 @@ export default function ChessBoard() {
             const isPromotionSquare =
                 (playerColor === "w" && square.slice(1) === "8") ||
                 (playerColor === "b" && square.slice(1) === "1")
+        
 
             if (isPromotionSquare && activePiece.type === "p") {
                 // open promotion dialog
@@ -91,11 +95,12 @@ export default function ChessBoard() {
         }
     }
 
-    function handlePromotion(promotion: string, square: Square) {
+    function handlePromotion(promotion: string) {
         if (!activePiece) return
+        const promotionFile = activePiece.square[0]
         const moveDetails = {
             from: activePiece.square,
-            to: square,
+            to: `${promotionFile}${promotionRank}` as Square,
             promotion,
         }
         dispatch(move(moveDetails))
@@ -105,38 +110,36 @@ export default function ChessBoard() {
     }
 
     return (
-        <div className="aspect-square w-full grid grid-cols-8 grid-rows-8">
-            {board.map((e, i) => {
-                const name = indexToSquare(i)
-                const isPromotionSquare =
-                    (playerColor === "w" && name.slice(1) === "8") ||
-                    (playerColor === "b" && name.slice(1) === "1")
-                return (
-                    <ChessBoardSquare
-                        key={i}
-                        color={getSquareColor(i)}
-                        name={name}
-                        piece={e}
-                        isToMove={allowedSquares.includes(name)}
-                        isLastMove={
-                            !!lastMove &&
-                            (lastMove.from == name || lastMove.to == name)
-                        }
-                        onClick={handleSquareClick}
-                    >
-                        {isPromotionSquare && (
-                            <SelectPromotion
-                                onChange={(promotion) =>
-                                    handlePromotion(promotion, name)
-                                }
-                                color={playerColor}
-                                open={isPromotion}
-                                onOpenChange={(open) => setIsPromotion(open)}
-                            />
-                        )}
-                    </ChessBoardSquare>
-                )
-            })}
+        <div className="relative w-full h-full">
+            <SelectPromotion
+                onChange={(promotion) =>
+                    handlePromotion(promotion)
+                }
+                color={playerColor}
+                open={isPromotion}
+                onClickOutside={() => setIsPromotion(false)}
+            />
+            <div className="aspect-square w-full grid grid-cols-8 grid-rows-8  ">
+                {board.map((e, i) => {
+                    const name = indexToSquare(i)
+                    return (
+                        <ChessBoardSquare
+                            key={i}
+                            color={getSquareColor(i)}
+                            name={name}
+                            piece={e}
+                            isToMove={allowedSquares.includes(name)}
+                            isLastMove={
+                                !!lastMove &&
+                                (lastMove.from == name || lastMove.to == name)
+                            }
+                            onClick={handleSquareClick}
+                        >
+                        </ChessBoardSquare>
+                    
+                    )
+                })}
+            </div>
         </div>
     )
 }

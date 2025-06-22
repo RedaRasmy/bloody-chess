@@ -19,7 +19,7 @@ export default function ChessBoardSquare({
     isToMove?: boolean
     isLastMove : boolean
     onClick : (square : Square,piece:BoardElement) => void
-    children: ReactNode
+    children?: ReactNode
 }) {
     return (
         <div

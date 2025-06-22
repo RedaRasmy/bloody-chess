@@ -1,10 +1,8 @@
 import Image from "next/image"
 import { getPieceName } from "../utils/getPieceName"
-import { useAppSelector } from "@/redux/hooks"
-import { selectPlayerColor } from "@/redux/slices/game-slice"
 import { cn } from "@/lib/utils"
 
-export function Piece({
+export function SmallPiece({
     type,
     color,
     className,
@@ -16,17 +14,16 @@ export function Piece({
     /// black is uppercase , white is lowercase
     const colorName = color == "b" ? "black" : "white"
     const name = getPieceName(type)
-    const playerColor = useAppSelector(selectPlayerColor)
 
     return (
         <Image
             alt={type}
-            fill
+            width={20}
+            height={20}
             src={`/images/chess-pieces/${colorName}-${name}.png`}
             className={cn("cursor-pointer", {
-                "rotate-180": playerColor === "b"
+                // "rotate-180": playerColor === "b"
             },className)}
         />
     )
 }
-
