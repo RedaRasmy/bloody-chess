@@ -3,7 +3,6 @@ import playSound from "./play-sound";
 
 export function playMoveSound(move:Move,isCheck:boolean) {
 
-    console.log('is check : ',isCheck)
     
     if (move.isCapture()) {
         playSound('capture')

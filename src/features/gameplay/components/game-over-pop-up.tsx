@@ -17,8 +17,6 @@ export default function GameOverPopUp() {
     const dispatch = useAppDispatch()
 
 
-    console.log(isGameOver)
-
     if (isGameOver) return (
         <Dialog defaultOpen >
             <DialogContent className="">

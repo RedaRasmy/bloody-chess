@@ -21,6 +21,7 @@ import { playMoveSound } from "../utils/play-move-sound"
 import { BoardElement } from "../types"
 import SelectPromotion from "./select-promotion"
 import { getEngineResponse } from "../server-actions/chess-engine"
+import { getBestMove } from "../utils/get-bestmove"
 
 export default function ChessBoard() {
     const dispatch = useAppDispatch()
@@ -40,22 +41,16 @@ export default function ChessBoard() {
     const promotionRank = playerColor === 'w' ? 8 : 1
 
     const chess = new Chess(fen)
-    console.log(fen)
 
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
             // after player moves, it’s opponent's turn
             async function fetchBestMove() {
-                console.log("fen given to bot : ",fen)
-                const res = await getEngineResponse(fen, level)
+                const res = await getEngineResponse(fen, level > 5 ? level-5 : 1)
                 if (res.success) {
-                    const bestMove = res.bestmove.split(" ")[1]
-                    const from = bestMove.slice(0, 2) as Square
-                    const to = bestMove.slice(2, 4) as Square
-                    const promotion =
-                        bestMove.length === 5 ? bestMove.slice(5) : undefined
-                    dispatch(move({ from, to, promotion }))
-                    const theMove = chess.move({ from, to, promotion })
+                    const bestMove = getBestMove(res,level,chess.moves({verbose:true}))
+                    dispatch(move(bestMove))
+                    const theMove = chess.move(bestMove)
                     playMoveSound(theMove, chess.inCheck())
                 }
             }

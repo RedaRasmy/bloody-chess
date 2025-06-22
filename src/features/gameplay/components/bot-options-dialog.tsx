@@ -34,7 +34,7 @@ export default function BotOptionsDialog() {
                     <div className="flex items-center gap-4">
                         <p className="text-nowrap">Level : {botOptions.level}</p>
                         <Slider
-                            max={15}
+                            max={20}
                             step={1}
                             onValueChange={(e) => dispatch(changeLevel(e[0]))}
                             value={[botOptions.level]}

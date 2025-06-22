@@ -68,7 +68,6 @@ const gameSlice = createSlice({
                 promotion : theMove.promotion 
             })
 
-            console.log(theMove.san)
 
 
             if (theMove.isCapture()) {
@@ -117,7 +116,6 @@ const gameSlice = createSlice({
             state.isStalemate = chess.isStalemate()
             state.isInsufficientMaterial = chess.isInsufficientMaterial()
             state.isThreefoldRepetition = chess.isThreefoldRepetition()
-            console.log("isThreefoldRepetition : ", chess.isThreefoldRepetition() )
             state.isDrawByFiftyMoves = chess.isDrawByFiftyMoves()
             state.isGameOver = chess.isGameOver()
             if (chess.isCheckmate()) {

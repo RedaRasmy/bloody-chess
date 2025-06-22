@@ -11,7 +11,6 @@ export default function Board() {
     const playerColor = useAppSelector(selectPlayerColor)
     const score = useAppSelector(selectScore)
     const opponentColor = (playerColor==='w') ? 'b' : 'w'
-    console.log('score : ',score)
     return (
         // <div className="w-full">
             <div className="flex flex-col w-full max-w-[75vh] gap-1">
