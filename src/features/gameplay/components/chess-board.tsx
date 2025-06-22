@@ -6,6 +6,7 @@ import {
     selectAllowedSquares,
     selectBoard,
     selectFEN,
+    selectIsGameOver,
     selectIsPlayerTurn,
     selectLastMove,
     selectPlayerColor,
@@ -32,15 +33,17 @@ export default function ChessBoard() {
     const { level } = useAppSelector(selectBotOptions)
     const lastMove = useAppSelector(selectLastMove)
     const activePiece = useAppSelector(selectActivePiece)
+    const isGameOver = useAppSelector(selectIsGameOver)
 
     const [isPromotion, setIsPromotion] = useState(false)
 
     const chess = new Chess(fen)
 
     useEffect(() => {
-        if (!isPlayerTurn) {
+        if (!isPlayerTurn && !isGameOver) {
             // after player moves, it’s opponent's turn
             async function fetchBestMove() {
+                console.log("fen given to bot : ",fen)
                 const res = await getEngineResponse(fen, level)
                 if (res.success) {
                     const bestMove = res.bestmove.split(" ")[1]
@@ -59,7 +62,7 @@ export default function ChessBoard() {
     }, [isPlayerTurn])
 
     async function handleSquareClick(square: Square, piece: BoardElement) {
-        if (!isPlayerTurn) return
+        if (!isPlayerTurn || isGameOver) return
         const isToMove = allowedSquares.includes(square)
 
         if (isToMove) {

@@ -4,12 +4,12 @@ import { Chess, Color, Square } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
-import { BoardElement } from "@/features/gameplay/types"
+import { BoardElement, MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 
 const initialState = {
-    fen: new Chess().fen(),
-    history : new Chess().history(),
+    fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    history : [] as MoveType[] ,
     allowedSquares: [] as Square[],
     activePiece : null as BoardElement,
     isPlayerTurn: true,
@@ -24,7 +24,7 @@ const initialState = {
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
     isResign: false,
-    lastMove : undefined as undefined | {from:Square,to:Square},
+    lastMove : undefined as undefined | MoveType,
     score : 0 ,
     capturedPieces : initialCaputeredPieces
 }
@@ -53,13 +53,23 @@ const gameSlice = createSlice({
         ) => {
             const { from, to, promotion } = action.payload
 
-            const chess = new Chess(state.fen)
+            const chess = new Chess()
+            state.history.forEach(mv=>chess.move(mv))
 
             const theMove = chess.move({
                 from,
                 to,
                 promotion,
             })
+
+            state.history.push({
+                from : theMove.from,
+                to : theMove.to,
+                promotion : theMove.promotion 
+            })
+
+            console.log(theMove.san)
+
 
             if (theMove.isCapture()) {
                 const playerColor = state.playerColor
@@ -107,6 +117,7 @@ const gameSlice = createSlice({
             state.isStalemate = chess.isStalemate()
             state.isInsufficientMaterial = chess.isInsufficientMaterial()
             state.isThreefoldRepetition = chess.isThreefoldRepetition()
+            console.log("isThreefoldRepetition : ", chess.isThreefoldRepetition() )
             state.isDrawByFiftyMoves = chess.isDrawByFiftyMoves()
             state.isGameOver = chess.isGameOver()
             if (chess.isCheckmate()) {
@@ -131,7 +142,6 @@ const gameSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(changeColor, (state, action) => {
             const color = action.payload
-            // const chess = new Chess(state.fen)
 
             if (color == "black") {
                 state.isPlayerTurn = false
@@ -177,3 +187,4 @@ export const selectGameOverData = (state: RootState) => ({
     }),
 })
 export const selectLastMove = (state:RootState) => state.game.lastMove
+export const selectIsGameOver = (state:RootState) => state.game.isGameOver

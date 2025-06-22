@@ -41,4 +41,10 @@ export type CapturedPieces = {
         r: number
         q: number
     }
-} 
+}
+
+export type MoveType = {
+    from : Square
+    to : Square
+    promotion?: PieceSymbol
+}
