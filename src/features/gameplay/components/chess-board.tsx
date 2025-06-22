@@ -37,8 +37,9 @@ export default function ChessBoard() {
     const isGameOver = useAppSelector(selectIsGameOver)
 
     const [isPromotion, setIsPromotion] = useState(false)
+    const [targetSquare,setTargetSquare]= useState<Square|null>(null)
 
-    const promotionRank = playerColor === 'w' ? 8 : 1
+    const promotionRank = playerColor === 'w' ? "8" : "1"
 
     const chess = new Chess(fen)
 
@@ -61,6 +62,7 @@ export default function ChessBoard() {
 
     async function handleSquareClick(square: Square, piece: BoardElement) {
         if (!isPlayerTurn || isGameOver) return
+        setTargetSquare(square)
         const isToMove = allowedSquares.includes(square)
 
         if (isToMove) {
@@ -69,10 +71,7 @@ export default function ChessBoard() {
                     "activePieceSquare shouldn't be undefined while isToMove is true "
                 )
 
-            const isPromotionSquare =
-                (playerColor === "w" && square.slice(1) === "8") ||
-                (playerColor === "b" && square.slice(1) === "1")
-        
+            const isPromotionSquare = promotionRank === square.slice(1)
 
             if (isPromotionSquare && activePiece.type === "p") {
                 // open promotion dialog
@@ -91,11 +90,10 @@ export default function ChessBoard() {
     }
 
     function handlePromotion(promotion: string) {
-        if (!activePiece) return
-        const promotionFile = activePiece.square[0]
+        if (!activePiece || !targetSquare) return
         const moveDetails = {
             from: activePiece.square,
-            to: `${promotionFile}${promotionRank}` as Square,
+            to: targetSquare,
             promotion,
         }
         dispatch(move(moveDetails))
