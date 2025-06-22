@@ -22,6 +22,7 @@ import { BoardElement } from "../types"
 import SelectPromotion from "./select-promotion"
 import { getEngineResponse } from "../server-actions/chess-engine"
 import { getBestMove } from "../utils/get-bestmove"
+import { cn } from "@/lib/utils"
 
 export default function ChessBoard() {
     const dispatch = useAppDispatch()
@@ -37,9 +38,9 @@ export default function ChessBoard() {
     const isGameOver = useAppSelector(selectIsGameOver)
 
     const [isPromotion, setIsPromotion] = useState(false)
-    const [targetSquare,setTargetSquare]= useState<Square|null>(null)
+    const [targetSquare, setTargetSquare] = useState<Square | null>(null)
 
-    const promotionRank = playerColor === 'w' ? "8" : "1"
+    const promotionRank = playerColor === "w" ? "8" : "1"
 
     const chess = new Chess(fen)
 
@@ -47,9 +48,16 @@ export default function ChessBoard() {
         if (!isPlayerTurn && !isGameOver) {
             // after player moves, it’s opponent's turn
             async function fetchBestMove() {
-                const res = await getEngineResponse(fen, level > 5 ? level-5 : 1)
+                const res = await getEngineResponse(
+                    fen,
+                    level > 5 ? level - 5 : 1
+                )
                 if (res.success) {
-                    const bestMove = getBestMove(res,level,chess.moves({verbose:true}))
+                    const bestMove = getBestMove(
+                        res,
+                        level,
+                        chess.moves({ verbose: true })
+                    )
                     dispatch(move(bestMove))
                     const theMove = chess.move(bestMove)
                     playMoveSound(theMove, chess.inCheck())
@@ -83,9 +91,13 @@ export default function ChessBoard() {
                     to: square,
                 })
                 playMoveSound(theMove, chess.inCheck())
+                setTargetSquare(null)
             }
         } else {
-            if (piece) dispatch(toMove(piece))
+            if (piece) {
+                dispatch(toMove(piece))
+                setTargetSquare(null)
+            }
         }
     }
 
@@ -100,19 +112,25 @@ export default function ChessBoard() {
         const theMove = chess.move(moveDetails)
         playMoveSound(theMove, chess.inCheck())
         setIsPromotion(false)
+        setTargetSquare(null)
     }
 
     return (
         <div className="relative w-full h-full">
             <SelectPromotion
-                onChange={(promotion) =>
-                    handlePromotion(promotion)
-                }
+                onChange={(promotion) => handlePromotion(promotion)}
                 color={playerColor}
                 open={isPromotion}
                 onClickOutside={() => setIsPromotion(false)}
             />
-            <div className="aspect-square w-full grid grid-cols-8 grid-rows-8  ">
+            <div
+                className={cn(
+                    "aspect-square w-full grid grid-cols-8 grid-rows-8  ",
+                    {
+                        "rotate-180": playerColor === "b",
+                    }
+                )}
+            >
                 {board.map((e, i) => {
                     const name = indexToSquare(i)
                     return (
@@ -127,9 +145,7 @@ export default function ChessBoard() {
                                 (lastMove.from == name || lastMove.to == name)
                             }
                             onClick={handleSquareClick}
-                        >
-                        </ChessBoardSquare>
-                    
+                        ></ChessBoardSquare>
                     )
                 })}
             </div>
