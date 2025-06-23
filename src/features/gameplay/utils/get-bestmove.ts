@@ -1,10 +1,10 @@
-import { PieceSymbol, Square } from "chess.js"
+import { Chess, PieceSymbol, Square } from "chess.js"
 import { EngineResponse, MoveType } from "../types"
 
 export function getBestMove(
     res: Extract<EngineResponse, { success: true }>,
     lvl: number,
-    possibleMoves : MoveType[]
+    fen : string
 ): MoveType {
 
 
@@ -21,6 +21,8 @@ export function getBestMove(
         const isRandom = Math.random() < randomness
 
         if (isRandom) {
+            const chess = new Chess(fen)
+            const possibleMoves = chess.moves({verbose:true})
             const lastIndex = possibleMoves.length -1
             const randomMove = possibleMoves[Math.floor(Math.random()*lastIndex)]
             return {

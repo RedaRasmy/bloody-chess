@@ -27,20 +27,18 @@ export type Sound = "move" | "check" | "castle" | "promote" | "capture"
 
 
 export type CapturedPieces = {
-    w: {
-        p: number
-        b: number
-        n: number
-        r: number
-        q: number
-    }
-    b: {
-        p: number
-        b: number
-        n: number
-        r: number
-        q: number
-    }
+    w: [number,number,number,number,number]
+    b: [number,number,number,number,number]
+}
+
+export type PlayerData = {
+    name : string,
+    image?: string
+}
+
+export type PlayersData = {
+    player : PlayerData
+    opponent : PlayerData
 }
 
 export type MoveType = {

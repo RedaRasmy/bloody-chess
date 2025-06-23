@@ -9,9 +9,9 @@ import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 
 const initialState = {
     fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-    history : [] as MoveType[] ,
+    history: [] as MoveType[],
     allowedSquares: [] as Square[],
-    activePiece : null as BoardElement,
+    activePiece: null as BoardElement,
     isPlayerTurn: true,
     isCheckmate: false,
     isDraw: false,
@@ -24,9 +24,9 @@ const initialState = {
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
     isResign: false,
-    lastMove : undefined as undefined | MoveType,
-    score : 0 ,
-    capturedPieces : initialCaputeredPieces
+    lastMove: undefined as undefined | MoveType,
+    score: 0,
+    capturedPieces: initialCaputeredPieces,
 }
 
 const gameSlice = createSlice({
@@ -54,7 +54,7 @@ const gameSlice = createSlice({
             const { from, to, promotion } = action.payload
 
             const chess = new Chess()
-            state.history.forEach(mv=>chess.move(mv))
+            state.history.forEach((mv) => chess.move(mv))
 
             const theMove = chess.move({
                 from,
@@ -63,43 +63,45 @@ const gameSlice = createSlice({
             })
 
             state.history.push({
-                from : theMove.from,
-                to : theMove.to,
-                promotion : theMove.promotion 
+                from: theMove.from,
+                to: theMove.to,
+                promotion: theMove.promotion,
             })
-
-
 
             if (theMove.isCapture()) {
                 const playerColor = state.playerColor
                 const isPlayer = theMove.color === playerColor
                 // maybe i should i add opponentColor in state
-                const pieceColor = isPlayer ? (playerColor === 'w' ? 'b' : 'w') : playerColor 
+                const pieceColor = isPlayer
+                    ? playerColor === "w"
+                        ? "b"
+                        : "w"
+                    : playerColor
                 const factor = isPlayer ? 1 : -1
 
                 switch (theMove.captured) {
-                    case "p" : 
+                    case "p":
                         state.score = state.score + factor
-                        state.capturedPieces[pieceColor].p++
+                        // state.capturedPieces[pieceColor].p++
+                        state.capturedPieces[pieceColor][0]++
                         break
-                    case "b" : 
-                        state.score = state.score + factor*3
-                        state.capturedPieces[pieceColor].b++
+                    case "b":
+                        state.score = state.score + factor * 3
+                        state.capturedPieces[pieceColor][1]++
                         break
-                    case "n" : 
-                        state.score = state.score + factor*3
-                        state.capturedPieces[pieceColor].n++
+                    case "n":
+                        state.score = state.score + factor * 3
+                        state.capturedPieces[pieceColor][2]++
                         break
-                    case "r" : 
-                        state.score = state.score + factor*5
-                        state.capturedPieces[pieceColor].r++
+                    case "r":
+                        state.score = state.score + factor * 5
+                        state.capturedPieces[pieceColor][3]++
                         break
-                    case "q" : 
-                        state.score = state.score + factor*9
-                        state.capturedPieces[pieceColor].q++
+                    case "q":
+                        state.score = state.score + factor * 9
+                        state.capturedPieces[pieceColor][4]++
                         break
                 }
-                
             }
 
             state.fen = chess.fen()
@@ -122,10 +124,14 @@ const gameSlice = createSlice({
                 state.winner = chess.turn() === "w" ? "b" : "w"
             }
             state.lastMove = {
-                from, to
-            } 
+                from,
+                to,
+            }
         },
-        toMove: (state, { payload: activePiece }: PayloadAction<Exclude<BoardElement , null>>) => {
+        toMove: (
+            state,
+            { payload: activePiece }: PayloadAction<Exclude<BoardElement, null>>
+        ) => {
             const chess = new Chess(state.fen)
             state.allowedSquares = chess
                 .moves({
@@ -135,6 +141,12 @@ const gameSlice = createSlice({
                 .map((m) => m.to)
 
             state.activePiece = activePiece
+        },
+        cancelMove: (
+            state
+        ) => {
+            state.allowedSquares = []
+            state.activePiece = null
         },
     },
     extraReducers: (builder) => {
@@ -156,7 +168,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { toMove, move, replay, resign } = gameSlice.actions
+export const { toMove, move, replay, resign, cancelMove } = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -169,8 +181,7 @@ export const selectAllowedSquares = (state: RootState) =>
 export const selectFEN = (state: RootState) => state.game.fen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
-export const selectActivePiece = (state: RootState) =>
-    state.game.activePiece
+export const selectActivePiece = (state: RootState) => state.game.activePiece
 export const selectGameOverData = (state: RootState) => ({
     isGameOver: state.game.isGameOver,
     isDraw: state.game.isDraw,
@@ -184,7 +195,8 @@ export const selectGameOverData = (state: RootState) => ({
         isResign: state.game.isResign,
     }),
 })
-export const selectLastMove = (state:RootState) => state.game.lastMove
-export const selectIsGameOver = (state:RootState) => state.game.isGameOver
-export const selectCapturedPieces = (state:RootState) => state.game.capturedPieces 
-export const selectScore = (state:RootState) => state.game.score 
+export const selectLastMove = (state: RootState) => state.game.lastMove
+export const selectIsGameOver = (state: RootState) => state.game.isGameOver
+export const selectCapturedPieces = (state: RootState) =>
+    state.game.capturedPieces
+export const selectScore = (state: RootState) => state.game.score

@@ -64,7 +64,7 @@ export default function BotOptionsDialog() {
                 </div>
                 <DialogFooter>
                     <Button asChild className="">
-                        <Link href={'/play'}>Start</Link>
+                        <Link href={'/play/bot'}>Start</Link>
                     </Button>
                 </DialogFooter>
             </DialogContent>
