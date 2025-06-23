@@ -10,11 +10,13 @@ export function Piece({
     color,
     className,
     ref,
+    noRotation = false
 }: {
     type: string // example : p , n , ...
     color: "w" | "b"
     className? : string,
-    ref : Ref<HTMLImageElement | null> | undefined
+    ref? : Ref<HTMLImageElement | null> | undefined
+    noRotation?: boolean
 }) {
     /// black is uppercase , white is lowercase
     const colorName = color == "b" ? "black" : "white"
@@ -28,7 +30,7 @@ export function Piece({
             fill
             src={`/images/chess-pieces/${colorName}-${name}.png`}
             className={cn("cursor-grab ", {
-                "rotate-180": playerColor === "b"
+                "rotate-180": !noRotation && playerColor === "b"
             },className)}
         />
     )
