@@ -29,7 +29,7 @@ export function Piece({
             alt={type}
             fill
             src={`/images/chess-pieces/${colorName}-${name}.png`}
-            className={cn("cursor-grab ", {
+            className={cn("cursor-grab touch-none", {
                 "rotate-180": !noRotation && playerColor === "b"
             },className)}
         />

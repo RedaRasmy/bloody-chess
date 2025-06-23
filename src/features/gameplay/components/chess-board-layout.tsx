@@ -14,6 +14,7 @@ import ChessBoardSquare from "./chess-board-square"
 import { getSquareColor } from "../utils/get-square-color"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import CapturedPieces from "./captured-pieces"
+import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 
 export default function ChessBoardLayout({
     // dump
@@ -72,6 +73,7 @@ export default function ChessBoardLayout({
 
     function handleSquareClick(square: Square, piece: BoardElement) {
         if (moving.isMoving) {
+            console.log('already moving')
             if (!activePiece)
                 throw new Error("Active piece shouldn't be null while moving")
 
@@ -96,6 +98,7 @@ export default function ChessBoardLayout({
                 }
             }
         } else {
+            console.log('start moving')
             if (piece) onMoveStart(piece)
             // if there is no piece then the player clicked empty square => nothing will happen
         }
@@ -123,7 +126,10 @@ export default function ChessBoardLayout({
                     onClickOutside={() => setIsPromoting(false)}
                 />
                 <DndContext
+                    modifiers={[restrictToWindowEdges]}
                     onDragStart={({ active }) => {
+                        console.log('darg start')
+                        console.log("active : ",active)
                         const square = active.id as Square
                         const piece = active.data.current as Exclude<
                             BoardElement,
@@ -172,7 +178,7 @@ export default function ChessBoardLayout({
                                         (lastMove.from == name ||
                                             lastMove.to == name)
                                     }
-                                    onClick={handleSquareClick}
+                                    onClick={()=>{}}
                                 ></ChessBoardSquare>
                             )
                         })}
