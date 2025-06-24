@@ -6,7 +6,7 @@ import {
     PlayersData,
 } from "../types"
 import SelectPromotion from "./select-promotion"
-import { DndContext } from "@dnd-kit/core"
+import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { indexToSquare } from "../utils/index-to-square"
@@ -14,7 +14,7 @@ import ChessBoardSquare from "./chess-board-square"
 import { getSquareColor } from "../utils/get-square-color"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import CapturedPieces from "./captured-pieces"
-import { restrictToWindowEdges } from '@dnd-kit/modifiers'
+import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers"
 
 export default function ChessBoardLayout({
     // dump
@@ -73,7 +73,7 @@ export default function ChessBoardLayout({
 
     function handleSquareClick(square: Square, piece: BoardElement) {
         if (moving.isMoving) {
-            console.log('already moving')
+            console.log("already moving")
             if (!activePiece)
                 throw new Error("Active piece shouldn't be null while moving")
 
@@ -98,9 +98,26 @@ export default function ChessBoardLayout({
                 }
             }
         } else {
-            console.log('start moving')
+            console.log("start moving")
             if (piece) onMoveStart(piece)
             // if there is no piece then the player clicked empty square => nothing will happen
+        }
+    }
+
+    function handleDragStart(event: DragStartEvent) {
+        const { active } = event
+        console.log("darg start")
+        console.log("active : ", active)
+        const square = active.id as Square
+        const piece = active.data.current as Exclude<BoardElement, null>
+        handleSquareClick(square, piece)
+    }
+    function handleDragEnd(event: DragEndEvent) {
+        const {over} = event
+        if (over && over.id !== activePiece?.square) {
+            const square = over.id as Square
+            const piece = over.data.current as Exclude<BoardElement, null>
+            handleSquareClick(square, piece)
         }
     }
 
@@ -126,29 +143,9 @@ export default function ChessBoardLayout({
                     onClickOutside={() => setIsPromoting(false)}
                 />
                 <DndContext
-                    modifiers={[restrictToWindowEdges]}
-                    onDragStart={({ active }) => {
-                        console.log('darg start')
-                        console.log("active : ",active)
-                        const square = active.id as Square
-                        const piece = active.data.current as Exclude<
-                            BoardElement,
-                            null
-                        >
-                        handleSquareClick(square, piece)
-                    }}
-                    onDragEnd={({ over }) => {
-                        // u sheck if it ended over target or not
-                        // if there yes so do : over.id? to know target square
-                        if (over) {
-                            const square = over.id as Square
-                            const piece = over.data.current as Exclude<
-                                BoardElement,
-                                null
-                            >
-                            handleSquareClick(square, piece)
-                        }
-                    }}
+                    modifiers={[restrictToWindowEdges,snapCenterToCursor]}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
                 >
                     <div
                         className={cn(
@@ -178,7 +175,7 @@ export default function ChessBoardLayout({
                                         (lastMove.from == name ||
                                             lastMove.to == name)
                                     }
-                                    onClick={()=>{}}
+                                    onClick={handleSquareClick}
                                 ></ChessBoardSquare>
                             )
                         })}
