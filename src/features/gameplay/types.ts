@@ -46,3 +46,8 @@ export type MoveType = {
     to : Square
     promotion?: PieceSymbol
 }
+
+export type ChessTimer = {
+    base : number
+    plus : number
+}
