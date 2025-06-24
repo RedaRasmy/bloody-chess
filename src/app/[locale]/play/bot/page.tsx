@@ -11,7 +11,6 @@ import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     cancelMove,
     move,
-    selectActivePiece,
     selectAllowedSquares,
     selectCapturedPieces,
     selectFEN,
@@ -35,7 +34,6 @@ export default function Page() {
     const fen = useAppSelector(selectFEN)
     const { level } = useAppSelector(selectBotOptions)
     const lastMove = useAppSelector(selectLastMove)
-    const activePiece = useAppSelector(selectActivePiece)
     const isGameOver = useAppSelector(selectIsGameOver)
     const capturedPieces = useAppSelector(selectCapturedPieces)
     const score = useAppSelector(selectScore)
@@ -66,15 +64,11 @@ export default function Page() {
         <GameLayout
             chessBoard={
                 <ChessBoardLayout
-                    activePiece={activePiece}
                     onMoveStart={(piece) => dispatch(toMove(piece))}
                     onMoveEnd={(mv) => dispatch(move(mv))}
                     fen={fen}
                     capturedPieces={capturedPieces}
-                    moving={{
-                        allowedSquares,
-                        isMoving: !!activePiece,
-                    }}
+                    allowedSquares={allowedSquares}
                     playerColor={playerColor}
                     players={{
                         player: {

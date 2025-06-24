@@ -15,38 +15,30 @@ import { getSquareColor } from "../utils/get-square-color"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import CapturedPieces from "./captured-pieces"
 import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers"
+import { rank } from "../utils/rank-file"
+import { promotionRank } from "../utils/promotion-rank"
 
 export default function ChessBoardLayout({
-    // dump
     fen,
     onMoveEnd,
     playerColor,
-    moving,
+    allowedSquares,
     lastMove,
     capturedPieces,
     score,
     players,
     onMoveStart,
-    activePiece,
     onMoveCancel,
 }: {
     fen: string
     onMoveEnd: (move: MoveType) => void
     playerColor: Color
-    moving:
-        | {
-              isMoving: true
-              allowedSquares: Square[]
-          }
-        | {
-              isMoving: false
-          }
+    allowedSquares : Square[] | undefined
     lastMove?: { from: Square; to: Square }
     capturedPieces: CapturedPiecesType
     score: number
     players: PlayersData
     onMoveStart: (piece: Exclude<BoardElement, null>) => void
-    activePiece: BoardElement
     onMoveCancel: () => void
 }) {
     const chess = new Chess(fen)
@@ -54,9 +46,7 @@ export default function ChessBoardLayout({
 
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
-    // const [activePiece, setActivePiece] = useState<BoardElement>(null)
-
-    const promotionRank = playerColor === "w" ? "8" : "1"
+    const [activePiece, setActivePiece] = useState<BoardElement>(null)
 
     const opponentColor = playerColor === "w" ? "b" : "w"
 
@@ -71,36 +61,28 @@ export default function ChessBoardLayout({
         setTargetSquare(null)
     }
 
-    function handleSquareClick(square: Square, piece: BoardElement) {
-        if (moving.isMoving) {
-            console.log("already moving")
-            if (!activePiece)
-                throw new Error("Active piece shouldn't be null while moving")
+    function handleSquareClick(square: Square) {
+        // clicking a square should only : cancel a move or play a move
 
-            if (!moving.allowedSquares.includes(square)) {
-                // if clicked in no-to-move square
-                if (!piece || piece.color !== playerColor) {
-                    onMoveCancel()
-                } else {
-                    onMoveStart(piece)
-                }
-            } else {
-                const isPromotionSquare = promotionRank === square.slice(1)
+        if (activePiece) {
+            if (!allowedSquares) throw new Error("allowedSquares shouldn't be undefined while moving")
 
-                if (isPromotionSquare && activePiece.type === "p") {
+            if (!activePiece) throw new Error("activePiece shouldn't be null while moving")
+
+            if (allowedSquares.includes(square)) {
+                const isPromotionMove = (promotionRank(playerColor) === rank(square)) && (activePiece.type === 'p')
+                if (isPromotionMove) {
                     setTargetSquare(square)
                     setIsPromoting(true)
                 } else {
                     onMoveEnd({
-                        from: activePiece.square,
-                        to: square,
+                        from : activePiece.square,
+                        to : square
                     })
                 }
+            } else { 
+                onMoveCancel()
             }
-        } else {
-            console.log("start moving")
-            if (piece) onMoveStart(piece)
-            // if there is no piece then the player clicked empty square => nothing will happen
         }
     }
 
@@ -108,17 +90,27 @@ export default function ChessBoardLayout({
         const { active } = event
         console.log("darg start")
         console.log("active : ", active)
-        const square = active.id as Square
         const piece = active.data.current as Exclude<BoardElement, null>
-        handleSquareClick(square, piece)
+        onMoveStart(piece)
+        setActivePiece(piece)
+
     }
     function handleDragEnd(event: DragEndEvent) {
+        if (!activePiece) throw new Error("activePiece should be defined on drag end")
+        if (!allowedSquares) throw new Error("on drag end allowedSquares should be defined")
+        
         const {over} = event
-        if (over && over.id !== activePiece?.square) {
-            const square = over.id as Square
-            const piece = over.data.current as Exclude<BoardElement, null>
-            handleSquareClick(square, piece)
+        
+        if (!over || over.id === activePiece.square) return;
+        const targetSquare = over.id as Square
+
+        if (allowedSquares.includes(targetSquare)) {
+            onMoveEnd({
+                from : activePiece.square,
+                to : targetSquare
+            })
         }
+
     }
 
     return (
@@ -164,8 +156,8 @@ export default function ChessBoardLayout({
                                     name={name}
                                     piece={e}
                                     isToMove={
-                                        moving.isMoving
-                                            ? moving.allowedSquares.includes(
+                                        allowedSquares
+                                            ? allowedSquares.includes(
                                                   name
                                               )
                                             : false

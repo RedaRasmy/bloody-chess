@@ -10,8 +10,7 @@ import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 const initialState = {
     fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     history: [] as MoveType[],
-    allowedSquares: [] as Square[],
-    activePiece: null as BoardElement,
+    allowedSquares: [] as Square[] | undefined,
     isPlayerTurn: true,
     isCheckmate: false,
     isDraw: false,
@@ -106,8 +105,7 @@ const gameSlice = createSlice({
 
             state.fen = chess.fen()
             // clear moving states
-            state.activePiece = null
-            state.allowedSquares = []
+            state.allowedSquares = undefined
 
             // change currentPlayer
             state.isPlayerTurn = !state.isPlayerTurn
@@ -140,13 +138,11 @@ const gameSlice = createSlice({
                 })
                 .map((m) => m.to)
 
-            state.activePiece = activePiece
         },
         cancelMove: (
             state
         ) => {
-            state.allowedSquares = []
-            state.activePiece = null
+            state.allowedSquares = undefined
         },
     },
     extraReducers: (builder) => {
@@ -181,7 +177,6 @@ export const selectAllowedSquares = (state: RootState) =>
 export const selectFEN = (state: RootState) => state.game.fen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
-export const selectActivePiece = (state: RootState) => state.game.activePiece
 export const selectGameOverData = (state: RootState) => ({
     isGameOver: state.game.isGameOver,
     isDraw: state.game.isDraw,
