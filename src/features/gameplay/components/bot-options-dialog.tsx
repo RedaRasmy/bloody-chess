@@ -16,6 +16,7 @@ import { changeColor, changeLevel, changeTimer, ColorOption, selectBotOptions } 
 import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
+import { replay } from "@/redux/slices/game-slice"
 
 export default function BotOptionsDialog() {
     const dispatch = useAppDispatch()
@@ -67,7 +68,7 @@ export default function BotOptionsDialog() {
                 </div>
                 <DialogFooter>
                     <Button asChild className="">
-                        <Link href={'/play/bot'}>Start</Link>
+                        <Link href={'/play/bot'} onClick={()=>dispatch(replay())}>Start</Link>
                     </Button>
                 </DialogFooter>
             </DialogContent>
