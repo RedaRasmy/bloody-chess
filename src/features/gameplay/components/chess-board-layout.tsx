@@ -94,8 +94,8 @@ export default function ChessBoardLayout({
 
     }
     function handleDragEnd(event: DragEndEvent) {
-        if (!activePiece) throw new Error("activePiece should be defined on drag end")
-        if (!allowedSquares) throw new Error("on drag end allowedSquares should be defined")
+
+        if (!activePiece || !allowedSquares) return;
         
         const {over} = event
         
