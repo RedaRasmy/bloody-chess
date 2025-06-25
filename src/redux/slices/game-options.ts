@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { RootState } from "../store"
+import { ChessTimerOption } from "@/features/gameplay/types"
 
 export type ColorOption = 'white' | 'random' | 'black'
 
@@ -7,13 +8,15 @@ type GameOptions = {
     bot : {
         level : number,
         color : ColorOption
+        timer : ChessTimerOption | null
     },
 }
 
 const initialState:GameOptions = {
     bot : {
         level : 1,
-        color : 'white'
+        color : 'white',
+        timer : null
     }
 }
 
@@ -30,11 +33,15 @@ const gameOptions = createSlice({
             const color = action.payload
             state.bot.color = color
         },
+        changeTimer : (state,action:PayloadAction<ChessTimerOption | null>)=>{
+            const timerOption = action.payload
+            state.bot.timer = timerOption
+        }
     },
 })
 
 
-export const {changeColor,changeLevel} = gameOptions.actions
+export const {changeColor,changeLevel,changeTimer} = gameOptions.actions
 
 export default gameOptions.reducer
 

@@ -1,6 +1,18 @@
-import { CapturedPieces } from "../types";
+import { CapturedPieces, ChessTimerOption } from "../types";
 
 export const initialCaputeredPieces:CapturedPieces = {
     w : [0,0,0,0,0], 
     b : [0,0,0,0,0]
 }
+
+export const TIMER_OPTIONS:ChessTimerOption[] = [
+    'bullet 1+0',
+    'bullet 2+1',
+    'blitz 3+0',
+    'blitz 3+2',
+    'blitz 5+0',
+    'blitz 5+3',
+    'rapid 10+0',
+    'rapid 10+5',
+    'rapid 15+10'
+]

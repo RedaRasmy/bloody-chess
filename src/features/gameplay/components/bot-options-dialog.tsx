@@ -12,12 +12,14 @@ import { Slider } from "@/components/ui/slider"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { changeColor, changeLevel, ColorOption, selectBotOptions } from "@/redux/slices/game-options"
+import { changeColor, changeLevel, changeTimer, ColorOption, selectBotOptions } from "@/redux/slices/game-options"
 import { Link } from "@/i18n/navigation"
+import SelectTimer from "./select-timer"
+import { TIMER_OPTIONS } from "../utils/constantes"
 
 export default function BotOptionsDialog() {
     const dispatch = useAppDispatch()
-    const botOptions = useAppSelector(selectBotOptions)
+    const {color,level,timer} = useAppSelector(selectBotOptions)
 
     return (
         <Dialog >
@@ -32,18 +34,18 @@ export default function BotOptionsDialog() {
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-4">
-                        <p className="text-nowrap">Level : {botOptions.level}</p>
+                        <p className="text-nowrap">Level : {level}</p>
                         <Slider
                             max={20}
                             step={1}
                             onValueChange={(e) => dispatch(changeLevel(e[0]))}
-                            value={[botOptions.level]}
+                            value={[level]}
                         />
                     </div>
                     <div className="flex  gap-4">
                         <p className="text-nowrap">Color : </p>
                         <RadioGroup
-                            defaultValue={botOptions.color}
+                            defaultValue={color}
                             onValueChange={e=>dispatch(changeColor(e as ColorOption))}
                             className="flex flex-row"
                         >
@@ -61,6 +63,7 @@ export default function BotOptionsDialog() {
                             </div>
                         </RadioGroup>
                     </div>
+                    <SelectTimer options={TIMER_OPTIONS} value={timer} onChange={(op)=>dispatch(changeTimer(op))}/>
                 </div>
                 <DialogFooter>
                     <Button asChild className="">

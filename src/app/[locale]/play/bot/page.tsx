@@ -5,6 +5,7 @@ import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 import { getEngineResponse } from "@/features/gameplay/server-actions/chess-engine"
 import { getBestMove } from "@/features/gameplay/utils/get-bestmove"
+import { parseTimer } from "@/features/gameplay/utils/parse-timer"
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectBotOptions } from "@/redux/slices/game-options"
@@ -32,7 +33,7 @@ export default function Page() {
     const playerColor = useAppSelector(selectPlayerColor)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const fen = useAppSelector(selectFEN)
-    const { level } = useAppSelector(selectBotOptions)
+    const { level , timer} = useAppSelector(selectBotOptions)
     const lastMove = useAppSelector(selectLastMove)
     const isGameOver = useAppSelector(selectIsGameOver)
     const capturedPieces = useAppSelector(selectCapturedPieces)
@@ -81,6 +82,7 @@ export default function Page() {
                     score={score}
                     lastMove={lastMove}
                     onMoveCancel={() => dispatch(cancelMove())}
+                    timer={timer ? parseTimer(timer) : undefined}
                 />
             }
             gameDetails={<GameDetails />}

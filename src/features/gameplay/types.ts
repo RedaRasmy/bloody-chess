@@ -1,12 +1,10 @@
 import { Color, PieceSymbol, Square } from "chess.js"
 
-export type BoardElement =
-    | {
-          square: Square
-          type: PieceSymbol
-          color: Color
-      }
-    | null
+export type BoardElement = {
+    square: Square
+    type: PieceSymbol
+    color: Color
+} | null
 
 export type EngineResponse =
     | {
@@ -25,29 +23,41 @@ export type PromotionPiece = "q" | "n" | "r" | "b"
 
 export type Sound = "move" | "check" | "castle" | "promote" | "capture"
 
-
 export type CapturedPieces = {
-    w: [number,number,number,number,number]
-    b: [number,number,number,number,number]
+    w: [number, number, number, number, number]
+    b: [number, number, number, number, number]
 }
 
 export type PlayerData = {
-    name : string,
+    name: string
     image?: string
 }
 
 export type PlayersData = {
-    player : PlayerData
-    opponent : PlayerData
+    player: PlayerData
+    opponent: PlayerData
 }
 
 export type MoveType = {
-    from : Square
-    to : Square
+    from: Square
+    to: Square
     promotion?: PieceSymbol
 }
 
 export type ChessTimer = {
-    base : number
-    plus : number
+    type: "bullet" | "blitz" | "rapid" | "classical"
+    base: number
+    plus: number
 }
+
+export type ChessTimerType = "bullet" | "blitz" | "rapid" | "classical"
+export type ChessTimerOption =
+    | "bullet 1+0"
+    | "bullet 2+1"
+    | "blitz 3+0"
+    | "blitz 3+2"
+    | "blitz 5+0"
+    | "blitz 5+3"
+    | "rapid 10+0"
+    | "rapid 10+5"
+    | "rapid 15+10"
