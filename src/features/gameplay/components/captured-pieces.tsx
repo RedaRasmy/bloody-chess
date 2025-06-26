@@ -14,7 +14,7 @@ export default function CapturedPieces({
 
     const pieces = ['p','b','n','r','q']
 
-    // console.log(color , capturedPieces)
+   
 
     return (
         <div className="flex items-center h-full ">

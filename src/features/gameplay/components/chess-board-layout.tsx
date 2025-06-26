@@ -118,7 +118,7 @@ export default function ChessBoardLayout({
                 username={players.opponent.name}
                 image={players.opponent.image}
                 score={score < 0 ? -score : 0}
-                remainingTime={timer ? timer.base : null}
+                timer={timer}
             />
             <div className="relative w-full h-full">
                 <SelectPromotion
@@ -173,7 +173,7 @@ export default function ChessBoardLayout({
                 username={players.player.name}
                 image={players.player.image}
                 score={score > 0 ? score : 0}
-                remainingTime={timer? timer.base : null}
+                timer={timer}
             />
         </div>
     )

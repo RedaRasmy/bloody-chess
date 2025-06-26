@@ -1,20 +1,19 @@
+import { RootState } from "@/redux/store"
+
 export function getGameoverCause({
     isCheckmate,
     isDrawByFiftyMoves,
     isInsufficientMaterial,
     isStalemate,
     isThreefoldRepetition,
-    isResign
-}:{
-    isCheckmate : boolean,
-    isDrawByFiftyMoves : boolean,
-    isInsufficientMaterial : boolean,
-    isStalemate : boolean,
-    isThreefoldRepetition : boolean,
-    isResign : boolean
-}) {
+    isResign,
+    isTimeOut
+    
+}:RootState['game']) {
     if (isCheckmate) {
         return 'Checkmate'
+    } else if (isTimeOut) {
+        return "Timeout"
     } else if (isDrawByFiftyMoves) {
         return 'Fifty moves rule'
     } else if (isInsufficientMaterial) {

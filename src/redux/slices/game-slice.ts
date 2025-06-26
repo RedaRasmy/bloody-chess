@@ -6,6 +6,7 @@ import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
 import { BoardElement, MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
+import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 
 const initialState = {
     fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -26,12 +27,19 @@ const initialState = {
     lastMove: undefined as undefined | MoveType,
     score: 0,
     capturedPieces: initialCaputeredPieces,
+    isTimeOut : false
 }
 
 const gameSlice = createSlice({
     name: "game-state",
     initialState,
     reducers: {
+        timeOut: (state) => {
+            state.isTimeOut = true
+            state.isGameOver = true
+            state.winner = state.isPlayerTurn ? oppositeColor(state.playerColor) : state.playerColor
+
+        },
         resign: (state) => {
             state.isResign = true
             state.isGameOver = true
@@ -50,6 +58,7 @@ const gameSlice = createSlice({
                 promotion?: string
             }>
         ) => {
+            if (state.isGameOver) return;
             const { from, to, promotion } = action.payload
 
             const chess = new Chess()
@@ -130,6 +139,7 @@ const gameSlice = createSlice({
             state,
             { payload: activePiece }: PayloadAction<Exclude<BoardElement, null>>
         ) => {
+            if (state.isGameOver) return;
             const chess = new Chess(state.fen)
             state.allowedSquares = chess
                 .moves({
@@ -164,7 +174,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { toMove, move, replay, resign, cancelMove } = gameSlice.actions
+export const { timeOut,toMove, move, replay, resign, cancelMove } = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -181,17 +191,11 @@ export const selectGameOverData = (state: RootState) => ({
     isGameOver: state.game.isGameOver,
     isDraw: state.game.isDraw,
     isWin: state.game.winner === state.game.playerColor,
-    cause: getGameoverCause({
-        isCheckmate: state.game.isCheckmate,
-        isDrawByFiftyMoves: state.game.isDrawByFiftyMoves,
-        isInsufficientMaterial: state.game.isInsufficientMaterial,
-        isStalemate: state.game.isStalemate,
-        isThreefoldRepetition: state.game.isThreefoldRepetition,
-        isResign: state.game.isResign,
-    }),
+    cause: getGameoverCause(state.game),
 })
 export const selectLastMove = (state: RootState) => state.game.lastMove
 export const selectIsGameOver = (state: RootState) => state.game.isGameOver
 export const selectCapturedPieces = (state: RootState) =>
     state.game.capturedPieces
 export const selectScore = (state: RootState) => state.game.score
+export const selectCurrentPlayer = (state:RootState) =>  state.game.isPlayerTurn ? state.game.playerColor : oppositeColor(state.game.playerColor)

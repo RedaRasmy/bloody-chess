@@ -6,9 +6,6 @@
 //   const maxX = containerNodeRect.width - activeNodeRect.width;
 //   const maxY = containerNodeRect.height - activeNodeRect.height;
 
-//   console.log("Transform:", transform);
-// console.log("Container bounds:", containerNodeRect);
-// console.log("Piece bounds:", activeNodeRect);
 
 //   return {
 //     ...transform,
