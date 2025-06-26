@@ -199,3 +199,4 @@ export const selectCapturedPieces = (state: RootState) =>
     state.game.capturedPieces
 export const selectScore = (state: RootState) => state.game.score
 export const selectCurrentPlayer = (state:RootState) =>  state.game.isPlayerTurn ? state.game.playerColor : oppositeColor(state.game.playerColor)
+export const selectIsNewGame = (state:RootState) => state.game.history.length === 0
