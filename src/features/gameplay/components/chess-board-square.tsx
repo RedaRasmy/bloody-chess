@@ -3,8 +3,10 @@ import { type Color, type Square } from "chess.js"
 import { BoardElement } from "../types"
 import { ReactNode } from "react"
 import { Piece } from "./piece"
-import { useDraggable, useDroppable } from "@dnd-kit/core"
-import {CSS} from '@dnd-kit/utilities';
+import { useAppSelector } from "@/redux/hooks"
+import { selectPlayerColor } from "@/redux/slices/game-slice"
+import DraggablePiece from "./draggable-piece"
+import { useDroppable } from "@dnd-kit/core"
 
 export default function ChessBoardSquare({
     name,
@@ -23,25 +25,14 @@ export default function ChessBoardSquare({
     onClick: (square: Square, piece: BoardElement) => void
     children?: ReactNode
 }) {
-    const { setNodeRef: droppableRef, isOver } = useDroppable({
+    const playerColor = useAppSelector(selectPlayerColor)
+    const { setNodeRef, isOver } = useDroppable({
         id: name,
     })
-    const {
-        setNodeRef: draggableRef,
-        listeners,
-        attributes,
-        transform,
-        isDragging
-    } = useDraggable({
-        id: name,
-        data: piece ? piece : undefined,
-    })
-    const style = {
-        transform: CSS.Translate.toString(transform),
-    }
+
     return (
         <div
-            ref={droppableRef}
+            ref={setNodeRef}
             className={cn(
                 "bg-amber-100 flex justify-center items-center relative",
                 {
@@ -55,19 +46,12 @@ export default function ChessBoardSquare({
             onClick={() => onClick(name, piece)}
         >
             {children}
-            {piece && (
-                <div
-                    className={cn(" relative w-full h-full ",{
-                        "z-50" : isDragging
-                    })}
-                    ref={draggableRef}
-                    style={style}
-                    {...listeners}
-                    {...attributes}
-                >
+            {piece &&
+                (piece.color === playerColor ? (
+                    <DraggablePiece piece={piece} square={name} />
+                ) : (
                     <Piece type={piece.type} color={piece.color} />
-                </div>
-            )}
+                ))}
             {isToMove && (
                 <div className="md:size-7 size-5 bg-gray-500/60 rounded-full z-10 absolute" />
             )}
