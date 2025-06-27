@@ -9,7 +9,9 @@
     "lint": "next lint",
     "db:push": "pnpx drizzle-kit push",
     "db:generate": "pnpx drizzle-kit generate",
-    "db:migrate": "pnpx drizzle-kit migrate"
+    "db:migrate": "pnpx drizzle-kit migrate",
+    "test" : "npx playwright test",
+    "test:live" : "npx playwright test --headed"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

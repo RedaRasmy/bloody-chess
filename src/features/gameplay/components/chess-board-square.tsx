@@ -32,6 +32,7 @@ export default function ChessBoardSquare({
 
     return (
         <div
+            data-testid={name}
             ref={setNodeRef}
             className={cn(
                 "bg-amber-100 flex justify-center items-center relative",

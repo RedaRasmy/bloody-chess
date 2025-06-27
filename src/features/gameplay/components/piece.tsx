@@ -25,6 +25,7 @@ export function Piece({
 
     return (
         <Image
+            data-testid={`${color}${type}`}
             ref={ref}
             alt={type}
             fill
