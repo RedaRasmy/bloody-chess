@@ -26,7 +26,7 @@ export default function Timer({
     const [didPlay,setDidPlay] = useState(false)
 
     useEffect(() => { 
-        if (isGameOver) {
+        if (!isGameOver) {
             setTime(duration)
         }
      },[isGameOver,duration])
