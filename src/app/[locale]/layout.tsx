@@ -9,6 +9,7 @@ import {NextIntlClientProvider , hasLocale } from 'next-intl';
 // import {getLocale} from 'next-intl/server';
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { ReactScan } from "@/components/react-scan";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default async function RootLayout({
 
     return (
         <html lang={locale} >
+        <ReactScan/>
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex-col flex`}
         >
