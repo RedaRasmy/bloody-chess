@@ -11,13 +11,13 @@ import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { indexToSquare } from "../utils/index-to-square"
-import ChessBoardSquare from "./chess-board-square"
 import { getSquareColor } from "../utils/get-square-color"
 import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers"
 import { rank } from "../utils/rank-file"
 import { promotionRank } from "../utils/promotion-rank"
 import PlayerSection from "./player-section"
 import { oppositeColor } from "../utils/opposite-color"
+import DroppableSquare from "./droppable-square"
 
 export default function ChessBoardLayout({
     fen,
@@ -87,6 +87,7 @@ export default function ChessBoardLayout({
     }
 
     function handleDragStart(event: DragStartEvent) {
+        console.log('handleDragStart runs')
         const { active } = event
         const piece = active.data.current as Exclude<BoardElement, null>
         onMoveStart(piece)
@@ -143,7 +144,7 @@ export default function ChessBoardLayout({
                         {board.map((e, i) => {
                             const name = indexToSquare(i)
                             return (
-                                <ChessBoardSquare
+                                <DroppableSquare
                                     key={i}
                                     color={getSquareColor(i)}
                                     name={name}
@@ -161,7 +162,7 @@ export default function ChessBoardLayout({
                                             lastMove.to == name)
                                     }
                                     onClick={handleSquareClick}
-                                ></ChessBoardSquare>
+                                />
                             )
                         })}
                     </div>
