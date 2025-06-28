@@ -28,6 +28,7 @@ export function Piece({
             data-testid={`${color}${type}`}
             ref={ref}
             alt={type}
+            sizes="(max-width:50px)"
             fill
             draggable={false}
             src={`/images/chess-pieces/${colorName}-${name}.png`}
