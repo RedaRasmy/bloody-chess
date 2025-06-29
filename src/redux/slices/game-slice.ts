@@ -1,17 +1,18 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
-import { Chess, Color, Square } from "chess.js"
+import { Chess, Color, DEFAULT_POSITION, Square } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
-import {  MoveType } from "@/features/gameplay/types"
+import { MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 
 // const chess = new Chess();
 
+
 const initialState = {
-    fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    fen: DEFAULT_POSITION ,
     history: [] as MoveType[],
     isPlayerTurn: true,
     isCheckmate: false,
@@ -28,21 +29,44 @@ const initialState = {
     lastMove: undefined as undefined | MoveType,
     score: 0,
     capturedPieces: initialCaputeredPieces,
-    isTimeOut : false,
-    legalMoves : Object.groupBy(new Chess().moves({verbose:true}).map(mv=>({
-        to: mv.to, from:mv.from , promotion : mv.promotion
-    })),move=>move.from)
+    isTimeOut: false,
+    legalMoves: Object.groupBy(
+        new Chess().moves({ verbose: true }).map((mv) => ({
+            to: mv.to,
+            from: mv.from,
+            promotion: mv.promotion,
+        })),
+        (move) => move.from
+    ),
+    toUndo: [] as string[],
+    toRedo: [] as string[],
+    currentFen : DEFAULT_POSITION
 }
 
 const gameSlice = createSlice({
     name: "game-state",
     initialState,
     reducers: {
+        undo: (state) => {
+            const toUndo = state.toUndo.at(-1)
+            if (!toUndo) return;
+            state.toUndo.pop()
+            state.toRedo.push(state.currentFen)
+            state.currentFen = toUndo
+        },
+        redo: (state) => {
+            const toRedo = state.toRedo.at(-1)
+            if (!toRedo) return;
+            state.toRedo.pop()
+            state.toUndo.push(state.currentFen)
+            state.currentFen = toRedo
+        },
         timeOut: (state) => {
             state.isTimeOut = true
             state.isGameOver = true
-            state.winner = state.isPlayerTurn ? oppositeColor(state.playerColor) : state.playerColor
-
+            state.winner = state.isPlayerTurn
+                ? oppositeColor(state.playerColor)
+                : state.playerColor
         },
         resign: (state) => {
             state.isResign = true
@@ -54,13 +78,9 @@ const gameSlice = createSlice({
             playerColor: state.playerColor,
             isPlayerTurn: state.playerColor === "w",
         }),
-        move: (
-            state,
-            action: PayloadAction<MoveType>
-        ) => {
-            if (state.isGameOver) return;
+        move: (state, action: PayloadAction<MoveType>) => {
+            if (state.isGameOver || state.toRedo.length > 0) return
             const { from, to } = action.payload
-
 
 
 
@@ -70,6 +90,9 @@ const gameSlice = createSlice({
             state.history.push(action.payload)
 
             const theMove = chess.move(action.payload)
+
+            state.currentFen = chess.fen()
+            state.toUndo.push(state.fen)// old fen
 
             if (theMove.isCapture()) {
                 const playerColor = state.playerColor
@@ -106,9 +129,14 @@ const gameSlice = createSlice({
                 }
             }
             state.fen = chess.fen()
-            state.legalMoves =  Object.groupBy(chess.moves({verbose:true}).map(mv=>({
-                from:mv.from, to:mv.to , promotion:mv.promotion
-            })),move=>move.from)
+            state.legalMoves = Object.groupBy(
+                chess.moves({ verbose: true }).map((mv) => ({
+                    from: mv.from,
+                    to: mv.to,
+                    promotion: mv.promotion,
+                })),
+                (move) => move.from
+            )
 
             // clear moving states
 
@@ -131,7 +159,6 @@ const gameSlice = createSlice({
                 to,
             }
         },
-
     },
     extraReducers: (builder) => {
         builder.addCase(changeColor, (state, action) => {
@@ -152,15 +179,16 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, replay, resign,  } = gameSlice.actions
+export const { timeOut, move, replay, resign,undo,redo } = gameSlice.actions
 
 export default gameSlice.reducer
 
 // Selectors
 
 export const selectBoard = (state: RootState) =>
-    new Chess(state.game.fen).board()
+    new Chess(state.game.currentFen).board().flat()
 export const selectFEN = (state: RootState) => state.game.fen
+export const selectCurrentFEN = (state: RootState) => state.game.currentFen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
 export const selectGameOverData = (state: RootState) => ({
@@ -174,15 +202,25 @@ export const selectIsGameOver = (state: RootState) => state.game.isGameOver
 export const selectCapturedPieces = (state: RootState) =>
     state.game.capturedPieces
 export const selectScore = (state: RootState) => state.game.score
-export const selectCurrentPlayer = (state:RootState) =>  state.game.isPlayerTurn ? state.game.playerColor : oppositeColor(state.game.playerColor)
-export const selectIsNewGame = (state:RootState) => state.game.history.length === 0
-export const selectAllowedSquares = (from:Square|null) => (state:RootState) => {
-    if (!from) return []
-    const allowedMoves = state.game.legalMoves[from]
-    if (allowedMoves) {
-        return allowedMoves.map(mv=>mv.to)
-    } else {
-        return []
+export const selectCurrentPlayer = (state: RootState) =>
+    state.game.isPlayerTurn
+        ? state.game.playerColor
+        : oppositeColor(state.game.playerColor)
+export const selectIsNewGame = (state: RootState) =>
+    state.game.history.length === 0
+export const selectAllowedSquares =
+    (from: Square | null) => (state: RootState) => {
+        if (!from) return []
+        const allowedMoves = state.game.legalMoves[from]
+        if (allowedMoves) {
+            return allowedMoves.map((mv) => mv.to)
+        } else {
+            return []
+        }
     }
-}
-export const selectLegalMoves = (state:RootState) => state.game.legalMoves
+export const selectLegalMoves = (state: RootState) => state.game.legalMoves
+export const selectisUndoRedoable = (state:RootState) => ({
+    isUndoable : state.game.toUndo.length > 0,
+    isRedoable : state.game.toRedo.length > 0,
+})
+export const selectToRedo = (state:RootState) => state.game.toRedo

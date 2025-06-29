@@ -94,7 +94,6 @@ export default function ChessBoardLayout({
         if (piece.square === activePiece?.square) {
             return;
         }
-        console.log('handleDragStart runs')
         onMoveStart(piece)
         setActivePiece(piece)
 

@@ -12,6 +12,7 @@ import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     move,
     selectCapturedPieces,
+    selectCurrentFEN,
     selectFEN,
     selectIsGameOver,
     selectIsPlayerTurn,
@@ -30,6 +31,7 @@ export default function Page() {
     const playerColor = useAppSelector(selectPlayerColor)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const fen = useAppSelector(selectFEN)
+    const currentFen = useAppSelector(selectCurrentFEN)
     const { level , timer} = useAppSelector(selectBotOptions)
     const lastMove = useAppSelector(selectLastMove)
     const isGameOver = useAppSelector(selectIsGameOver)
@@ -39,7 +41,7 @@ export default function Page() {
 
     const [allowedSquares,setAllowedSquares] = useState<Square[]>([])
 
-    const chess = new Chess(fen)
+  
 
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
@@ -52,14 +54,16 @@ export default function Page() {
                 if (res.success) {
                     const bestMove = getBestMove(res, level, fen)
                     dispatch(move(bestMove))
+                    const chess = new Chess(fen)
                     const theMove = chess.move(bestMove)
                     playMoveSound(theMove, chess.inCheck())
                 }
             }
             fetchBestMove()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isPlayerTurn])
+
+
+    }, [isPlayerTurn,fen,dispatch,level,isGameOver])
 
     return (
         <GameLayout
@@ -70,7 +74,7 @@ export default function Page() {
                         setAllowedSquares(moves ? moves.map(mv=>mv.to) : [])
                     }}
                     onMoveEnd={(mv) => {dispatch(move(mv));setAllowedSquares([])}}
-                    fen={fen}
+                    fen={currentFen}
                     capturedPieces={capturedPieces}
                     allowedSquares={allowedSquares}
                     playerColor={playerColor}
@@ -83,7 +87,7 @@ export default function Page() {
                         },
                     }}
                     score={score}
-                    lastMove={lastMove}
+                    lastMove={fen === currentFen ? lastMove : undefined}
                     onMoveCancel={() => setAllowedSquares([])}
                     timer={timer ? parseTimer(timer) : undefined}
                 />
