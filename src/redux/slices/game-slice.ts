@@ -4,14 +4,15 @@ import { Chess, Color, Square } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
-import { BoardElement, MoveType } from "@/features/gameplay/types"
+import {  MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
+
+// const chess = new Chess();
 
 const initialState = {
     fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     history: [] as MoveType[],
-    allowedSquares: [] as Square[] | undefined,
     isPlayerTurn: true,
     isCheckmate: false,
     isDraw: false,
@@ -27,7 +28,10 @@ const initialState = {
     lastMove: undefined as undefined | MoveType,
     score: 0,
     capturedPieces: initialCaputeredPieces,
-    isTimeOut : false
+    isTimeOut : false,
+    legalMoves : Object.groupBy(new Chess().moves({verbose:true}).map(mv=>({
+        to: mv.to, from:mv.from , promotion : mv.promotion
+    })),move=>move.from)
 }
 
 const gameSlice = createSlice({
@@ -52,29 +56,20 @@ const gameSlice = createSlice({
         }),
         move: (
             state,
-            action: PayloadAction<{
-                from: Square
-                to: Square
-                promotion?: string
-            }>
+            action: PayloadAction<MoveType>
         ) => {
             if (state.isGameOver) return;
-            const { from, to, promotion } = action.payload
+            const { from, to } = action.payload
+
+
+
 
             const chess = new Chess()
             state.history.forEach((mv) => chess.move(mv))
 
-            const theMove = chess.move({
-                from,
-                to,
-                promotion,
-            })
+            state.history.push(action.payload)
 
-            state.history.push({
-                from: theMove.from,
-                to: theMove.to,
-                promotion: theMove.promotion,
-            })
+            const theMove = chess.move(action.payload)
 
             if (theMove.isCapture()) {
                 const playerColor = state.playerColor
@@ -90,7 +85,6 @@ const gameSlice = createSlice({
                 switch (theMove.captured) {
                     case "p":
                         state.score = state.score + factor
-                        // state.capturedPieces[pieceColor].p++
                         state.capturedPieces[pieceColor][0]++
                         break
                     case "b":
@@ -111,10 +105,12 @@ const gameSlice = createSlice({
                         break
                 }
             }
-
             state.fen = chess.fen()
+            state.legalMoves =  Object.groupBy(chess.moves({verbose:true}).map(mv=>({
+                from:mv.from, to:mv.to , promotion:mv.promotion
+            })),move=>move.from)
+
             // clear moving states
-            state.allowedSquares = undefined
 
             // change currentPlayer
             state.isPlayerTurn = !state.isPlayerTurn
@@ -135,25 +131,7 @@ const gameSlice = createSlice({
                 to,
             }
         },
-        toMove: (
-            state,
-            { payload: activePiece }: PayloadAction<Exclude<BoardElement, null>>
-        ) => {
-            if (state.isGameOver) return;
-            const chess = new Chess(state.fen)
-            state.allowedSquares = chess
-                .moves({
-                    square: activePiece.square,
-                    verbose: true,
-                })
-                .map((m) => m.to)
 
-        },
-        cancelMove: (
-            state
-        ) => {
-            state.allowedSquares = undefined
-        },
     },
     extraReducers: (builder) => {
         builder.addCase(changeColor, (state, action) => {
@@ -174,7 +152,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut,toMove, move, replay, resign, cancelMove } = gameSlice.actions
+export const { timeOut, move, replay, resign,  } = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -182,8 +160,6 @@ export default gameSlice.reducer
 
 export const selectBoard = (state: RootState) =>
     new Chess(state.game.fen).board()
-export const selectAllowedSquares = (state: RootState) =>
-    state.game.allowedSquares
 export const selectFEN = (state: RootState) => state.game.fen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
@@ -200,3 +176,13 @@ export const selectCapturedPieces = (state: RootState) =>
 export const selectScore = (state: RootState) => state.game.score
 export const selectCurrentPlayer = (state:RootState) =>  state.game.isPlayerTurn ? state.game.playerColor : oppositeColor(state.game.playerColor)
 export const selectIsNewGame = (state:RootState) => state.game.history.length === 0
+export const selectAllowedSquares = (from:Square|null) => (state:RootState) => {
+    if (!from) return []
+    const allowedMoves = state.game.legalMoves[from]
+    if (allowedMoves) {
+        return allowedMoves.map(mv=>mv.to)
+    } else {
+        return []
+    }
+}
+export const selectLegalMoves = (state:RootState) => state.game.legalMoves

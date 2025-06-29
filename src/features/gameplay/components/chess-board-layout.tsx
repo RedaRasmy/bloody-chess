@@ -35,7 +35,7 @@ export default function ChessBoardLayout({
     fen: string
     onMoveEnd: (move: MoveType) => void
     playerColor: Color
-    allowedSquares : Square[] | undefined
+    allowedSquares : Square[] 
     lastMove?: { from: Square; to: Square }
     capturedPieces: CapturedPiecesType
     score: number
@@ -50,6 +50,7 @@ export default function ChessBoardLayout({
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
     const [activePiece, setActivePiece] = useState<BoardElement>(null)
+
 
     const opponentColor = oppositeColor(playerColor)
 
@@ -81,15 +82,19 @@ export default function ChessBoardLayout({
                     })
                 }
             } else { 
+                setActivePiece(null)
                 onMoveCancel()
             }
         }
     }
 
     function handleDragStart(event: DragStartEvent) {
-        console.log('handleDragStart runs')
         const { active } = event
         const piece = active.data.current as Exclude<BoardElement, null>
+        if (piece.square === activePiece?.square) {
+            return;
+        }
+        console.log('handleDragStart runs')
         onMoveStart(piece)
         setActivePiece(piece)
 

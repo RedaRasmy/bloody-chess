@@ -10,26 +10,23 @@ import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectBotOptions } from "@/redux/slices/game-options"
 import {
-    cancelMove,
     move,
-    selectAllowedSquares,
     selectCapturedPieces,
     selectFEN,
     selectIsGameOver,
     selectIsPlayerTurn,
     selectLastMove,
+    selectLegalMoves,
     selectPlayerColor,
     selectScore,
-    toMove,
 } from "@/redux/slices/game-slice"
-import { Chess } from "chess.js"
-import React, { useEffect } from "react"
+import { Chess, Square } from "chess.js"
+import React, { useEffect, useState } from "react"
 
 export default function Page() {
     // chessEngine calls should be here
     // for now connect with game-slice to valide moves in the client for play/bot
     const dispatch = useAppDispatch()
-    const allowedSquares = useAppSelector(selectAllowedSquares)
     const playerColor = useAppSelector(selectPlayerColor)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const fen = useAppSelector(selectFEN)
@@ -38,6 +35,9 @@ export default function Page() {
     const isGameOver = useAppSelector(selectIsGameOver)
     const capturedPieces = useAppSelector(selectCapturedPieces)
     const score = useAppSelector(selectScore)
+    const legalMoves = useAppSelector(selectLegalMoves)
+
+    const [allowedSquares,setAllowedSquares] = useState<Square[]>([])
 
     const chess = new Chess(fen)
 
@@ -65,8 +65,11 @@ export default function Page() {
         <GameLayout
             chessBoard={
                 <ChessBoardLayout
-                    onMoveStart={(piece) => dispatch(toMove(piece))}
-                    onMoveEnd={(mv) => dispatch(move(mv))}
+                    onMoveStart={(piece) => {
+                        const moves = legalMoves[piece.square]
+                        setAllowedSquares(moves ? moves.map(mv=>mv.to) : [])
+                    }}
+                    onMoveEnd={(mv) => {dispatch(move(mv));setAllowedSquares([])}}
                     fen={fen}
                     capturedPieces={capturedPieces}
                     allowedSquares={allowedSquares}
@@ -81,7 +84,7 @@ export default function Page() {
                     }}
                     score={score}
                     lastMove={lastMove}
-                    onMoveCancel={() => dispatch(cancelMove())}
+                    onMoveCancel={() => setAllowedSquares([])}
                     timer={timer ? parseTimer(timer) : undefined}
                 />
             }
