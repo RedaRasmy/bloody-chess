@@ -36,6 +36,7 @@
     "drizzle-zod": "^0.8.2",
     "install": "^0.13.0",
     "lucide-react": "^0.514.0",
+    "motion": "^12.20.1",
     "next": "15.3.3",
     "next-auth": "^4.24.11",
     "next-intl": "^4.1.0",
