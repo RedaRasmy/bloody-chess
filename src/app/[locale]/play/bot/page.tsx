@@ -87,7 +87,7 @@ export default function Page() {
                         },
                     }}
                     score={score}
-                    lastMove={fen === currentFen ? lastMove : undefined}
+                    lastMove={lastMove}
                     onMoveCancel={() => setAllowedSquares([])}
                     timer={timer ? parseTimer(timer) : undefined}
                 />

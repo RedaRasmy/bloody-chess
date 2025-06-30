@@ -8,9 +8,6 @@ import { MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 
-// const chess = new Chess();
-
-
 const initialState = {
     fen: DEFAULT_POSITION ,
     history: [] as MoveType[],
@@ -26,7 +23,7 @@ const initialState = {
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
     isResign: false,
-    lastMove: undefined as undefined | MoveType,
+    currentMoveIndex : -1,
     score: 0,
     capturedPieces: initialCaputeredPieces,
     isTimeOut: false,
@@ -44,7 +41,7 @@ const initialState = {
 }
 
 const gameSlice = createSlice({
-    name: "game-state",
+    name: "game",
     initialState,
     reducers: {
         undo: (state) => {
@@ -53,6 +50,7 @@ const gameSlice = createSlice({
             state.toUndo.pop()
             state.toRedo.push(state.currentFen)
             state.currentFen = toUndo
+            state.currentMoveIndex--
         },
         redo: (state) => {
             const toRedo = state.toRedo.at(-1)
@@ -60,6 +58,7 @@ const gameSlice = createSlice({
             state.toRedo.pop()
             state.toUndo.push(state.currentFen)
             state.currentFen = toRedo
+            state.currentMoveIndex++   
         },
         timeOut: (state) => {
             state.isTimeOut = true
@@ -80,9 +79,6 @@ const gameSlice = createSlice({
         }),
         move: (state, action: PayloadAction<MoveType>) => {
             if (state.isGameOver || state.toRedo.length > 0) return
-            const { from, to } = action.payload
-
-
 
             const chess = new Chess()
             state.history.forEach((mv) => chess.move(mv))
@@ -154,10 +150,7 @@ const gameSlice = createSlice({
             if (chess.isCheckmate()) {
                 state.winner = chess.turn() === "w" ? "b" : "w"
             }
-            state.lastMove = {
-                from,
-                to,
-            }
+            state.currentMoveIndex = state.history.length - 1
         },
     },
     extraReducers: (builder) => {
@@ -197,7 +190,12 @@ export const selectGameOverData = (state: RootState) => ({
     isWin: state.game.winner === state.game.playerColor,
     cause: getGameoverCause(state.game),
 })
-export const selectLastMove = (state: RootState) => state.game.lastMove
+export const selectLastMove = (state: RootState) => {
+    const index = state.game.currentMoveIndex
+    if (index === -1) return undefined
+    const move = state.game.history[index]
+    return move
+}
 export const selectIsGameOver = (state: RootState) => state.game.isGameOver
 export const selectCapturedPieces = (state: RootState) =>
     state.game.capturedPieces
