@@ -1,18 +1,21 @@
 "use client"
-import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
 import GameDetails from "@/features/gameplay/components/game-details"
 import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
+import PlayerSection from "@/features/gameplay/components/player-section"
+import ChessBoard from "@/features/gameplay/components/temp/chess-board"
+import ChessBoardLayout from "@/features/gameplay/components/temp/chess-board-layout"
 import { getEngineResponse } from "@/features/gameplay/server-actions/chess-engine"
 import { getBestMove } from "@/features/gameplay/utils/get-bestmove"
+import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { parseTimer } from "@/features/gameplay/utils/parse-timer"
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     move,
+    selectBoard,
     selectCapturedPieces,
-    selectCurrentFEN,
     selectFEN,
     selectIsGameOver,
     selectIsPlayerTurn,
@@ -31,17 +34,18 @@ export default function Page() {
     const playerColor = useAppSelector(selectPlayerColor)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const fen = useAppSelector(selectFEN)
-    const currentFen = useAppSelector(selectCurrentFEN)
-    const { level , timer} = useAppSelector(selectBotOptions)
+    const pieces = useAppSelector(selectBoard)
+    const { level, timer: timerOption } = useAppSelector(selectBotOptions)
     const lastMove = useAppSelector(selectLastMove)
     const isGameOver = useAppSelector(selectIsGameOver)
     const capturedPieces = useAppSelector(selectCapturedPieces)
     const score = useAppSelector(selectScore)
     const legalMoves = useAppSelector(selectLegalMoves)
 
-    const [allowedSquares,setAllowedSquares] = useState<Square[]>([])
+    const [allowedSquares, setAllowedSquares] = useState<Square[]>([])
 
-  
+    const timer = timerOption ? parseTimer(timerOption) : undefined
+    const opponentColor = oppositeColor(playerColor)
 
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
@@ -61,35 +65,50 @@ export default function Page() {
             }
             fetchBestMove()
         }
-
-
-    }, [isPlayerTurn,fen,dispatch,level,isGameOver])
+    }, [isPlayerTurn, fen, dispatch, level, isGameOver])
 
     return (
         <GameLayout
             chessBoard={
                 <ChessBoardLayout
-                    onMoveStart={(piece) => {
-                        const moves = legalMoves[piece.square]
-                        setAllowedSquares(moves ? moves.map(mv=>mv.to) : [])
-                    }}
-                    onMoveCancel={() => setAllowedSquares([])}
-                    onMoveEnd={(mv) => {dispatch(move(mv));setAllowedSquares([])}}
-                    fen={currentFen}
-                    capturedPieces={capturedPieces}
-                    allowedSquares={allowedSquares}
-                    playerColor={playerColor}
-                    players={{
-                        player: {
-                            name: "Guest",
-                        },
-                        opponent: {
-                            name: `Bot-${level}`,
-                        },
-                    }}
-                    score={score}
-                    lastMove={lastMove}
-                    timer={timer ? parseTimer(timer) : undefined}
+                    OpponentSection={
+                        <PlayerSection
+                            capturedPieces={capturedPieces[playerColor]}
+                            opponentColor={playerColor}
+                            score={score < 0 ? -score : 0}
+                            username={`bot-${level}`}
+                            timer={timer}
+                        />
+                    }
+                    ChessBoard={
+                        <ChessBoard
+                            allowedSquares={allowedSquares}
+                            lastMove={lastMove}
+                            pieces={pieces}
+                            playerColor={playerColor}
+                            onMoveStart={(piece) => {
+                                const moves = legalMoves[piece.square]
+                                setAllowedSquares(
+                                    moves ? moves.map((mv) => mv.to) : []
+                                )
+                            }}
+                            onMoveCancel={() => setAllowedSquares([])}
+                            onMoveEnd={(mv) => {
+                                dispatch(move(mv))
+                                setAllowedSquares([])
+                            }}
+                            preMoves={[]} // TODO
+                        />
+                    }
+                    PlayerSection={
+                        <PlayerSection
+                            score={score > 0 ? score : 0}
+                            username="Guest"
+                            timer={timer}
+                            capturedPieces={capturedPieces[opponentColor]}
+                            opponentColor={opponentColor}
+                        />
+                    }
                 />
             }
             gameDetails={<GameDetails />}

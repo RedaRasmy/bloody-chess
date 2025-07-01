@@ -7,7 +7,6 @@ import ChessBoardSquare from "./chess-board-square"
 
 export default function DroppableSquare(props: {
     name: Square
-    color: Color
     piece: BoardElement
     isToMove?: boolean
     isLastMove: boolean

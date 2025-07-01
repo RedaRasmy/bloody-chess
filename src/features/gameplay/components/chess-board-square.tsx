@@ -6,11 +6,11 @@ import { Piece } from "./piece"
 import { useAppSelector } from "@/redux/hooks"
 import { selectPlayerColor } from "@/redux/slices/game-slice"
 import DraggablePiece from "./draggable-piece"
+import { getSquareColor } from "../utils/get-square-color"
 // import { useDroppable } from "@dnd-kit/core"
 
 export default function ChessBoardSquare({
     name,
-    color,
     piece,
     isToMove = false,
     isLastMove,
@@ -18,7 +18,6 @@ export default function ChessBoardSquare({
     children,
 }: {
     name: Square
-    color: Color
     piece: BoardElement
     isToMove?: boolean
     isLastMove: boolean
@@ -27,7 +26,8 @@ export default function ChessBoardSquare({
 }) {
     const playerColor = useAppSelector(selectPlayerColor)
   
-
+    const color = getSquareColor(name)
+    
     return (
         <div
             data-testid={name}

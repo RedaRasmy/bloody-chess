@@ -33,7 +33,6 @@ export default function ChessBoardLayout({
     timer
 }: {
     fen: string
-    onMoveEnd: (move: MoveType) => void
     playerColor: Color
     allowedSquares : Square[] 
     lastMove?: { from: Square; to: Square }
@@ -42,6 +41,7 @@ export default function ChessBoardLayout({
     players: PlayersData
     onMoveStart: (piece: Exclude<BoardElement, null>) => void
     onMoveCancel: () => void
+    onMoveEnd: (move: MoveType) => void
     timer?: ChessTimer
 }) {
     const chess = new Chess(fen)
@@ -150,7 +150,6 @@ export default function ChessBoardLayout({
                             return (
                                 <DroppableSquare
                                     key={i}
-                                    color={getSquareColor(i)}
                                     name={name}
                                     piece={e}
                                     isToMove={
