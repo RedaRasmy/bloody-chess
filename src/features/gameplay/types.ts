@@ -61,3 +61,10 @@ export type ChessTimerOption =
     | "rapid 10+0"
     | "rapid 10+5"
     | "rapid 15+10"
+
+export type Piece = {
+    id : string,
+    type: PieceSymbol
+    color: Color,
+    square: Square
+}

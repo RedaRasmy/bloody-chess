@@ -1,7 +1,7 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { PieceSymbol, Square, SQUARES } from "chess.js"
 import ChessSquare from "./chess-square"
-import { BoardElement, MoveType } from "../../types"
+import { BoardElement, MoveType, Piece } from "../../types"
 // import Draggable from "./draggable"
 import Droppable from "./droppable"
 // import ChessPiece from "./chess-piece"
@@ -25,7 +25,7 @@ export default function ChessBoard({
     lastMove,
     // preMoves,
 }: {
-    pieces: BoardElement[]
+    pieces: Piece[]
     playerColor: "w" | "b"
     onMoveStart: (piece: Exclude<BoardElement, null>) => void
     onMoveCancel: () => void
@@ -137,7 +137,7 @@ export default function ChessBoard({
                 {pieces.map((piece) => {
                     if (piece) {
                         return (
-                            <Draggable key={piece.square} id={piece.square} data={piece}>
+                            <Draggable square={piece.square} key={piece.id} id={piece.id} data={piece}>
                                 <ChessPiece piece={piece} />
                             </Draggable>
                         )

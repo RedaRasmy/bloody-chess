@@ -7,6 +7,7 @@ import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
 import { MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
+import getInitialPieces from "@/features/gameplay/utils/get-initial-pieces"
 
 const initialState = {
     fen: DEFAULT_POSITION ,
@@ -37,7 +38,8 @@ const initialState = {
     ),
     toUndo: [] as string[],
     toRedo: [] as string[],
-    currentFen : DEFAULT_POSITION
+    currentFen : DEFAULT_POSITION,
+    pieces : getInitialPieces()
 }
 
 const gameSlice = createSlice({
@@ -79,6 +81,13 @@ const gameSlice = createSlice({
         }),
         move: (state, action: PayloadAction<MoveType>) => {
             if (state.isGameOver || state.toRedo.length > 0) return
+            const {from ,to } = action.payload
+
+            // handle pieces change
+            const piece = state.pieces.find(p=>p.square === from)!
+            piece.square = to
+            state.pieces = state.pieces.filter(p => p.square !== to || p === piece);
+
 
             const chess = new Chess()
             state.history.forEach((mv) => chess.move(mv))
@@ -178,8 +187,29 @@ export default gameSlice.reducer
 
 // Selectors
 
-export const selectBoard = (state: RootState) =>
-    new Chess(state.game.currentFen).board().flat()
+// export const selectBoard = (state: RootState) => {
+//     const pieces = new Chess(state.game.currentFen).board().flat().filter(el => !!el);
+//     const pieceCount = {} as Record<string, number>;
+    
+//     return pieces.map((piece) => {
+//         // Count how many of this piece type/color we've seen
+//         const key = `${piece.color}-${piece.type}`;
+//         pieceCount[key] = (pieceCount[key] || 0) + 1;
+        
+//         return {
+//             ...piece,
+//             id: `${piece.color}-${piece.type}-${pieceCount[key]}`,
+//         }
+//     });
+// }
+// export const selectBoard = (state: RootState) =>
+//     new Chess(state.game.currentFen).board().flat().filter(el=>!!el).map((el,index)=>{
+//         return {
+//             ...el,
+//             id: `${el.color}-${el.type}-${index}`,
+//         }
+//     })
+export const selectPieces = (state: RootState) => state.game.pieces
 export const selectFEN = (state: RootState) => state.game.fen
 export const selectCurrentFEN = (state: RootState) => state.game.currentFen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn

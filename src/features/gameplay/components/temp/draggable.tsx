@@ -10,6 +10,7 @@ import useChessBoardWidth from "@/hooks/useChessBoardWidth"
 
 export default function Draggable({
     id,
+    square,
     data,
     children,
     className,
@@ -17,7 +18,8 @@ export default function Draggable({
     id: string
     data: Exclude<BoardElement, null> | undefined
     children: ReactNode
-    className?: string
+    className?: string,
+    square: Square
 }) {
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
@@ -33,7 +35,7 @@ export default function Draggable({
             : "none",
     }
 
-    const [x, y] = squareToCoords(id as Square)
+    const [x, y] = squareToCoords(square)
 
     const a = useChessBoardWidth()
 
@@ -44,7 +46,10 @@ export default function Draggable({
                 x: x * (a/8),
                 y: y * (a/8),
             }}
-            transition={{ duration: 1 }}
+            // initial={false}
+            layoutId={id}
+            // layout
+            transition={{ duration: 0.5 }}
             className="absolute"
         >
             <div

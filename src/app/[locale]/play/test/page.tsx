@@ -14,13 +14,13 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     move,
-    selectBoard,
     selectCapturedPieces,
     selectFEN,
     selectIsGameOver,
     selectIsPlayerTurn,
     selectLastMove,
     selectLegalMoves,
+    selectPieces,
     selectPlayerColor,
     selectScore,
 } from "@/redux/slices/game-slice"
@@ -34,7 +34,7 @@ export default function Page() {
     const playerColor = useAppSelector(selectPlayerColor)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const fen = useAppSelector(selectFEN)
-    const pieces = useAppSelector(selectBoard)
+    const pieces = useAppSelector(selectPieces)
     const { level, timer: timerOption } = useAppSelector(selectBotOptions)
     const lastMove = useAppSelector(selectLastMove)
     const isGameOver = useAppSelector(selectIsGameOver)
