@@ -9,10 +9,16 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Slider } from "@/components/ui/slider"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+// import { Label } from "@/components/ui/label"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { changeColor, changeLevel, changeTimer, ColorOption, selectBotOptions } from "@/redux/slices/game-options"
+import {
+    // changeColor,
+    changeLevel,
+    changeTimer,
+    // ColorOption,
+    selectBotOptions,
+} from "@/redux/slices/game-options"
 import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
@@ -20,11 +26,11 @@ import { replay } from "@/redux/slices/game-slice"
 
 export default function BotOptionsDialog() {
     const dispatch = useAppDispatch()
-    const {color,level,timer} = useAppSelector(selectBotOptions)
+    const { color, level, timer } = useAppSelector(selectBotOptions)
 
     return (
-        <Dialog >
-            <DialogTrigger asChild >
+        <Dialog>
+            <DialogTrigger asChild>
                 <Button className="lg:w-sm w-50 py-6 cursor-pointer">
                     Play Bot
                 </Button>
@@ -43,7 +49,7 @@ export default function BotOptionsDialog() {
                             value={[level]}
                         />
                     </div>
-                    <div className="flex  gap-4">
+                    {/* <div className="flex  gap-4">
                         <p className="text-nowrap">Color : </p>
                         <RadioGroup
                             defaultValue={color}
@@ -63,12 +69,21 @@ export default function BotOptionsDialog() {
                                 <Label htmlFor="r3">Black</Label>
                             </div>
                         </RadioGroup>
-                    </div>
-                    <SelectTimer options={TIMER_OPTIONS} value={timer} onChange={(op)=>dispatch(changeTimer(op))}/>
+                    </div> */}
+                    <SelectTimer
+                        options={TIMER_OPTIONS}
+                        value={timer}
+                        onChange={(op) => dispatch(changeTimer(op))}
+                    />
                 </div>
                 <DialogFooter>
                     <Button asChild className="">
-                        <Link href={'/play/bot'} onClick={()=>dispatch(replay())}>Start</Link>
+                        <Link
+                            href={"/play/bot"}
+                            onClick={() => dispatch(replay())}
+                        >
+                            Start
+                        </Link>
                     </Button>
                 </DialogFooter>
             </DialogContent>
