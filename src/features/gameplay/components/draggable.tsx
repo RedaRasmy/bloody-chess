@@ -9,13 +9,11 @@ import { motion } from "motion/react"
 import useChessBoardWidth from "@/hooks/useChessBoardWidth"
 
 export default function Draggable({
-    id,
     square,
     data,
     children,
     className,
 }: {
-    id: string
     data: Exclude<BoardElement, null> | undefined
     children: ReactNode
     className?: string
@@ -23,16 +21,11 @@ export default function Draggable({
 }) {
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
-            id,
+            id : square,
             data,
         })
     const style = {
         transform: CSS.Translate.toString(transform),
-    }
-    const dragStyle = {
-        transform: transform
-            ? `translate(${transform.x}px, ${transform.y}px)`
-            : "none",
     }
 
     const [x, y] = squareToCoords(square)
@@ -76,7 +69,7 @@ export default function Draggable({
                 ref={setNodeRef}
                 {...listeners}
                 {...attributes}
-                className={cn({ "z-1000": isDragging }, className)}
+                className={cn({ "z-10": isDragging }, className)}
                 style={style}
             >
                 {children}

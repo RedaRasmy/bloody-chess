@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils"
 import { getSquareColor } from "../utils/get-square-color"
 import { Square } from "chess.js"
-import { useDroppable } from "@dnd-kit/core"
 
 export default function ChessSquare({
     squareName,
@@ -17,13 +16,10 @@ export default function ChessSquare({
     isPreMove: boolean
 }) {
     const color = getSquareColor(squareName)
-    const { setNodeRef, isOver } = useDroppable({
-        id: squareName,
-    })
+
     return (
         <div
             data-testid={squareName}
-            ref={setNodeRef}
             className={cn(
                 "bg-amber-100 flex justify-center items-center relative w-full h-full",
                 {
@@ -38,7 +34,7 @@ export default function ChessSquare({
             onClick={() => onClick(squareName)}
         >
             {isTarget && (
-                <div className="md:size-7 size-4 bg-gray-500/60 rounded-full z-10 absolute" />
+                <div className=" lg:size-6 size-5 bg-gray-500/60 rounded-full z-1 absolute " />
             )}
         </div>
     )

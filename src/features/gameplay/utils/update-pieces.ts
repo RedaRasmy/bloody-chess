@@ -1,5 +1,5 @@
-import { Move, Square } from "chess.js"
-import { DetailedMove, MoveType, Piece } from "../types"
+import { Square } from "chess.js"
+import { DetailedMove, Piece } from "../types"
 import { rank } from "./rank-file"
 
 export default function updatePieces(piecesToUpdate: Piece[], move: DetailedMove,reversed = false): Piece[] {

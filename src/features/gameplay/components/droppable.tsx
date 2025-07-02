@@ -2,9 +2,8 @@ import { cn } from "@/lib/utils"
 import { ReactNode } from "react"
 import { useDroppable } from "@dnd-kit/core"
 
-export default function Droppable({id,overStyling="",children,className}: {
+export default function Droppable({id,children,className}: {
     id: string,
-    overStyling?: string,
     className?: string,
     children?: ReactNode
 }) {
@@ -15,8 +14,9 @@ export default function Droppable({id,overStyling="",children,className}: {
     return (
         <div
             ref={setNodeRef}
-            className={cn(className, {
-                overStyling : isOver,
+
+            className={cn(className,{
+                'border-3 border-gray-400' : isOver,
             })}
         >
             {children}

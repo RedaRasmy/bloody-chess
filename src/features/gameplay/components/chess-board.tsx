@@ -2,9 +2,7 @@ import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { PieceSymbol, Square, SQUARES } from "chess.js"
 import ChessSquare from "./chess-square"
 import { BoardElement, MoveType, Piece } from "../types"
-// import Draggable from "./draggable"
 import Droppable from "./droppable"
-// import ChessPiece from "./chess-piece"
 import { useState } from "react"
 import SelectPromotion from "./select-promotion"
 import { promotionRank } from "../utils/promotion-rank"
@@ -92,10 +90,18 @@ export default function ChessBoard({
         const targetSquare = over.id as Square
 
         if (allowedSquares.includes(targetSquare)) {
-            onMoveEnd({
-                from: activePiece.square,
-                to: targetSquare,
-            })
+            const isPromotionMove =
+                promotionRank(playerColor) === rank(targetSquare) &&
+                activePiece.type === "p"
+            if (isPromotionMove) {
+                setTargetSquare(targetSquare)
+                setIsPromoting(true)
+            } else {
+                onMoveEnd({
+                    from: activePiece.square,
+                    to: targetSquare,
+                })
+            }
         }
     }
 
@@ -121,11 +127,7 @@ export default function ChessBoard({
                     onClickOutside={() => setIsPromoting(false)}
                 />
                 {SQUARES.map((sq) => (
-                    <Droppable
-                        key={sq}
-                        id={sq}
-                        overStyling="border-3 border-gray-400"
-                    >
+                    <Droppable key={sq} id={sq}>
                         <ChessSquare
                             squareName={sq}
                             isLastMove={
@@ -144,7 +146,6 @@ export default function ChessBoard({
                             <Draggable
                                 square={piece.square}
                                 key={piece.id}
-                                id={piece.id}
                                 data={piece}
                             >
                                 <ChessPiece piece={piece} />
