@@ -1,7 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { redo, replay, resign, selectIsGameOver, selectisUndoRedoable, undo } from "@/redux/slices/game-slice";
+import { redo, replay, resign, selectIsGameOver, selectisUndoRedoable, undo,  } from "@/redux/slices/game-slice";
 
 export default function GameDetails() {
     const dispatch = useAppDispatch()

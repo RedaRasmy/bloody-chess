@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { getSquareColor } from "../../utils/get-square-color"
+import { getSquareColor } from "../utils/get-square-color"
 import { Square } from "chess.js"
 import { useDroppable } from "@dnd-kit/core"
 

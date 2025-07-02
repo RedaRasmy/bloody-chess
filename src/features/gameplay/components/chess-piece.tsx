@@ -1,9 +1,9 @@
 
 import { cn } from "@/lib/utils"
-import { BoardElement } from "../../types"
-import { getPieceName } from "../../utils/getPieceName"
+import { BoardElement } from "../types"
+import { getPieceName } from "../utils/getPieceName"
 import Image from "next/image"
-import { squareToCoords } from "../../utils/square-to-coords"
+import { squareToCoords } from "../utils/square-to-coords"
 import useChessBoardWidth from "@/hooks/useChessBoardWidth"
 
 export default function ChessPiece({
@@ -27,7 +27,6 @@ export default function ChessPiece({
         <Image
             data-testid={`${color}${type}`}
             alt={type}
-            // sizes="(max-width:50px)"
             width={a/8}
             height={a/8}
             draggable={false}

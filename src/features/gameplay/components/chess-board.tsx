@@ -1,14 +1,14 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { PieceSymbol, Square, SQUARES } from "chess.js"
 import ChessSquare from "./chess-square"
-import { BoardElement, MoveType, Piece } from "../../types"
+import { BoardElement, MoveType, Piece } from "../types"
 // import Draggable from "./draggable"
 import Droppable from "./droppable"
 // import ChessPiece from "./chess-piece"
 import { useState } from "react"
-import SelectPromotion from "../select-promotion"
-import { promotionRank } from "../../utils/promotion-rank"
-import { rank } from "../../utils/rank-file"
+import SelectPromotion from "./select-promotion"
+import { promotionRank } from "../utils/promotion-rank"
+import { rank } from "../utils/rank-file"
 import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers"
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
@@ -23,8 +23,8 @@ export default function ChessBoard({
     onMoveCancel,
     allowedSquares,
     lastMove,
-    // preMoves,
-}: {
+}: // preMoves,
+{
     pieces: Piece[]
     playerColor: "w" | "b"
     onMoveStart: (piece: Exclude<BoardElement, null>) => void
@@ -105,12 +105,6 @@ export default function ChessBoard({
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <SelectPromotion
-                onChange={handlePromotion}
-                color={playerColor}
-                open={isPromoting}
-                onClickOutside={() => setIsPromoting(false)}
-            />
             <div
                 id="chess-board"
                 className={cn(
@@ -120,8 +114,18 @@ export default function ChessBoard({
                     }
                 )}
             >
+                <SelectPromotion
+                    onChange={handlePromotion}
+                    color={playerColor}
+                    open={isPromoting}
+                    onClickOutside={() => setIsPromoting(false)}
+                />
                 {SQUARES.map((sq) => (
-                    <Droppable key={sq} id={sq} overStyling="border-3 border-gray-400">
+                    <Droppable
+                        key={sq}
+                        id={sq}
+                        overStyling="border-3 border-gray-400"
+                    >
                         <ChessSquare
                             squareName={sq}
                             isLastMove={
@@ -137,7 +141,12 @@ export default function ChessBoard({
                 {pieces.map((piece) => {
                     if (piece) {
                         return (
-                            <Draggable square={piece.square} key={piece.id} id={piece.id} data={piece}>
+                            <Draggable
+                                square={piece.square}
+                                key={piece.id}
+                                id={piece.id}
+                                data={piece}
+                            >
                                 <ChessPiece piece={piece} />
                             </Draggable>
                         )

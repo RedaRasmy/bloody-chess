@@ -1,10 +1,13 @@
 "use client"
-import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
 import GameDetails from "@/features/gameplay/components/game-details"
 import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
+import PlayerSection from "@/features/gameplay/components/player-section"
+import ChessBoard from "@/features/gameplay/components/chess-board"
+import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
 import { getEngineResponse } from "@/features/gameplay/server-actions/chess-engine"
 import { getBestMove } from "@/features/gameplay/utils/get-bestmove"
+import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { parseTimer } from "@/features/gameplay/utils/parse-timer"
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
@@ -12,12 +15,13 @@ import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     move,
     selectCapturedPieces,
-    selectCurrentFEN,
     selectFEN,
     selectIsGameOver,
     selectIsPlayerTurn,
+    selectisUndoRedoable,
     selectLastMove,
     selectLegalMoves,
+    selectPieces,
     selectPlayerColor,
     selectScore,
 } from "@/redux/slices/game-slice"
@@ -25,23 +29,24 @@ import { Chess, Square } from "chess.js"
 import React, { useEffect, useState } from "react"
 
 export default function Page() {
-    // chessEngine calls should be here
-    // for now connect with game-slice to valide moves in the client for play/bot
+    
     const dispatch = useAppDispatch()
     const playerColor = useAppSelector(selectPlayerColor)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const fen = useAppSelector(selectFEN)
-    const currentFen = useAppSelector(selectCurrentFEN)
-    const { level , timer} = useAppSelector(selectBotOptions)
+    const pieces = useAppSelector(selectPieces)
+    const { level, timer: timerOption } = useAppSelector(selectBotOptions)
     const lastMove = useAppSelector(selectLastMove)
     const isGameOver = useAppSelector(selectIsGameOver)
     const capturedPieces = useAppSelector(selectCapturedPieces)
     const score = useAppSelector(selectScore)
     const legalMoves = useAppSelector(selectLegalMoves)
+    const {isRedoable} = useAppSelector(selectisUndoRedoable)
 
-    const [allowedSquares,setAllowedSquares] = useState<Square[]>([])
+    const [allowedSquares, setAllowedSquares] = useState<Square[]>([])
 
-  
+    const timer = timerOption ? parseTimer(timerOption) : undefined
+    const opponentColor = oppositeColor(playerColor)
 
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
@@ -61,35 +66,54 @@ export default function Page() {
             }
             fetchBestMove()
         }
-
-
-    }, [isPlayerTurn,fen,dispatch,level,isGameOver])
+    }, [isPlayerTurn, fen, dispatch, level, isGameOver])
 
     return (
         <GameLayout
             chessBoard={
                 <ChessBoardLayout
-                    onMoveStart={(piece) => {
-                        const moves = legalMoves[piece.square]
-                        setAllowedSquares(moves ? moves.map(mv=>mv.to) : [])
-                    }}
-                    onMoveCancel={() => setAllowedSquares([])}
-                    onMoveEnd={(mv) => {dispatch(move(mv));setAllowedSquares([])}}
-                    fen={currentFen}
-                    capturedPieces={capturedPieces}
-                    allowedSquares={allowedSquares}
-                    playerColor={playerColor}
-                    players={{
-                        player: {
-                            name: "Guest",
-                        },
-                        opponent: {
-                            name: `Bot-${level}`,
-                        },
-                    }}
-                    score={score}
-                    lastMove={lastMove}
-                    timer={timer ? parseTimer(timer) : undefined}
+                    OpponentSection={
+                        <PlayerSection
+                            capturedPieces={capturedPieces[playerColor]}
+                            opponentColor={playerColor}
+                            score={score < 0 ? -score : 0}
+                            username={`bot-${level}`}
+                            timer={timer}
+                        />
+                    }
+                    ChessBoard={
+                        <ChessBoard
+                            allowedSquares={allowedSquares}
+                            lastMove={lastMove}
+                            pieces={pieces}
+                            playerColor={playerColor}
+                            onMoveStart={(piece) => {
+                                if (isRedoable) {
+                                    setAllowedSquares([])
+                                } else {
+                                    const moves = legalMoves[piece.square]
+                                    setAllowedSquares(
+                                        moves ? moves.map((mv) => mv.to) : []
+                                    )
+                                }
+                            }}
+                            onMoveCancel={() => setAllowedSquares([])}
+                            onMoveEnd={(mv) => {
+                                dispatch(move(mv))
+                                setAllowedSquares([])
+                            }}
+                            preMoves={[]} // TODO
+                        />
+                    }
+                    PlayerSection={
+                        <PlayerSection
+                            score={score > 0 ? score : 0}
+                            username="Guest"
+                            timer={timer}
+                            capturedPieces={capturedPieces[opponentColor]}
+                            opponentColor={opponentColor}
+                        />
+                    }
                 />
             }
             gameDetails={<GameDetails />}

@@ -4,14 +4,17 @@ import { Chess, Color, DEFAULT_POSITION, Square } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
-import { MoveType } from "@/features/gameplay/types"
+import { DetailedMove, MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import getInitialPieces from "@/features/gameplay/utils/get-initial-pieces"
+import { rank } from "@/features/gameplay/utils/rank-file"
+import updatePieces from "@/features/gameplay/utils/update-pieces"
+import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 
 const initialState = {
-    fen: DEFAULT_POSITION ,
-    history: [] as MoveType[],
+    fen: DEFAULT_POSITION,
+    history: [] as DetailedMove[],
     isPlayerTurn: true,
     isCheckmate: false,
     isDraw: false,
@@ -24,22 +27,12 @@ const initialState = {
     winner: undefined as undefined | Color,
     playerColor: "w" as Color,
     isResign: false,
-    currentMoveIndex : -1,
+    currentMoveIndex: -1,
     score: 0,
     capturedPieces: initialCaputeredPieces,
     isTimeOut: false,
-    legalMoves: Object.groupBy(
-        new Chess().moves({ verbose: true }).map((mv) => ({
-            to: mv.to,
-            from: mv.from,
-            promotion: mv.promotion,
-        })),
-        (move) => move.from
-    ),
-    toUndo: [] as string[],
-    toRedo: [] as string[],
-    currentFen : DEFAULT_POSITION,
-    pieces : getInitialPieces()
+    legalMoves: getLegalMoves(new Chess()),
+    pieces: getInitialPieces(),
 }
 
 const gameSlice = createSlice({
@@ -47,20 +40,12 @@ const gameSlice = createSlice({
     initialState,
     reducers: {
         undo: (state) => {
-            const toUndo = state.toUndo.at(-1)
-            if (!toUndo) return;
-            state.toUndo.pop()
-            state.toRedo.push(state.currentFen)
-            state.currentFen = toUndo
+            state.pieces = updatePieces(state.pieces,state.history[state.currentMoveIndex],true)
             state.currentMoveIndex--
         },
         redo: (state) => {
-            const toRedo = state.toRedo.at(-1)
-            if (!toRedo) return;
-            state.toRedo.pop()
-            state.toUndo.push(state.currentFen)
-            state.currentFen = toRedo
-            state.currentMoveIndex++   
+            state.currentMoveIndex++
+            state.pieces = updatePieces(state.pieces,state.history[state.currentMoveIndex])
         },
         timeOut: (state) => {
             state.isTimeOut = true
@@ -80,24 +65,26 @@ const gameSlice = createSlice({
             isPlayerTurn: state.playerColor === "w",
         }),
         move: (state, action: PayloadAction<MoveType>) => {
-            if (state.isGameOver || state.toRedo.length > 0) return
-            const {from ,to } = action.payload
-
-            // handle pieces change
-            const piece = state.pieces.find(p=>p.square === from)!
-            piece.square = to
-            state.pieces = state.pieces.filter(p => p.square !== to || p === piece);
-
-
+            if (state.isGameOver || state.currentMoveIndex < state.history.length -1) return
             const chess = new Chess()
+
             state.history.forEach((mv) => chess.move(mv))
-
-            state.history.push(action.payload)
-
             const theMove = chess.move(action.payload)
+            
+            const detailedMove = {
+                from: theMove.from,
+                to: theMove.to,
+                promotion: theMove.promotion,
+                isCapture: theMove.isCapture(),
+                isKingsideCastle: theMove.isKingsideCastle(),
+                isQueensideCastle: theMove.isQueensideCastle(),
+                captured: state.pieces.find(
+                    (p) => p.square === theMove.to, )
+            }
+            state.history.push(detailedMove)
 
-            state.currentFen = chess.fen()
-            state.toUndo.push(state.fen)// old fen
+            // update pieces
+            state.pieces = updatePieces(state.pieces, detailedMove)
 
             if (theMove.isCapture()) {
                 const playerColor = state.playerColor
@@ -134,14 +121,7 @@ const gameSlice = createSlice({
                 }
             }
             state.fen = chess.fen()
-            state.legalMoves = Object.groupBy(
-                chess.moves({ verbose: true }).map((mv) => ({
-                    from: mv.from,
-                    to: mv.to,
-                    promotion: mv.promotion,
-                })),
-                (move) => move.from
-            )
+            state.legalMoves = getLegalMoves(chess) 
 
             // clear moving states
 
@@ -181,37 +161,14 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, replay, resign,undo,redo } = gameSlice.actions
+export const { timeOut, move, replay, resign, undo, redo } = gameSlice.actions
 
 export default gameSlice.reducer
 
 // Selectors
 
-// export const selectBoard = (state: RootState) => {
-//     const pieces = new Chess(state.game.currentFen).board().flat().filter(el => !!el);
-//     const pieceCount = {} as Record<string, number>;
-    
-//     return pieces.map((piece) => {
-//         // Count how many of this piece type/color we've seen
-//         const key = `${piece.color}-${piece.type}`;
-//         pieceCount[key] = (pieceCount[key] || 0) + 1;
-        
-//         return {
-//             ...piece,
-//             id: `${piece.color}-${piece.type}-${pieceCount[key]}`,
-//         }
-//     });
-// }
-// export const selectBoard = (state: RootState) =>
-//     new Chess(state.game.currentFen).board().flat().filter(el=>!!el).map((el,index)=>{
-//         return {
-//             ...el,
-//             id: `${el.color}-${el.type}-${index}`,
-//         }
-//     })
 export const selectPieces = (state: RootState) => state.game.pieces
 export const selectFEN = (state: RootState) => state.game.fen
-export const selectCurrentFEN = (state: RootState) => state.game.currentFen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
 export const selectGameOverData = (state: RootState) => ({
@@ -234,21 +191,9 @@ export const selectCurrentPlayer = (state: RootState) =>
     state.game.isPlayerTurn
         ? state.game.playerColor
         : oppositeColor(state.game.playerColor)
-export const selectIsNewGame = (state: RootState) =>
-    state.game.history.length === 0
-export const selectAllowedSquares =
-    (from: Square | null) => (state: RootState) => {
-        if (!from) return []
-        const allowedMoves = state.game.legalMoves[from]
-        if (allowedMoves) {
-            return allowedMoves.map((mv) => mv.to)
-        } else {
-            return []
-        }
-    }
+
 export const selectLegalMoves = (state: RootState) => state.game.legalMoves
-export const selectisUndoRedoable = (state:RootState) => ({
-    isUndoable : state.game.toUndo.length > 0,
-    isRedoable : state.game.toRedo.length > 0,
+export const selectisUndoRedoable = (state: RootState) => ({
+    isUndoable: state.game.currentMoveIndex >= 0,
+    isRedoable: state.game.currentMoveIndex < state.game.history.length - 1,
 })
-export const selectToRedo = (state:RootState) => state.game.toRedo

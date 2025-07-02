@@ -68,3 +68,13 @@ export type Piece = {
     color: Color,
     square: Square
 }
+
+export type DetailedMove = {
+    from: Square
+    to: Square
+    promotion?: PieceSymbol
+    isCapture: boolean
+    isKingsideCastle: boolean
+    isQueensideCastle: boolean
+    captured?: Piece
+}
