@@ -1,5 +1,5 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice, createSelector } from "@reduxjs/toolkit"
 import { Chess, Color, DEFAULT_POSITION } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
@@ -15,23 +15,25 @@ const initialState = {
     fen: DEFAULT_POSITION,
     history: [] as DetailedMove[],
     isPlayerTurn: true,
-    isCheckmate: false,
-    isDraw: false,
-    isStalemate: false,
     isCheck: false,
-    isInsufficientMaterial: false,
-    isThreefoldRepetition: false,
-    isDrawByFiftyMoves: false,
-    isGameOver: false,
-    winner: undefined as undefined | Color,
     playerColor: "w" as Color,
-    isResign: false,
     currentMoveIndex: -1,
     score: 0,
     capturedPieces: initialCaputeredPieces,
-    isTimeOut: false,
     legalMoves: getLegalMoves(new Chess()),
     pieces: getInitialPieces(),
+    gameOver: {
+        isResign: false,
+        isDraw: false,
+        isInsufficientMaterial: false,
+        isThreefoldRepetition: false,
+        isGameOver: false,
+        isTimeOut: false,
+        isStalemate: false,
+        isDrawByFiftyMoves: false,
+        isCheckmate: false,
+        winner: undefined as undefined | Color,
+    },
 }
 
 const gameSlice = createSlice({
@@ -54,16 +56,16 @@ const gameSlice = createSlice({
             )
         },
         timeOut: (state) => {
-            state.isTimeOut = true
-            state.isGameOver = true
-            state.winner = state.isPlayerTurn
+            state.gameOver.isTimeOut = true
+            state.gameOver.isGameOver = true
+            state.gameOver.winner = state.isPlayerTurn
                 ? oppositeColor(state.playerColor)
                 : state.playerColor
         },
         resign: (state) => {
-            state.isResign = true
-            state.isGameOver = true
-            state.winner = state.playerColor === "w" ? "b" : "w"
+            state.gameOver.isResign = true
+            state.gameOver.isGameOver = true
+            state.gameOver.winner = state.playerColor === "w" ? "b" : "w"
         },
         replay: (state) => ({
             ...initialState,
@@ -72,7 +74,7 @@ const gameSlice = createSlice({
         }),
         move: (state, action: PayloadAction<MoveType>) => {
             if (
-                state.isGameOver ||
+                state.gameOver.isGameOver ||
                 state.currentMoveIndex < state.history.length - 1
             )
                 return
@@ -136,18 +138,23 @@ const gameSlice = createSlice({
             // change currentPlayer
             state.isPlayerTurn = !state.isPlayerTurn
 
-            // clear moving states
-            state.isCheckmate = chess.isCheckmate()
             state.isCheck = chess.isCheck()
-            state.isDraw = chess.isDraw()
-            state.isStalemate = chess.isStalemate()
-            state.isInsufficientMaterial = chess.isInsufficientMaterial()
-            state.isThreefoldRepetition = chess.isThreefoldRepetition()
-            state.isDrawByFiftyMoves = chess.isDrawByFiftyMoves()
-            state.isGameOver = chess.isGameOver()
-            if (chess.isCheckmate()) {
-                state.winner = chess.turn() === "w" ? "b" : "w"
+            state.gameOver = {
+                ...state.gameOver,
+                winner: chess.isCheckmate()
+                    ? chess.turn() === "w"
+                        ? "b"
+                        : "w"
+                    : undefined,
+                isCheckmate: chess.isCheckmate(),
+                isDraw: chess.isDraw(),
+                isStalemate: chess.isStalemate(),
+                isInsufficientMaterial: chess.isInsufficientMaterial(),
+                isThreefoldRepetition: chess.isThreefoldRepetition(),
+                isDrawByFiftyMoves: chess.isDrawByFiftyMoves(),
+                isGameOver: chess.isGameOver(),
             }
+
             state.currentMoveIndex = state.history.length - 1
         },
     },
@@ -180,19 +187,28 @@ export const selectPieces = (state: RootState) => state.game.pieces
 export const selectFEN = (state: RootState) => state.game.fen
 export const selectIsPlayerTurn = (state: RootState) => state.game.isPlayerTurn
 export const selectPlayerColor = (state: RootState) => state.game.playerColor
-export const selectGameOverData = (state: RootState) => ({
-    isGameOver: state.game.isGameOver,
-    isDraw: state.game.isDraw,
-    isWin: state.game.winner === state.game.playerColor,
-    cause: getGameoverCause(state.game),
-})
+
+export const selectGameOverData = createSelector(
+    [
+        (state: RootState) => state.game.gameOver,
+        (state: RootState) => state.game.playerColor,
+    ],
+    (gameOver, playerColor) => ({
+        isGameOver: gameOver.isGameOver,
+        isDraw: gameOver.isDraw,
+        isWin: gameOver.winner === playerColor,
+        cause: getGameoverCause(gameOver),
+    })
+)
+
 export const selectLastMove = (state: RootState) => {
     const index = state.game.currentMoveIndex
     if (index === -1) return undefined
     const move = state.game.history[index]
     return move
 }
-export const selectIsGameOver = (state: RootState) => state.game.isGameOver
+export const selectIsGameOver = (state: RootState) =>
+    state.game.gameOver.isGameOver
 export const selectCapturedPieces = (state: RootState) =>
     state.game.capturedPieces
 export const selectScore = (state: RootState) => state.game.score
@@ -202,7 +218,16 @@ export const selectCurrentPlayer = (state: RootState) =>
         : oppositeColor(state.game.playerColor)
 
 export const selectLegalMoves = (state: RootState) => state.game.legalMoves
-export const selectisUndoRedoable = (state: RootState) => ({
-    isUndoable: state.game.currentMoveIndex >= 0,
-    isRedoable: state.game.currentMoveIndex < state.game.history.length - 1,
-})
+
+export const selectIsUndoRedoable = createSelector(
+    [
+        (state: RootState) => state.game.currentMoveIndex,
+        (state: RootState) => state.game.history.length,
+    ],
+    (currentMoveIndex, historyLen) => {
+        return {
+            isUndoable: currentMoveIndex >= 0,
+            isRedoable: currentMoveIndex < historyLen - 1,
+        }
+    }
+)

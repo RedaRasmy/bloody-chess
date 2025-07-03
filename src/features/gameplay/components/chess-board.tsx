@@ -1,5 +1,5 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
-import { PieceSymbol, Square, SQUARES } from "chess.js"
+import { PieceSymbol, Square } from "chess.js"
 import ChessSquare from "./chess-square"
 import { BoardElement, MoveType, Piece } from "../types"
 import Droppable from "./droppable"
@@ -11,6 +11,7 @@ import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers"
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 import useChessBoardWidth from "@/hooks/useChessBoardWidth"
+import getSquares from "../utils/get-squares"
 const Draggable = dynamic(() => import("./draggable"))
 const ChessPiece = dynamic(() => import("./chess-piece"))
 
@@ -36,6 +37,8 @@ export default function ChessBoard({
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
     const [activePiece, setActivePiece] = useState<BoardElement>(null)
+
+    const squares = getSquares()
 
     function handlePromotion(promotion: string) {
         if (!activePiece || !targetSquare) return
@@ -74,7 +77,6 @@ export default function ChessBoard({
     }
 
     const boardWidth = useChessBoardWidth()
-    console.log('width : ' ,boardWidth)
 
     function handleDragStart(event: DragStartEvent) {
         const { active } = event
@@ -128,7 +130,7 @@ export default function ChessBoard({
                 className={cn(
                     "relative grid grid-cols-8 grid-rows-8 aspect-square",
                     {
-                        "rotate-180": playerColor === "b",
+                        // "rotate-180": playerColor === "b",
                     }
                 )}
             >
@@ -138,7 +140,7 @@ export default function ChessBoard({
                     open={isPromoting}
                     onClickOutside={() => setIsPromoting(false)}
                 />
-                {SQUARES.map((sq) => (
+                {squares.map((sq) => (
                     <Droppable key={sq} id={sq}>
                         <ChessSquare
                             squareName={sq}
@@ -156,6 +158,7 @@ export default function ChessBoard({
                     if (piece && boardWidth) {
                         return (
                             <Draggable
+                                isReversed={playerColor==='b'}
                                 boardWidth={boardWidth}
                                 square={piece.square}
                                 key={piece.id}

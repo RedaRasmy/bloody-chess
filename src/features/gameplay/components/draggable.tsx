@@ -13,14 +13,16 @@ export default function Draggable({
     children,
     className,
     boardWidth,
+    isReversed
 }: {
     data: Exclude<BoardElement, null> | undefined
     children: ReactNode
     className?: string
     square: Square
     boardWidth: number
+    isReversed:boolean
 }) {
-    console.log("draggable compo runs !")
+    // console.log("draggable compo runs !")
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
             id: square,
@@ -30,7 +32,7 @@ export default function Draggable({
         transform: CSS.Translate.toString(transform),
     }
 
-    const [x, y] = squareToCoords(square)
+    const [x, y] = squareToCoords(square,isReversed)
 
     const [justDropped, setJustDropped] = useState(false)
 

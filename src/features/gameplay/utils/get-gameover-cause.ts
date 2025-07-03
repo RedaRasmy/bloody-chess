@@ -9,7 +9,7 @@ export function getGameoverCause({
     isResign,
     isTimeOut
     
-}:RootState['game']) {
+}:RootState['game']['gameOver']) {
     if (isCheckmate) {
         return 'Checkmate'
     } else if (isTimeOut) {

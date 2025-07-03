@@ -18,7 +18,7 @@ import {
     selectFEN,
     selectIsGameOver,
     selectIsPlayerTurn,
-    selectisUndoRedoable,
+    selectIsUndoRedoable,
     selectLastMove,
     selectLegalMoves,
     selectPieces,
@@ -41,16 +41,17 @@ export default function Page() {
     const capturedPieces = useAppSelector(selectCapturedPieces)
     const score = useAppSelector(selectScore)
     const legalMoves = useAppSelector(selectLegalMoves)
-    const {isRedoable} = useAppSelector(selectisUndoRedoable)
+    const {isRedoable} = useAppSelector(selectIsUndoRedoable)
 
     const [allowedSquares, setAllowedSquares] = useState<Square[]>([])
 
     const timer = timerOption ? parseTimer(timerOption) : undefined
     const opponentColor = oppositeColor(playerColor)
 
+    const [botIsThinking ,setBotIsThinking] = useState(false)
     useEffect(() => {
-        if (!isPlayerTurn && !isGameOver) {
-            // after player moves, it’s opponent's turn
+        if (!isPlayerTurn && !isGameOver && !botIsThinking) {
+            setBotIsThinking(true)
             async function fetchBestMove() {
                 const res = await getEngineResponse(
                     fen,
@@ -58,16 +59,20 @@ export default function Page() {
                 )
                 if (res.success) {
                     const bestMove = getBestMove(res, level, fen)
+                    console.log('bot move :',bestMove)
                     dispatch(move(bestMove))
                     const chess = new Chess(fen)
                     const theMove = chess.move(bestMove)
                     playMoveSound(theMove, chess.inCheck())
+                    setBotIsThinking(false)
                 }
+
             }
             fetchBestMove()
         }
-    }, [isPlayerTurn, fen, dispatch, level, isGameOver])
+    }, [isPlayerTurn , dispatch, level, isGameOver])
 
+    console.log('is player turn :',isPlayerTurn)
     return (
         <GameLayout
             chessBoard={
