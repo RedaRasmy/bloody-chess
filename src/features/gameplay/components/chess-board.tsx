@@ -74,6 +74,10 @@ export default function ChessBoard({
     function handleDragStart(event: DragStartEvent) {
         const { active } = event
         const piece = active.data.current as Exclude<BoardElement, null>
+        /// prevent unnecesasry calculations :
+        // if not a player's piece
+        if (piece.color !== playerColor) return; 
+        // if it's the same piece
         if (piece.square === activePiece?.square) {
             return
         }

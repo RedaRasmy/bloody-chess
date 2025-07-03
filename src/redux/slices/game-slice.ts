@@ -39,12 +39,19 @@ const gameSlice = createSlice({
     initialState,
     reducers: {
         undo: (state) => {
-            state.pieces = updatePieces(state.pieces,state.history[state.currentMoveIndex],true)
+            state.pieces = updatePieces(
+                state.pieces,
+                state.history[state.currentMoveIndex],
+                true
+            )
             state.currentMoveIndex--
         },
         redo: (state) => {
             state.currentMoveIndex++
-            state.pieces = updatePieces(state.pieces,state.history[state.currentMoveIndex])
+            state.pieces = updatePieces(
+                state.pieces,
+                state.history[state.currentMoveIndex]
+            )
         },
         timeOut: (state) => {
             state.isTimeOut = true
@@ -64,12 +71,16 @@ const gameSlice = createSlice({
             isPlayerTurn: state.playerColor === "w",
         }),
         move: (state, action: PayloadAction<MoveType>) => {
-            if (state.isGameOver || state.currentMoveIndex < state.history.length -1) return
+            if (
+                state.isGameOver ||
+                state.currentMoveIndex < state.history.length - 1
+            )
+                return
             const chess = new Chess()
 
             state.history.forEach((mv) => chess.move(mv))
             const theMove = chess.move(action.payload)
-            
+
             const detailedMove = {
                 from: theMove.from,
                 to: theMove.to,
@@ -77,8 +88,7 @@ const gameSlice = createSlice({
                 isCapture: theMove.isCapture(),
                 isKingsideCastle: theMove.isKingsideCastle(),
                 isQueensideCastle: theMove.isQueensideCastle(),
-                captured: state.pieces.find(
-                    (p) => p.square === theMove.to, )
+                captured: state.pieces.find((p) => p.square === theMove.to),
             }
             state.history.push(detailedMove)
 
@@ -120,13 +130,13 @@ const gameSlice = createSlice({
                 }
             }
             state.fen = chess.fen()
-            state.legalMoves = getLegalMoves(chess) 
-
-            // clear moving states
-
+            if (!state.isPlayerTurn) {
+                state.legalMoves = getLegalMoves(chess)
+            }
             // change currentPlayer
             state.isPlayerTurn = !state.isPlayerTurn
 
+            // clear moving states
             state.isCheckmate = chess.isCheckmate()
             state.isCheck = chess.isCheck()
             state.isDraw = chess.isDraw()

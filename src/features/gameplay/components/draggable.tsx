@@ -19,6 +19,7 @@ export default function Draggable({
     className?: string
     square: Square
 }) {
+    console.log('draggable compo runs !')
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
             id : square,

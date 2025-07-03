@@ -99,6 +99,7 @@ export default function Page() {
                             }}
                             onMoveCancel={() => setAllowedSquares([])}
                             onMoveEnd={(mv) => {
+                                if (!isPlayerTurn) return;
                                 dispatch(move(mv))
                                 setAllowedSquares([])
                             }}
