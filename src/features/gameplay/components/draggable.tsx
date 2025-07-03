@@ -6,23 +6,24 @@ import { ReactNode, useEffect, useState } from "react"
 import { squareToCoords } from "../utils/square-to-coords"
 import { Square } from "chess.js"
 import { motion } from "motion/react"
-import useChessBoardWidth from "@/hooks/useChessBoardWidth"
 
 export default function Draggable({
     square,
     data,
     children,
     className,
+    boardWidth,
 }: {
     data: Exclude<BoardElement, null> | undefined
     children: ReactNode
     className?: string
     square: Square
+    boardWidth: number
 }) {
-    console.log('draggable compo runs !')
+    console.log("draggable compo runs !")
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
-            id : square,
+            id: square,
             data,
         })
     const style = {
@@ -30,8 +31,6 @@ export default function Draggable({
     }
 
     const [x, y] = squareToCoords(square)
-
-    const a = useChessBoardWidth()
 
     const [justDropped, setJustDropped] = useState(false)
 
@@ -46,19 +45,16 @@ export default function Draggable({
         }
     }, [isDragging, justDropped])
 
-    if (a === 0) {
-        return null // Avoid rendering if board width is not set
-    }
     return (
         <motion.div
             // Outer wrapper: handles layout and framer positioning
             initial={{
-                x: x * (a / 8),
-                y: y * (a / 8),
+                x: x * (boardWidth / 8),
+                y: y * (boardWidth / 8),
             }}
             animate={{
-                x: x * (a / 8),
-                y: y * (a / 8),
+                x: x * (boardWidth / 8),
+                y: y * (boardWidth / 8),
             }}
             layout
             transition={{

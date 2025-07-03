@@ -10,6 +10,7 @@ import { rank } from "../utils/rank-file"
 import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers"
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
+import useChessBoardWidth from "@/hooks/useChessBoardWidth"
 const Draggable = dynamic(() => import("./draggable"))
 const ChessPiece = dynamic(() => import("./chess-piece"))
 
@@ -71,12 +72,15 @@ export default function ChessBoard({
         }
     }
 
+    const boardWidth = useChessBoardWidth()
+    console.log('width : ' ,boardWidth)
+
     function handleDragStart(event: DragStartEvent) {
         const { active } = event
         const piece = active.data.current as Exclude<BoardElement, null>
         /// prevent unnecesasry calculations :
         // if not a player's piece
-        if (piece.color !== playerColor) return; 
+        if (piece.color !== playerColor) return
         // if it's the same piece
         if (piece.square === activePiece?.square) {
             return
@@ -145,14 +149,18 @@ export default function ChessBoard({
                     </Droppable>
                 ))}
                 {pieces.map((piece) => {
-                    if (piece) {
+                    if (piece && boardWidth) {
                         return (
                             <Draggable
+                                boardWidth={boardWidth}
                                 square={piece.square}
                                 key={piece.id}
                                 data={piece}
                             >
-                                <ChessPiece piece={piece} />
+                                <ChessPiece
+                                    piece={piece}
+                                    boardWidth={boardWidth}
+                                />
                             </Draggable>
                         )
                     }

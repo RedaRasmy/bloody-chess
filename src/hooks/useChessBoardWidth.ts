@@ -20,6 +20,7 @@ import { useEffect, useState } from "react"
 // I think I should disable pieces animation while resizing the window somehow for better perf 
 
 export default function useChessBoardWidth() {
+    console.log('chessboarddwith hook runs...')
     const [width, setWidth] = useState(0)
     useEffect(() => {
         const chessBoard = document.getElementById("chess-board")
