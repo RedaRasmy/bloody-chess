@@ -26,7 +26,7 @@ import { replay } from "@/redux/slices/game-slice"
 
 export default function BotOptionsDialog() {
     const dispatch = useAppDispatch()
-    const { color, level, timer } = useAppSelector(selectBotOptions)
+    const { level, timer } = useAppSelector(selectBotOptions)
 
     return (
         <Dialog>
