@@ -88,7 +88,7 @@ export default function Page() {
                             pieces={pieces}
                             playerColor={playerColor}
                             onMoveStart={(piece) => {
-                                if (isRedoable) {
+                                if (isRedoable || !isPlayerTurn) {
                                     setAllowedSquares([])
                                 } else {
                                     const moves = legalMoves[piece.square]

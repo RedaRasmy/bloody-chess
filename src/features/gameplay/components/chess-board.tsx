@@ -46,6 +46,7 @@ export default function ChessBoard({
         })
         setIsPromoting(false)
         setTargetSquare(null)
+        setActivePiece(null)
     }
 
     function handleClick(square: Square) {
@@ -82,9 +83,9 @@ export default function ChessBoard({
         // if not a player's piece
         if (piece.color !== playerColor) return
         // if it's the same piece
-        if (piece.square === activePiece?.square) {
-            return
-        }
+        // if (piece.square === activePiece?.square) {
+        //     return
+        // }
         onMoveStart(piece)
         setActivePiece(piece)
     }
@@ -109,7 +110,10 @@ export default function ChessBoard({
                     from: activePiece.square,
                     to: targetSquare,
                 })
+                setActivePiece(null)
             }
+        } else {
+            setActivePiece(null)
         }
     }
 
