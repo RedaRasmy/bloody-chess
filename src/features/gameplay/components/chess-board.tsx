@@ -38,7 +38,7 @@ export default function ChessBoard({
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
     const [activePiece, setActivePiece] = useState<BoardElement>(null)
 
-    const squares = getSquares()
+    const squares = getSquares(playerColor==='b')
 
     function handlePromotion(promotion: string) {
         if (!activePiece || !targetSquare) return
@@ -128,10 +128,7 @@ export default function ChessBoard({
             <div
                 id="chess-board"
                 className={cn(
-                    "relative grid grid-cols-8 grid-rows-8 aspect-square",
-                    {
-                        // "rotate-180": playerColor === "b",
-                    }
+                    "relative grid grid-cols-8 grid-rows-8 aspect-square"
                 )}
             >
                 <SelectPromotion

@@ -9,14 +9,14 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Slider } from "@/components/ui/slider"
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-// import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
-    // changeColor,
+    changeColor,
     changeLevel,
     changeTimer,
-    // ColorOption,
+    ColorOption,
     selectBotOptions,
 } from "@/redux/slices/game-options"
 import { Link } from "@/i18n/navigation"
@@ -26,7 +26,7 @@ import { replay } from "@/redux/slices/game-slice"
 
 export default function BotOptionsDialog() {
     const dispatch = useAppDispatch()
-    const { level, timer } = useAppSelector(selectBotOptions)
+    const { level, timer, color } = useAppSelector(selectBotOptions)
 
     return (
         <Dialog>
@@ -49,7 +49,7 @@ export default function BotOptionsDialog() {
                             value={[level]}
                         />
                     </div>
-                    {/* <div className="flex  gap-4">
+                    <div className="flex  gap-4">
                         <p className="text-nowrap">Color : </p>
                         <RadioGroup
                             defaultValue={color}
@@ -69,7 +69,7 @@ export default function BotOptionsDialog() {
                                 <Label htmlFor="r3">Black</Label>
                             </div>
                         </RadioGroup>
-                    </div> */}
+                    </div>
                     <SelectTimer
                         options={TIMER_OPTIONS}
                         value={timer}

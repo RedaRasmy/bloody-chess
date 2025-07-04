@@ -26,10 +26,9 @@ import {
     selectScore,
 } from "@/redux/slices/game-slice"
 import { Chess, Square } from "chess.js"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function Page() {
-    
     const dispatch = useAppDispatch()
     const playerColor = useAppSelector(selectPlayerColor)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
@@ -41,17 +40,15 @@ export default function Page() {
     const capturedPieces = useAppSelector(selectCapturedPieces)
     const score = useAppSelector(selectScore)
     const legalMoves = useAppSelector(selectLegalMoves)
-    const {isRedoable} = useAppSelector(selectIsUndoRedoable)
+    const { isRedoable } = useAppSelector(selectIsUndoRedoable)
 
     const [allowedSquares, setAllowedSquares] = useState<Square[]>([])
 
     const timer = timerOption ? parseTimer(timerOption) : undefined
     const opponentColor = oppositeColor(playerColor)
 
-    const [botIsThinking ,setBotIsThinking] = useState(false)
     useEffect(() => {
-        if (!isPlayerTurn && !isGameOver && !botIsThinking) {
-            setBotIsThinking(true)
+        if (!isPlayerTurn && !isGameOver ) {
             async function fetchBestMove() {
                 const res = await getEngineResponse(
                     fen,
@@ -59,12 +56,10 @@ export default function Page() {
                 )
                 if (res.success) {
                     const bestMove = getBestMove(res, level, fen)
-                    console.log('bot move :',bestMove)
                     dispatch(move(bestMove))
                     const chess = new Chess(fen)
                     const theMove = chess.move(bestMove)
                     playMoveSound(theMove, chess.inCheck())
-                    setBotIsThinking(false)
                 }
 
             }
@@ -72,7 +67,6 @@ export default function Page() {
         }
     }, [isPlayerTurn , dispatch, level, isGameOver])
 
-    console.log('is player turn :',isPlayerTurn)
     return (
         <GameLayout
             chessBoard={
@@ -104,7 +98,7 @@ export default function Page() {
                             }}
                             onMoveCancel={() => setAllowedSquares([])}
                             onMoveEnd={(mv) => {
-                                if (!isPlayerTurn) return;
+                                if (!isPlayerTurn) return
                                 dispatch(move(mv))
                                 setAllowedSquares([])
                             }}

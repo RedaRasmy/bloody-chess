@@ -22,7 +22,6 @@ export default function Draggable({
     boardWidth: number
     isReversed:boolean
 }) {
-    // console.log("draggable compo runs !")
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
             id: square,
@@ -62,13 +61,15 @@ export default function Draggable({
             transition={{
                 duration: justDropped ? 0 : 0.2, // Skip animation if just dropped
             }}
-            className="absolute"
+            className={cn("absolute z-20",{
+                'z-30' : isDragging
+            })}
         >
             <div
                 ref={setNodeRef}
                 {...listeners}
                 {...attributes}
-                className={cn({ "z-10": isDragging }, className)}
+                className={cn( className)}
                 style={style}
             >
                 {children}
