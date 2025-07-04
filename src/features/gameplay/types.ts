@@ -21,7 +21,7 @@ export type EngineResponse =
 
 export type PromotionPiece = "q" | "n" | "r" | "b"
 
-export type Sound = "move" | "check" | "castle" | "promote" | "capture"
+export type Sound = "move" | "check" | "castle" | "promote" | "capture" | 'game-start' | 'game-end'
 
 export type CapturedPieces = {
     w: [number, number, number, number, number]

@@ -27,6 +27,7 @@ import {
 } from "@/redux/slices/game-slice"
 import { Chess, Square } from "chess.js"
 import { useEffect, useState } from "react"
+import playSound from "@/features/gameplay/utils/play-sound"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -48,6 +49,14 @@ export default function Page() {
     const opponentColor = oppositeColor(playerColor)
 
     useEffect(() => {
+        if (!isGameOver) {
+            playSound('game-start')
+        } else {
+            playSound('game-end')
+        }
+    },[isGameOver])
+
+    useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
             async function fetchBestMove() {
                 const res = await getEngineResponse(
@@ -64,7 +73,7 @@ export default function Page() {
             }
             fetchBestMove()
         }
-    }, [isPlayerTurn, dispatch, level, isGameOver])
+    }, [isPlayerTurn,fen, dispatch, level, isGameOver])
 
     return (
         <GameLayout
