@@ -27,8 +27,8 @@ export default function ChessSquare({
                     "bg-red-700": color === "b",
                     "bg-amber-400": isLastMove && color == "w",
                     "bg-amber-300": isLastMove && color == "b",
-                    "bg-red-500/50": isPreMove && color == "w",
-                    "bg-red-500/30": isPreMove && color == "b",
+                    "bg-red-500/70": isPreMove && color == "w",
+                    "bg-red-500/50": isPreMove && color == "b",
                 }
             )}
             onClick={() => onClick(squareName)}

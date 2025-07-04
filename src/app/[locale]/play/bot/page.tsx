@@ -14,6 +14,8 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     move,
+    premove,
+    removePremove,
     selectCapturedPieces,
     selectFEN,
     selectIsGameOver,
@@ -23,11 +25,13 @@ import {
     selectLegalMoves,
     selectPieces,
     selectPlayerColor,
+    selectPreMoves,
     selectScore,
 } from "@/redux/slices/game-slice"
 import { Chess, Square } from "chess.js"
 import { useEffect, useState } from "react"
 import playSound from "@/features/gameplay/utils/play-sound"
+import delay from "@/utils/delay"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -42,7 +46,7 @@ export default function Page() {
     const score = useAppSelector(selectScore)
     const legalMoves = useAppSelector(selectLegalMoves)
     const { isRedoable } = useAppSelector(selectIsUndoRedoable)
-
+    const preMoves = useAppSelector(selectPreMoves)
     const [allowedSquares, setAllowedSquares] = useState<Square[]>([])
 
     const timer = timerOption ? parseTimer(timerOption) : undefined
@@ -50,15 +54,24 @@ export default function Page() {
 
     useEffect(() => {
         if (!isGameOver) {
-            playSound('game-start')
+            playSound("game-start")
         } else {
-            playSound('game-end')
+            playSound("game-end")
         }
-    },[isGameOver])
+    }, [isGameOver])
+
+    useEffect(() => {
+        if (preMoves.length > 0 && isPlayerTurn) {
+            const nextMove = preMoves[0]
+            dispatch(move(nextMove))
+            dispatch(removePremove()) // Remove from queue
+        }
+    }, [preMoves, isPlayerTurn,dispatch])
 
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
             async function fetchBestMove() {
+                await delay(2000)
                 const res = await getEngineResponse(
                     fen,
                     level > 5 ? level - 5 : 1
@@ -73,7 +86,7 @@ export default function Page() {
             }
             fetchBestMove()
         }
-    }, [isPlayerTurn,fen, dispatch, level, isGameOver])
+    }, [isPlayerTurn, fen, dispatch, level, isGameOver])
 
     return (
         <GameLayout
@@ -106,14 +119,18 @@ export default function Page() {
                             }}
                             onMoveCancel={() => setAllowedSquares([])}
                             onMoveEnd={(mv) => {
-                                if (!isPlayerTurn) return
-                                dispatch(move(mv))
-                                setAllowedSquares([])
-                                const chess = new Chess(fen)
-                                const theMove = chess.move(mv)
-                                playMoveSound(theMove, chess.inCheck())
+                                if (!isPlayerTurn) {
+                                    dispatch(premove(mv))
+                                } else {
+                                    dispatch(move(mv))
+                                    setAllowedSquares([])
+                                    const chess = new Chess(fen)
+                                    const theMove = chess.move(mv)
+                                    playMoveSound(theMove, chess.inCheck())
+                                }
                             }}
-                            preMoves={[]} // TODO
+                            preMoves={preMoves}
+                            isPlayerTurn={isPlayerTurn}
                         />
                     }
                     PlayerSection={

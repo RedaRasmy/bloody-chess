@@ -11,6 +11,7 @@ import getInitialPieces from "@/features/gameplay/utils/get-initial-pieces"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import updateScoreAndCapturedPieces from "@/features/gameplay/utils/update-score"
+import safeMove from "@/features/gameplay/utils/safe-move"
 
 const initialState = {
     fen: DEFAULT_POSITION,
@@ -23,6 +24,7 @@ const initialState = {
     capturedPieces: initialCaputeredPieces,
     legalMoves: getLegalMoves(new Chess()),
     pieces: getInitialPieces(),
+    preMoves : [] as MoveType[],
     gameOver: {
         isResign: false,
         isDraw: false,
@@ -41,6 +43,12 @@ const gameSlice = createSlice({
     name: "game",
     initialState,
     reducers: {
+        premove : (state,{payload:move}) => { 
+            state.preMoves.push(move)
+        },
+        removePremove : (state) => { 
+            state.preMoves.shift()
+        },
         undo: (state) => {
             state.pieces = updatePieces(
                 state.pieces,
@@ -78,11 +86,18 @@ const gameSlice = createSlice({
                 state.gameOver.isGameOver ||
                 state.currentMoveIndex < state.history.length - 1
             )
-                return
+                return;
+
+
             const chess = new Chess()
 
             state.history.forEach((mv) => chess.move(mv))
-            const theMove = chess.move(action.payload)
+
+            const theMove = safeMove(chess,action.payload)
+
+            if (!theMove) {
+                return;
+            }
 
             const detailedMove = {
                 from: theMove.from,
@@ -136,6 +151,7 @@ const gameSlice = createSlice({
             }
 
             state.currentMoveIndex = state.history.length - 1
+  
         },
     },
     extraReducers: (builder) => {
@@ -157,7 +173,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, replay, resign, undo, redo } = gameSlice.actions
+export const { timeOut, move, replay, resign, undo, redo , premove,removePremove } = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -210,4 +226,10 @@ export const selectIsUndoRedoable = createSelector(
             isRedoable: currentMoveIndex < historyLen - 1,
         }
     }
+)
+export const selectPreMoves = createSelector(
+    [
+        (state:RootState) => state.game.preMoves
+    ] ,
+    (premoves) => premoves
 )

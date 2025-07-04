@@ -23,7 +23,7 @@ export default function updateScoreAndCapturedPieces({
             score, capturedPieces
         }
         let outputScore = score
-        let outputCapturedPieces = capturedPieces
+        const outputCapturedPieces = capturedPieces
         const isPlayer = movePlayer === playerColor
 
         const pieceColor = isPlayer

@@ -23,8 +23,9 @@ export default function ChessBoard({
     onMoveCancel,
     allowedSquares,
     lastMove,
-}: // preMoves,
-{
+    preMoves,
+    isPlayerTurn,
+}: {
     pieces: Piece[]
     playerColor: "w" | "b"
     onMoveStart: (piece: Exclude<BoardElement, null>) => void
@@ -33,12 +34,13 @@ export default function ChessBoard({
     allowedSquares: Square[]
     lastMove: MoveType | undefined
     preMoves: MoveType[]
+    isPlayerTurn: boolean
 }) {
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
     const [activePiece, setActivePiece] = useState<BoardElement>(null)
 
-    const squares = getSquares(playerColor==='b')
+    const squares = getSquares(playerColor === "b")
 
     function handlePromotion(promotion: string) {
         if (!activePiece || !targetSquare) return
@@ -100,7 +102,25 @@ export default function ChessBoard({
         if (!over || over.id === activePiece.square) return
         const targetSquare = over.id as Square
 
-        if (allowedSquares.includes(targetSquare)) {
+        if (isPlayerTurn) {
+            if (allowedSquares.includes(targetSquare)) {
+                const isPromotionMove =
+                    promotionRank(playerColor) === rank(targetSquare) &&
+                    activePiece.type === "p"
+                if (isPromotionMove) {
+                    setTargetSquare(targetSquare)
+                    setIsPromoting(true)
+                } else {
+                    onMoveEnd({
+                        from: activePiece.square,
+                        to: targetSquare,
+                    })
+                    setActivePiece(null)
+                }
+            } else {
+                setActivePiece(null)
+            }
+        } else {
             const isPromotionMove =
                 promotionRank(playerColor) === rank(targetSquare) &&
                 activePiece.type === "p"
@@ -114,8 +134,6 @@ export default function ChessBoard({
                 })
                 setActivePiece(null)
             }
-        } else {
-            setActivePiece(null)
         }
     }
 
@@ -145,7 +163,11 @@ export default function ChessBoard({
                                 !!lastMove &&
                                 (lastMove.from === sq || lastMove.to === sq)
                             }
-                            isPreMove={false}
+                            isPreMove={
+                                !!preMoves.find(
+                                    (mv) => mv.from === sq || mv.to === sq
+                                )
+                            }
                             isTarget={allowedSquares.includes(sq)}
                             onClick={handleClick}
                         />
@@ -155,7 +177,7 @@ export default function ChessBoard({
                     if (piece && boardWidth) {
                         return (
                             <Draggable
-                                isReversed={playerColor==='b'}
+                                isReversed={playerColor === "b"}
                                 boardWidth={boardWidth}
                                 square={piece.square}
                                 key={piece.id}
