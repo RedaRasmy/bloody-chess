@@ -10,6 +10,7 @@ import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import getInitialPieces from "@/features/gameplay/utils/get-initial-pieces"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
+import updateScoreAndCapturedPieces from "@/features/gameplay/utils/update-score"
 
 const initialState = {
     fen: DEFAULT_POSITION,
@@ -97,40 +98,19 @@ const gameSlice = createSlice({
             // update pieces
             state.pieces = updatePieces(state.pieces, detailedMove)
 
-            if (theMove.isCapture()) {
-                const playerColor = state.playerColor
-                const isPlayer = theMove.color === playerColor
-                // maybe i should i add opponentColor in state
-                const pieceColor = isPlayer
-                    ? playerColor === "w"
-                        ? "b"
-                        : "w"
-                    : playerColor
-                const factor = isPlayer ? 1 : -1
+            // update score and captured pieces 
+            const {score,capturedPieces} = updateScoreAndCapturedPieces({
+                captured : theMove.captured,
+                promotion : theMove.promotion,
+                capturedPieces : state.capturedPieces,
+                movePlayer : theMove.color,
+                playerColor : state.playerColor,
+                score : state.score
+            })
+            state.score = score
+            state.capturedPieces = capturedPieces
 
-                switch (theMove.captured) {
-                    case "p":
-                        state.score = state.score + factor
-                        state.capturedPieces[pieceColor][0]++
-                        break
-                    case "b":
-                        state.score = state.score + factor * 3
-                        state.capturedPieces[pieceColor][1]++
-                        break
-                    case "n":
-                        state.score = state.score + factor * 3
-                        state.capturedPieces[pieceColor][2]++
-                        break
-                    case "r":
-                        state.score = state.score + factor * 5
-                        state.capturedPieces[pieceColor][3]++
-                        break
-                    case "q":
-                        state.score = state.score + factor * 9
-                        state.capturedPieces[pieceColor][4]++
-                        break
-                }
-            }
+            
             state.fen = chess.fen()
             if (!state.isPlayerTurn) {
                 state.legalMoves = getLegalMoves(chess)

@@ -61,7 +61,7 @@ export default function Draggable({
             transition={{
                 duration: justDropped ? 0 : 0.2, // Skip animation if just dropped
             }}
-            className={cn("absolute z-20",{
+            className={cn("absolute z-10",{
                 'z-30' : isDragging
             })}
         >

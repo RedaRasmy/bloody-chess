@@ -34,7 +34,7 @@ export default function ChessSquare({
             onClick={() => onClick(squareName)}
         >
             {isTarget && (
-                <div className=" lg:size-6 size-5 bg-gray-500/60 rounded-full z-10 absolute " />
+                <div className=" lg:size-6 size-5 bg-gray-500/60 rounded-full z-20 absolute " />
             )}
         </div>
     )
