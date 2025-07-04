@@ -48,7 +48,7 @@ export default function Page() {
     const opponentColor = oppositeColor(playerColor)
 
     useEffect(() => {
-        if (!isPlayerTurn && !isGameOver ) {
+        if (!isPlayerTurn && !isGameOver) {
             async function fetchBestMove() {
                 const res = await getEngineResponse(
                     fen,
@@ -61,11 +61,10 @@ export default function Page() {
                     const theMove = chess.move(bestMove)
                     playMoveSound(theMove, chess.inCheck())
                 }
-
             }
             fetchBestMove()
         }
-    }, [isPlayerTurn , dispatch, level, isGameOver])
+    }, [isPlayerTurn, dispatch, level, isGameOver])
 
     return (
         <GameLayout
@@ -101,6 +100,9 @@ export default function Page() {
                                 if (!isPlayerTurn) return
                                 dispatch(move(mv))
                                 setAllowedSquares([])
+                                const chess = new Chess(fen)
+                                const theMove = chess.move(mv)
+                                playMoveSound(theMove, chess.inCheck())
                             }}
                             preMoves={[]} // TODO
                         />
