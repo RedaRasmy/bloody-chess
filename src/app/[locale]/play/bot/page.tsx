@@ -31,7 +31,6 @@ import {
 import { Chess, Square } from "chess.js"
 import { useEffect, useState } from "react"
 import playSound from "@/features/gameplay/utils/play-sound"
-import delay from "@/utils/delay"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -71,7 +70,7 @@ export default function Page() {
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
             async function fetchBestMove() {
-                await delay(2000)
+                // await delay(2000)
                 const res = await getEngineResponse(
                     fen,
                     level > 5 ? level - 5 : 1
