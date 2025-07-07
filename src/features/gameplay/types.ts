@@ -78,3 +78,9 @@ export type DetailedMove = {
     isQueensideCastle: boolean
     captured?: Piece
 }
+
+export type LegalMoves = Partial<Record<Square, {
+    from: Square;
+    to: Square;
+    promotion: PieceSymbol | undefined;
+}[]>>

@@ -4,7 +4,7 @@ import { Chess, Color, DEFAULT_POSITION } from "chess.js"
 import { RootState } from "../store"
 import { changeColor } from "./game-options"
 import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
-import { DetailedMove, MoveType } from "@/features/gameplay/types"
+import { BoardElement, DetailedMove, MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import getInitialPieces from "@/features/gameplay/utils/get-initial-pieces"
@@ -24,7 +24,8 @@ const initialState = {
     capturedPieces: initialCaputeredPieces,
     legalMoves: getLegalMoves(new Chess()),
     pieces: getInitialPieces(),
-    preMoves : [] as MoveType[],
+    preMoves: [] as MoveType[],
+    activePiece: null as BoardElement,
     gameOver: {
         isResign: false,
         isDraw: false,
@@ -43,10 +44,10 @@ const gameSlice = createSlice({
     name: "game",
     initialState,
     reducers: {
-        premove : (state,{payload:move}) => { 
+        premove: (state, { payload: move }) => {
             state.preMoves.push(move)
         },
-        removePremove : (state) => { 
+        removePremove: (state) => {
             state.preMoves.shift()
         },
         undo: (state) => {
@@ -81,22 +82,26 @@ const gameSlice = createSlice({
             playerColor: state.playerColor,
             isPlayerTurn: state.playerColor === "w",
         }),
+        select: (state,action:PayloadAction<Exclude<BoardElement,null>>) => {
+            const piece = action.payload
+            state.activePiece = piece
+        },
         move: (state, action: PayloadAction<MoveType>) => {
             if (
                 state.gameOver.isGameOver ||
                 state.currentMoveIndex < state.history.length - 1
             )
-                return;
+                return
 
 
             const chess = new Chess()
 
             state.history.forEach((mv) => chess.move(mv))
 
-            const theMove = safeMove(chess,action.payload)
+            const theMove = safeMove(chess, action.payload)
 
             if (!theMove) {
-                return;
+                return
             }
 
             const detailedMove = {
@@ -113,19 +118,18 @@ const gameSlice = createSlice({
             // update pieces
             state.pieces = updatePieces(state.pieces, detailedMove)
 
-            // update score and captured pieces 
-            const {score,capturedPieces} = updateScoreAndCapturedPieces({
-                captured : theMove.captured,
-                promotion : theMove.promotion,
-                capturedPieces : state.capturedPieces,
-                movePlayer : theMove.color,
-                playerColor : state.playerColor,
-                score : state.score
+            // update score and captured pieces
+            const { score, capturedPieces } = updateScoreAndCapturedPieces({
+                captured: theMove.captured,
+                promotion: theMove.promotion,
+                capturedPieces: state.capturedPieces,
+                movePlayer: theMove.color,
+                playerColor: state.playerColor,
+                score: state.score,
             })
             state.score = score
             state.capturedPieces = capturedPieces
 
-            
             state.fen = chess.fen()
             if (!state.isPlayerTurn) {
                 state.legalMoves = getLegalMoves(chess)
@@ -151,7 +155,9 @@ const gameSlice = createSlice({
             }
 
             state.currentMoveIndex = state.history.length - 1
-  
+
+            
+            state.activePiece = null
         },
     },
     extraReducers: (builder) => {
@@ -173,7 +179,17 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, replay, resign, undo, redo , premove,removePremove } = gameSlice.actions
+export const {
+    timeOut,
+    move,
+    replay,
+    resign,
+    undo,
+    redo,
+    premove,
+    removePremove,
+    select
+} = gameSlice.actions
 
 export default gameSlice.reducer
 
@@ -228,8 +244,10 @@ export const selectIsUndoRedoable = createSelector(
     }
 )
 export const selectPreMoves = createSelector(
-    [
-        (state:RootState) => state.game.preMoves
-    ] ,
+    [(state: RootState) => state.game.preMoves],
     (premoves) => premoves
+)
+export const selectActivePiece = createSelector(
+    [(state: RootState) => state.game.activePiece],
+    (activePiece) => activePiece
 )

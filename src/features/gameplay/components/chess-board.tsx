@@ -1,7 +1,7 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { PieceSymbol, Square } from "chess.js"
 import ChessSquare from "./chess-square"
-import { BoardElement, MoveType, Piece } from "../types"
+import { BoardElement, LegalMoves, MoveType, Piece } from "../types"
 import Droppable from "./droppable"
 import { useState } from "react"
 import SelectPromotion from "./select-promotion"
@@ -21,24 +21,26 @@ export default function ChessBoard({
     onMoveStart,
     onMoveEnd,
     onMoveCancel,
-    allowedSquares,
+    legalMoves,
     lastMove,
     preMoves,
     isPlayerTurn,
+    activePiece
 }: {
+    activePiece : BoardElement
     pieces: Piece[]
     playerColor: "w" | "b"
     onMoveStart: (piece: Exclude<BoardElement, null>) => void
-    onMoveCancel: () => void
+    onMoveCancel?: () => void
     onMoveEnd: (move: MoveType) => void
-    allowedSquares: Square[]
     lastMove: MoveType | undefined
+    legalMoves : LegalMoves
     preMoves: MoveType[]
     isPlayerTurn: boolean
 }) {
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
-    const [activePiece, setActivePiece] = useState<BoardElement>(null)
+    const allowedSquares = activePiece ? legalMoves[activePiece.square]?.map(mv=>mv.to) ?? [] : []
 
     const squares = getSquares(playerColor === "b")
 
@@ -51,7 +53,6 @@ export default function ChessBoard({
         })
         setIsPromoting(false)
         setTargetSquare(null)
-        setActivePiece(null)
     }
 
     function handleClick(square: Square) {
@@ -72,8 +73,7 @@ export default function ChessBoard({
                     })
                 }
             } else {
-                setActivePiece(null)
-                onMoveCancel()
+                !!onMoveCancel && onMoveCancel()
             }
         }
     }
@@ -91,11 +91,10 @@ export default function ChessBoard({
         //     return
         // }
         onMoveStart(piece)
-        setActivePiece(piece)
     }
 
     function handleDragEnd(event: DragEndEvent) {
-        if (!activePiece || !allowedSquares) return
+        if (!activePiece) return
 
         const { over } = event
 
@@ -115,10 +114,7 @@ export default function ChessBoard({
                         from: activePiece.square,
                         to: targetSquare,
                     })
-                    setActivePiece(null)
                 }
-            } else {
-                setActivePiece(null)
             }
         } else {
             const isPromotionMove =
@@ -132,7 +128,6 @@ export default function ChessBoard({
                     from: activePiece.square,
                     to: targetSquare,
                 })
-                setActivePiece(null)
             }
         }
     }

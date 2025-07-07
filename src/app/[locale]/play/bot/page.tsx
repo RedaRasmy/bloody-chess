@@ -16,6 +16,8 @@ import {
     move,
     premove,
     removePremove,
+    select,
+    selectActivePiece,
     selectCapturedPieces,
     selectFEN,
     selectIsGameOver,
@@ -28,9 +30,10 @@ import {
     selectPreMoves,
     selectScore,
 } from "@/redux/slices/game-slice"
-import { Chess, Square } from "chess.js"
-import { useEffect, useState } from "react"
+import { Chess } from "chess.js"
+import { useEffect } from "react"
 import playSound from "@/features/gameplay/utils/play-sound"
+// import delay from '@/utils/delay'
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -46,7 +49,7 @@ export default function Page() {
     const legalMoves = useAppSelector(selectLegalMoves)
     const { isRedoable } = useAppSelector(selectIsUndoRedoable)
     const preMoves = useAppSelector(selectPreMoves)
-    const [allowedSquares, setAllowedSquares] = useState<Square[]>([])
+    const activePiece = useAppSelector(selectActivePiece)
 
     const timer = timerOption ? parseTimer(timerOption) : undefined
     const opponentColor = oppositeColor(playerColor)
@@ -70,7 +73,7 @@ export default function Page() {
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
             async function fetchBestMove() {
-                // await delay(2000)
+                // await delay(5000)
                 const res = await getEngineResponse(
                     fen,
                     level > 5 ? level - 5 : 1
@@ -102,27 +105,25 @@ export default function Page() {
                     }
                     ChessBoard={
                         <ChessBoard
-                            allowedSquares={allowedSquares}
+                            // allowedSquares={allowedSquares}
                             lastMove={lastMove}
                             pieces={pieces}
                             playerColor={playerColor}
                             onMoveStart={(piece) => {
                                 if (isRedoable || !isPlayerTurn) {
-                                    setAllowedSquares([])
                                 } else {
-                                    const moves = legalMoves[piece.square]
-                                    setAllowedSquares(
-                                        moves ? moves.map((mv) => mv.to) : []
-                                    )
+                                    dispatch(select(piece))
+
                                 }
                             }}
-                            onMoveCancel={() => setAllowedSquares([])}
+                            activePiece={activePiece}
+                            // onMoveCancel={() => setAllowedSquares([])}
+                            legalMoves={legalMoves}
                             onMoveEnd={(mv) => {
                                 if (!isPlayerTurn) {
                                     dispatch(premove(mv))
                                 } else {
                                     dispatch(move(mv))
-                                    setAllowedSquares([])
                                     const chess = new Chess(fen)
                                     const theMove = chess.move(mv)
                                     playMoveSound(theMove, chess.inCheck())
