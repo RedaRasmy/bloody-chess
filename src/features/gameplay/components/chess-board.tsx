@@ -73,7 +73,7 @@ export default function ChessBoard({
                     })
                 }
             } else {
-                !!onMoveCancel && onMoveCancel()
+                onMoveCancel?.()
             }
         }
     }
@@ -94,7 +94,7 @@ export default function ChessBoard({
     }
 
     function handleDragEnd(event: DragEndEvent) {
-        if (!activePiece) return
+        if (!activePiece) return;
 
         const { over } = event
 
