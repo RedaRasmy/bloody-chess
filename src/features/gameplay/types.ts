@@ -84,3 +84,5 @@ export type LegalMoves = Partial<Record<Square, {
     to: Square;
     promotion: PieceSymbol | undefined;
 }[]>>
+
+export type ColorOption = 'white' | 'random' | 'black'

@@ -16,13 +16,13 @@ import {
     changeColor,
     changeLevel,
     changeTimer,
-    ColorOption,
     selectBotOptions,
 } from "@/redux/slices/game-options"
 import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
 import { replay } from "@/redux/slices/game-slice"
+import {ColorOption} from '../types'
 
 export default function BotOptionsDialog() {
     const dispatch = useAppDispatch()
