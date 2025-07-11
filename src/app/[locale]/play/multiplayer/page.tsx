@@ -1,6 +1,6 @@
 
 export default function page() {
   return (
-    <div>online</div>
+    <div>multiplayer</div>
   )
 }

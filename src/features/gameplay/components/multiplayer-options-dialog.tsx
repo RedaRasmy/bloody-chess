@@ -35,6 +35,7 @@ export default function MultiplayerOptionsDialog() {
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
                     <SelectTimer
+                        required
                         options={TIMER_OPTIONS}
                         value={timer}
                         onChange={(op) => dispatch(changeTimer(op))}

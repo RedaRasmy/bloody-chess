@@ -9,6 +9,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import BotOptionsDialog from "@/features/gameplay/components/bot-options-dialog"
+import MultiplayerOptionsDialog from "@/features/gameplay/components/multiplayer-options-dialog"
 
 
 export default function Home() {
@@ -16,7 +17,7 @@ export default function Home() {
     return (
         <div className="flex h-full justify-center items-center bg-gray-200">
             <div className="flex flex-col gap-2">
-                <Dialog>
+                {/* <Dialog>
                     <DialogTrigger asChild>
                         <Button className="lg:w-sm w-50 py-6 cursor-pointer">
                             Play Online
@@ -31,7 +32,8 @@ export default function Home() {
                             <Button type="submit">Start</Button>
                         </DialogFooter>
                     </DialogContent>
-                </Dialog>
+                </Dialog> */}
+                <MultiplayerOptionsDialog/>
                 <BotOptionsDialog/>
             </div>
         </div>
