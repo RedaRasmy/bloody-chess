@@ -31,7 +31,7 @@ import {
 } from "@/redux/slices/game-slice"
 import { Chess } from "chess.js"
 import { useEffect } from "react"
-import delay from '@/utils/delay'
+// import delay from '@/utils/delay'
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -55,7 +55,7 @@ export default function Page() {
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
             async function fetchBestMove() {
-                await delay(5000)
+                // await delay(5000)
                 const res = await getEngineResponse(
                     fen,
                     level > 5 ? level - 5 : 1
