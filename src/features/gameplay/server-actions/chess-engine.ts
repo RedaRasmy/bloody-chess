@@ -17,3 +17,8 @@ export async function getEngineResponse(fen:string,level:number):Promise<EngineR
 
 }
 
+
+// I should set a max retries -> throw user friendly error with UI
+// TODO: search about what best to do for better UX if the bot failed to responde
+// or maybe I should set a client engine version fallback (wasm?) if the API failed
+

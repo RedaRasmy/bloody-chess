@@ -15,7 +15,6 @@ import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     move,
     premove,
-    removePremove,
     select,
     selectActivePiece,
     selectCapturedPieces,
@@ -33,12 +32,11 @@ import {
 import { Chess } from "chess.js"
 import { useEffect } from "react"
 import playSound from "@/features/gameplay/utils/play-sound"
-// import delay from '@/utils/delay'
+import delay from '@/utils/delay'
 
 export default function Page() {
     const dispatch = useAppDispatch()
     const playerColor = useAppSelector(selectPlayerColor)
-    const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const fen = useAppSelector(selectFEN)
     const pieces = useAppSelector(selectPieces)
     const { level, timer: timerOption } = useAppSelector(selectBotOptions)
@@ -48,6 +46,7 @@ export default function Page() {
     const score = useAppSelector(selectScore)
     const legalMoves = useAppSelector(selectLegalMoves)
     const { isRedoable } = useAppSelector(selectIsUndoRedoable)
+    const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const preMoves = useAppSelector(selectPreMoves)
     const activePiece = useAppSelector(selectActivePiece)
 
@@ -63,17 +62,9 @@ export default function Page() {
     }, [isGameOver])
 
     useEffect(() => {
-        if (preMoves.length > 0 && isPlayerTurn) {
-            const nextMove = preMoves[0]
-            dispatch(move(nextMove))
-            dispatch(removePremove()) // Remove from queue
-        }
-    }, [preMoves, isPlayerTurn,dispatch])
-
-    useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
             async function fetchBestMove() {
-                // await delay(5000)
+                await delay(5000)
                 const res = await getEngineResponse(
                     fen,
                     level > 5 ? level - 5 : 1
@@ -105,19 +96,19 @@ export default function Page() {
                     }
                     ChessBoard={
                         <ChessBoard
-                            // allowedSquares={allowedSquares}
                             lastMove={lastMove}
                             pieces={pieces}
                             playerColor={playerColor}
                             onMoveStart={(piece) => {
-                                if (isRedoable || !isPlayerTurn) {
+                                if (isRedoable) {
+                                    // do nothing for now
+                                    // maybe I should reset the latest state ? 
                                 } else {
                                     dispatch(select(piece))
 
                                 }
                             }}
                             activePiece={activePiece}
-                            // onMoveCancel={() => setAllowedSquares([])}
                             legalMoves={legalMoves}
                             onMoveEnd={(mv) => {
                                 if (!isPlayerTurn) {
