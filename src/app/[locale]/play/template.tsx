@@ -5,7 +5,7 @@ import { selectIsPlayerTurn, selectPreMoves,selectIsGameOver } from "@/redux/sli
 import { removePremove, move } from "@/redux/slices/game-slice"
 import playSound from "@/features/gameplay/utils/play-sound"
 
-export default function template({ children }: { children: ReactNode }) {
+export default function Template({ children }: { children: ReactNode }) {
     const dispatch = useAppDispatch()
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const preMoves = useAppSelector(selectPreMoves)
