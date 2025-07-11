@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import GameDetails from "@/features/gameplay/components/game-details"
 import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
@@ -31,7 +31,6 @@ import {
 } from "@/redux/slices/game-slice"
 import { Chess } from "chess.js"
 import { useEffect } from "react"
-import playSound from "@/features/gameplay/utils/play-sound"
 import delay from '@/utils/delay'
 
 export default function Page() {
@@ -52,14 +51,6 @@ export default function Page() {
 
     const timer = timerOption ? parseTimer(timerOption) : undefined
     const opponentColor = oppositeColor(playerColor)
-
-    useEffect(() => {
-        if (!isGameOver) {
-            playSound("game-start")
-        } else {
-            playSound("game-end")
-        }
-    }, [isGameOver])
 
     useEffect(() => {
         if (!isPlayerTurn && !isGameOver) {
