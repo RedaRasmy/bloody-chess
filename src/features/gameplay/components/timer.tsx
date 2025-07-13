@@ -3,7 +3,7 @@ import {
     selectCurrentPlayer,
     selectIsGameOver,
     timeOut,
-    selectIsNewGame
+    selectIsNewGame,
 } from "@/redux/slices/game-slice"
 import { Color } from "chess.js"
 import { useEffect, useRef, useState } from "react"
@@ -20,50 +20,64 @@ export default function Timer({
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
-    const [time,setTime]= useState(duration)
-    const intervalRef = useRef<NodeJS.Timeout|null>(null)
+    const [time, setTime] = useState(duration * 1000)
+    const intervalRef = useRef<NodeJS.Timeout | null>(null)
+    const startTimeRef = useRef<number | null>(null)
 
     const isRunning = currentPlayer === player && !isGameOver
 
-    const [didPlay,setDidPlay] = useState(false)
+    const [didPlay, setDidPlay] = useState(false)
 
-    useEffect(() => { 
+    useEffect(() => {
         if (!isGameOver) {
-            setTime(duration)
+            setTime(duration*1000)
         }
-     },[isGameOver,duration,isNewGame])
-    
+    }, [isGameOver, duration, isNewGame])
+
     useEffect(() => {
         if (isRunning) {
             setDidPlay(true)
+            startTimeRef.current = Date.now()
             intervalRef.current = setInterval(() => {
-                setTime(prev => Math.max(prev-1,0))
-            },1000)
+                const now = Date.now()
+                const elapsed = now - (startTimeRef.current || now)
+                setTime(prev => Math.max(prev-elapsed,0))
+                startTimeRef.current = now
+            }, 100)
         } else if (!isRunning && didPlay) {
-            setTime(prev=>prev+plus)
+            setTime((prev) => prev + plus * 1000)
         }
-        
-        return () => { 
+
+        return () => {
             if (intervalRef.current) clearInterval(intervalRef.current)
-         }
-     },[isRunning,plus,didPlay])
+            startTimeRef.current = null
+        }
+    }, [isRunning, plus, didPlay])
 
     const dispatch = useAppDispatch()
 
+    const totalSeconds = Math.floor(time / 1000)
 
-    const minutes = Math.floor(time / 60)
-    const seconds = time % 60
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    const hundredMs = Math.floor((time % 1000) / 100)
 
     useEffect(() => {
-        if (time===0) {
+        if (time <= 0) {
             dispatch(timeOut())
         }
-    },[time,dispatch])
-
+    }, [time, dispatch])
 
     return (
         <div className="bg-gray-300 py-0.5 px-3 rounded-md font-bold">
             {minutes}:{seconds.toString().padStart(2, "0")}
+            {
+                time <= duration*100 && 
+                <>
+                    :
+                    {hundredMs}
+                </>
+            }
         </div>
     )
 }
