@@ -12,6 +12,7 @@ import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import updateScoreAndCapturedPieces from "@/features/gameplay/utils/update-score"
 import safeMove from "@/features/gameplay/utils/safe-move"
+// import { ChessTimerOption } from "@/features/gameplay/types"
 
 const initialState = {
     fen: DEFAULT_POSITION,
@@ -26,6 +27,13 @@ const initialState = {
     pieces: getInitialPieces(),
     preMoves: [] as MoveType[],
     activePiece: null as BoardElement,
+    // timer: undefined as
+    //     | undefined
+    //     | {
+    //           option: ChessTimerOption
+    //           white: number
+    //           black: number
+    //       },
     gameOver: {
         isResign: false,
         isDraw: false,
@@ -38,6 +46,7 @@ const initialState = {
         isCheckmate: false,
         winner: undefined as undefined | Color,
     },
+    newGame : false // should change on new game
 }
 
 const gameSlice = createSlice({
@@ -81,8 +90,9 @@ const gameSlice = createSlice({
             ...initialState,
             playerColor: state.playerColor,
             isPlayerTurn: state.playerColor === "w",
+            newGame : !state.newGame
         }),
-        select: (state,action:PayloadAction<Exclude<BoardElement,null>>) => {
+        select: (state, action: PayloadAction<Exclude<BoardElement, null>>) => {
             const piece = action.payload
             state.activePiece = piece
         },
@@ -92,7 +102,6 @@ const gameSlice = createSlice({
                 state.currentMoveIndex < state.history.length - 1
             )
                 return
-
 
             const chess = new Chess()
 
@@ -156,7 +165,6 @@ const gameSlice = createSlice({
 
             state.currentMoveIndex = state.history.length - 1
 
-            
             state.activePiece = null
         },
     },
@@ -188,7 +196,7 @@ export const {
     redo,
     premove,
     removePremove,
-    select
+    select,
 } = gameSlice.actions
 
 export default gameSlice.reducer
@@ -251,3 +259,4 @@ export const selectActivePiece = createSelector(
     [(state: RootState) => state.game.activePiece],
     (activePiece) => activePiece
 )
+export const selectIsNewGame = (state:RootState) => state.game.newGame

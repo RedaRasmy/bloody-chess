@@ -3,6 +3,7 @@ import {
     selectCurrentPlayer,
     selectIsGameOver,
     timeOut,
+    selectIsNewGame
 } from "@/redux/slices/game-slice"
 import { Color } from "chess.js"
 import { useEffect, useRef, useState } from "react"
@@ -17,6 +18,7 @@ export default function Timer({
     plus: number
 }) {
     const isGameOver = useAppSelector(selectIsGameOver)
+    const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
     const [time,setTime]= useState(duration)
     const intervalRef = useRef<NodeJS.Timeout|null>(null)
@@ -29,9 +31,9 @@ export default function Timer({
         if (!isGameOver) {
             setTime(duration)
         }
-     },[isGameOver,duration])
+     },[isGameOver,duration,isNewGame])
     
-    useEffect(() => { 
+    useEffect(() => {
         if (isRunning) {
             setDidPlay(true)
             intervalRef.current = setInterval(() => {
