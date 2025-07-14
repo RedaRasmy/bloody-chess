@@ -25,7 +25,8 @@ export default function ChessBoard({
     lastMove,
     preMoves,
     isPlayerTurn,
-    activePiece
+    activePiece,
+    animatedMoves
 }: {
     activePiece : BoardElement
     pieces: Piece[]
@@ -36,11 +37,13 @@ export default function ChessBoard({
     lastMove: MoveType | undefined
     legalMoves : LegalMoves
     preMoves: MoveType[]
-    isPlayerTurn: boolean
+    isPlayerTurn: boolean,
+    animatedMoves : boolean
 }) {
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
     const allowedSquares = activePiece ? legalMoves[activePiece.square]?.map(mv=>mv.to) ?? [] : []
+
 
     const squares = getSquares(playerColor === "b")
 
@@ -172,7 +175,8 @@ export default function ChessBoard({
                     if (piece && boardWidth) {
                         return (
                             <Draggable
-                                isReversed={playerColor === "b"}
+                                animated={animatedMoves}
+                                reversed={playerColor === "b"}
                                 boardWidth={boardWidth}
                                 square={piece.square}
                                 key={piece.id}

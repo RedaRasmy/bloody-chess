@@ -29,6 +29,7 @@ import {
     selectPreMoves,
     selectScore,
 } from "@/redux/slices/game-slice"
+import {selectEnableAnimation} from '@/redux/slices/settings'
 import { Chess } from "chess.js"
 import { useEffect } from "react"
 // import delay from '@/utils/delay'
@@ -48,6 +49,7 @@ export default function Page() {
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const preMoves = useAppSelector(selectPreMoves)
     const activePiece = useAppSelector(selectActivePiece)
+    const enableAnimation = useAppSelector(selectEnableAnimation)
 
     const timer = timerOption ? parseTimer(timerOption) : undefined
     const opponentColor = oppositeColor(playerColor)
@@ -87,6 +89,7 @@ export default function Page() {
                     }
                     ChessBoard={
                         <ChessBoard
+                            animatedMoves={enableAnimation}
                             lastMove={lastMove}
                             pieces={pieces}
                             playerColor={playerColor}

@@ -13,14 +13,16 @@ export default function Draggable({
     children,
     className,
     boardWidth,
-    isReversed
+    reversed,
+    animated,
 }: {
     data: Exclude<BoardElement, null> | undefined
     children: ReactNode
     className?: string
     square: Square
     boardWidth: number
-    isReversed:boolean
+    reversed: boolean
+    animated: boolean
 }) {
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
@@ -31,7 +33,7 @@ export default function Draggable({
         transform: CSS.Translate.toString(transform),
     }
 
-    const [x, y] = squareToCoords(square,isReversed)
+    const [x, y] = squareToCoords(square, reversed)
 
     const [justDropped, setJustDropped] = useState(false)
 
@@ -46,34 +48,48 @@ export default function Draggable({
         }
     }, [isDragging, justDropped])
 
+    const targetPosition = {
+        x: x * (boardWidth / 8),
+        y: y * (boardWidth / 8),
+    }
+
+    const sharedProps = {
+        className: cn("absolute z-10", {
+            "z-30": isDragging,
+        }),
+        style: {
+            left: targetPosition.x,
+            top: targetPosition.y,
+        },
+    }
+
+    const draggableContent = (
+        <div
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            className={cn(className)}
+            style={style}
+        >
+            {children}
+        </div>
+    )
+
+    if (!animated) {
+        return <div {...sharedProps}>{draggableContent}</div>
+    }
+
     return (
         <motion.div
-            // Outer wrapper: handles layout and framer positioning
-            initial={{
-                x: x * (boardWidth / 8),
-                y: y * (boardWidth / 8),
-            }}
-            animate={{
-                x: x * (boardWidth / 8),
-                y: y * (boardWidth / 8),
-            }}
-            layout
+            animate={targetPosition}
             transition={{
                 duration: justDropped ? 0 : 0.2, // Skip animation if just dropped
             }}
-            className={cn("absolute z-10",{
-                'z-30' : isDragging
+            className={cn("absolute z-10", {
+                "z-30": isDragging,
             })}
         >
-            <div
-                ref={setNodeRef}
-                {...listeners}
-                {...attributes}
-                className={cn( className)}
-                style={style}
-            >
-                {children}
-            </div>
+            {draggableContent}
         </motion.div>
     )
 }
