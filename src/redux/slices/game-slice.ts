@@ -54,6 +54,7 @@ const gameSlice = createSlice({
     initialState,
     reducers: {
         premove: (state, { payload: move }) => {
+            if (state.gameOver.isGameOver) return;
             state.preMoves.push(move)
         },
         removePremove: (state) => {
