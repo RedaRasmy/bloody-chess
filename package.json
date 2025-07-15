@@ -10,7 +10,7 @@
     "db:push": "pnpx drizzle-kit push",
     "db:generate": "pnpx drizzle-kit generate",
     "db:migrate": "pnpx drizzle-kit migrate",
-    "test:unit" : "vitest",
+    "test:unit": "vitest",
     "test": "npx playwright test",
     "test:live": "npx playwright test --headed"
   },
@@ -45,6 +45,7 @@
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "react-scan": "^0.3.4",
+    "redux-persist": "^6.0.0",
     "tailwind-merge": "^3.3.1",
     "usehooks-ts": "^3.1.1",
     "zod": "^3.25.61"

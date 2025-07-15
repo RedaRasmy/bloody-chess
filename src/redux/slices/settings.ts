@@ -10,7 +10,7 @@ type Settings = Record<string, SettingValue>
 
 const initialState = {
   animation: {
-    enabled: false as boolean,
+    enabled: true as boolean,
     moves: true as boolean,
   },
 } satisfies Settings
