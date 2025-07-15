@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 import useChessBoardWidth from "@/hooks/useChessBoardWidth"
 import getSquares from "../utils/get-squares"
-const Draggable = dynamic(() => import("./draggable"))
 const ChessPiece = dynamic(() => import("./chess-piece"))
 
 export default function ChessBoard({
@@ -174,19 +173,13 @@ export default function ChessBoard({
                 {pieces.map((piece) => {
                     if (piece && boardWidth) {
                         return (
-                            <Draggable
+                            <ChessPiece
                                 animated={animatedMoves}
                                 reversed={playerColor === "b"}
                                 boardWidth={boardWidth}
-                                square={piece.square}
                                 key={piece.id}
                                 data={piece}
-                            >
-                                <ChessPiece
-                                    piece={piece}
-                                    boardWidth={boardWidth}
-                                />
-                            </Draggable>
+                            />
                         )
                     }
                 })}
