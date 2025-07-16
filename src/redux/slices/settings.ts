@@ -8,8 +8,6 @@ type SettingValue = {
 }
 type Settings = Record<string, SettingValue>
 
-const x:List = ['hmm','hm']
-
 const initialState = {
   animation: {
     enabled: true as boolean,
