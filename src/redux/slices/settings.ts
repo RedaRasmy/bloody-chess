@@ -1,12 +1,14 @@
 import { createSlice, createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
-import { Primitive } from "@/utils/global-types"
+import { Primitive , List} from "@/utils/global-types"
 
 type SettingValue = {
     enabled: boolean
-    [key: string]: Primitive | any[] | SettingValue
+    [key: string]: Primitive | List | SettingValue
 }
 type Settings = Record<string, SettingValue>
+
+const x:List = ['hmm','hm']
 
 const initialState = {
   animation: {
