@@ -3,8 +3,7 @@ import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
 // import GoogleProvider from "next-auth/providers/google"
 import { supabase } from "@/utils/supabase/client"
-import tryCatch from "@/utils/try-catch"
-// const supabase = createClient()
+// import tryCatch from "@/utils/try-catch"
 
 interface User {
     id: string
@@ -62,9 +61,9 @@ const authHandlers = {
         return data.user
     },
 
-    async handleResetPassword(email: string) {
-        //
-    },
+    // async handleResetPassword(email: string) {
+    //     //
+    // },
 }
 
 const authOptions: NextAuthOptions = {

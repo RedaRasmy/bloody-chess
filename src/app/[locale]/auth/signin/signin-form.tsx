@@ -49,6 +49,7 @@ export default function SignInForm() {
                 router.push("/")
             }
         } catch (err) {
+            console.error(err)
             form.setError("root", { message: "Unexpected error occurred 🤕" })
         }
     }
