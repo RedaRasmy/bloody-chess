@@ -88,8 +88,28 @@ const authOptions: NextAuthOptions = {
                 },
             },
             async authorize(credentials): Promise<User | null> {
+                if (!credentials) throw new Error("No credentials")
+                if (credentials.mode === "resetpassword") {
+                    try {
+                        const { data, error } =
+                            await supabase.auth.resetPasswordForEmail(
+                                credentials.email,
+                                {
+                                    redirectTo: `${process.env.NEXTAUTH_URL}/auth/update-password`,
+                                }
+                            )
+
+                        if (error) throw error
+
+                        // Return null because we don't want to sign in the user yet
+                        return null
+                    } catch (error) {
+                        console.error("Reset password error:", error)
+                        throw new Error("Failed to send reset password email")
+                    }
+                }
+                
                 try {
-                    if (!credentials) throw new Error("No credentials")
                     const { email, password, mode } = credentials
                     const lowerMode = mode?.toLowerCase()
 
