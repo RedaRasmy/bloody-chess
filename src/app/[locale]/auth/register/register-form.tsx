@@ -13,25 +13,16 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn, useSession } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Link } from "@/i18n/navigation"
-import { useEffect } from "react"
 
 const formSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8, "Password must be at least 8 characters."),
 })
 
-export default function SignInPage() {
-    const session = useSession()
+export default function RegisterForm() {
     const router = useRouter()
-
-    useEffect(() => {
-        if (session.status === "authenticated") {
-            router.push("/")
-        }
-    }, [session.status, router])
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -47,7 +38,7 @@ export default function SignInPage() {
             const result = await signIn("credentials", {
                 email,
                 password,
-                mode: "signin",
+                mode: "signup",
                 redirect: false,
             })
 
@@ -75,10 +66,8 @@ export default function SignInPage() {
                 className="space-y-5 my-auto place-self-center w-[min(90%,400px)]"
             >
                 <div>
-                    <h1 className="text-3xl">Login to your account</h1>
-                    <p className="text-red-500 my-2">
-                        {message}
-                    </p>
+                    <h1 className="text-3xl">Create new account</h1>
+                    <p className="text-red-500 my-2">{message}</p>
                 </div>
                 <FormField
                     control={form.control}
@@ -107,14 +96,11 @@ export default function SignInPage() {
                             <FormControl>
                                 <Input
                                     placeholder="Enter your password"
-                                    type='password'
+                                    type="password"
                                     {...field}
                                 />
                             </FormControl>
                             <FormDescription>
-                                <Link href={"/auth/reset"}>
-                                    Forget password?
-                                </Link>
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -126,7 +112,7 @@ export default function SignInPage() {
                         className=""
                         disabled={form.formState.isSubmitting}
                     >
-                        Sign in
+                        Register
                     </Button>
                 </div>
             </form>
