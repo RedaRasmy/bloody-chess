@@ -56,8 +56,6 @@ export default function SignInForm() {
     const errors = form.formState.errors
     const message =
         errors.root?.message ??
-        errors.email?.message ??
-        errors.password?.message ??
         null
 
     return (
@@ -67,7 +65,7 @@ export default function SignInForm() {
                 className="space-y-5 my-auto place-self-center w-[min(90%,400px)]"
             >
                 <div>
-                    <h1 className="text-3xl">Login to your account</h1>
+                    <h1 className="text-2xl md:text-3xl mb-5 md:mb-10">Login to your account</h1>
                     <p className="text-red-500 my-2">{message}</p>
                 </div>
                 <FormField
@@ -113,7 +111,7 @@ export default function SignInForm() {
                 <div className="flex flex-row-reverse mt-6">
                     <Button
                         type="submit"
-                        className=""
+                        className="cursor-pointer"
                         disabled={form.formState.isSubmitting}
                     >
                         Sign in

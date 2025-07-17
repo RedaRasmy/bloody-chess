@@ -14,46 +14,47 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import {useState} from 'react'
 
 const formSchema = z.object({
     email: z.string().email(),
-    password: z.string().min(8, "Password must be at least 8 characters."),
 })
 
-export default function RegisterForm() {
-    const router = useRouter()
+export default function ResetForm() {
+    const [success, setSuccess] = useState<string | null>(null)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
-            password: "",
         },
     })
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        const { email, password } = values
+        const { email } = values
         try {
             const result = await signIn("credentials", {
-                email,
-                password,
-                mode: "signup",
                 redirect: false,
+                email,
+                mode: "resetpassword",
             })
 
             if (result?.error) {
-                form.setError("root", { message: result.error })
+                form.setError('root',{
+                    message : result.error
+                })
+
             } else {
-                router.push("/")
+                setSuccess("Reset password email sent. Please check your inbox.")
             }
-        } catch (err) {
-            form.setError("root", { message: "Unexpected error occurred 🤕" })
+        } catch (e) {
+            console.error("Error during password reset:", e)
+            form.setError('root',{message:"An unexpected error occurred"})
         }
     }
 
     const errors = form.formState.errors
-    const message =
+    const error =
         errors.root?.message ??
         null
 
@@ -64,8 +65,11 @@ export default function RegisterForm() {
                 className="space-y-5 my-auto place-self-center w-[min(90%,400px)]"
             >
                 <div>
-                    <h1 className="text-2xl md:text-3xl mb-5 md:mb-10">Create new account</h1>
-                    <p className="text-red-500 my-2">{message}</p>
+                    <h1 className="text-2xl md:text-3xl mb-5 md:mb-10">Reset your password</h1>
+                    {success 
+                    ? <p className="text-green-500 my-2">{success}</p>
+                    : <p className="text-red-500 my-2">{error}</p>
+                    }
                 </div>
                 <FormField
                     control={form.control}
@@ -85,32 +89,13 @@ export default function RegisterForm() {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Enter your password"
-                                    type="password"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
                 <div className="flex flex-row-reverse mt-6">
                     <Button
                         type="submit"
                         className="cursor-pointer"
                         disabled={form.formState.isSubmitting}
                     >
-                        Register
+                        Send
                     </Button>
                 </div>
             </form>

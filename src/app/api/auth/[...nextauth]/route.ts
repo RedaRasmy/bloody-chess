@@ -91,7 +91,7 @@ const authOptions: NextAuthOptions = {
                 if (!credentials) throw new Error("No credentials")
                 if (credentials.mode === "resetpassword") {
                     try {
-                        const { data, error } =
+                        const { error } =
                             await supabase.auth.resetPasswordForEmail(
                                 credentials.email,
                                 {
@@ -132,7 +132,7 @@ const authOptions: NextAuthOptions = {
                     console.error("[AUTH] Authorization error:", {
                         error,
                         email: credentials?.email,
-                        // mode: credentials?.mode,
+                        mode: credentials?.mode,
                         timestamp: new Date().toISOString(),
                     })
                     throw error
@@ -143,7 +143,6 @@ const authOptions: NextAuthOptions = {
             clientId: process.env.GITHUB_ID!,
             clientSecret: process.env.GITHUB_SECRET!,
         }),
-        // ...add more providers here
     ],
     session: {
         strategy: "jwt",
