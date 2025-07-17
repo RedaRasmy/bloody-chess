@@ -5,9 +5,9 @@ import { getServerSession } from "next-auth"
 export default async function page() {
     const session = await getServerSession()
     if (!session || !session.user) {
-        redirect("/api/auth/signin")
+        redirect("/auth/signin")
     }
   return (
-    <div>profile</div>
+    <div>profile , email : {session.user.email}</div>
   )
 }
