@@ -4,6 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials"
 // import GoogleProvider from "next-auth/providers/google"
 import { supabase } from "@/utils/supabase/client"
 // import tryCatch from "@/utils/try-catch"
+import {db} from '@/db/drizzle'
+import { players } from "@/db/schema"
 
 interface User {
     id: string
@@ -107,7 +109,7 @@ const authOptions: NextAuthOptions = {
                         throw new Error("Failed to send reset password email")
                     }
                 }
-                
+
                 try {
                     const { email, password, mode } = credentials
                     const lowerMode = mode?.toLowerCase()
@@ -152,6 +154,33 @@ const authOptions: NextAuthOptions = {
         error: "auth/error",
     },
     callbacks: {
+        async signIn({ user, account, profile }) {
+            // Only create player on first signup, not every signin
+            if (account?.provider && user.email) {
+                // Check if player already exists
+                const existingPlayer = await db
+                    .query
+                    .players
+                    .findFirst({
+                        where : (players,{eq}) => eq(players.userId, user.id)
+                    })
+
+                if (!existingPlayer) {
+                    // Create player profile
+                    await db.insert(players).values({
+                        userId: user.id,
+                        username:
+                            user.name || user.email?.split("@")[0] || "Player",
+                        elo: 500,
+                        gamesPlayed: 0,
+                        wins: 0,
+                        losses: 0,
+                        draws: 0,
+                    })
+                }
+            }
+            return true
+        },
         async jwt({ token, user }) {
             if (user) {
                 token.userId = user.id
