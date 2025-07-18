@@ -16,48 +16,83 @@ import {
 // import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
-import { replay } from "@/redux/slices/game-slice"
-import { useState } from "react"
-import delay from "@/utils/delay"
-// import {supabase} from '@/utils/supabase/client'
-import createGame from '../server-actions/create-game'
-import startGame from '../server-actions/start-game'
+// import { replay } from "@/redux/slices/game-slice"
+import { useState, useEffect } from "react"
+// import delay from "@/utils/delay"
+import { supabase } from "@/utils/supabase/client"
+import createGame from "../server-actions/create-game"
+import startGameIfExists from "../server-actions/start-game"
+import usePlayer from "@/features/gameplay/hooks/use-player"
+import { useRouter } from "next/navigation"
 
 export default function MultiplayerOptionsDialog() {
     const [isSearching, setIsSearching] = useState(false)
+    const router = useRouter()
 
     // const [gameFound, setGameFound] = useState(false)
     const dispatch = useAppDispatch()
     const { timer } = useAppSelector(selectMultiplayerOptions)
+    const player = usePlayer()
 
+    useEffect(() => {
+        if (player.type === "loading") return;
 
-    async function handelSearch() {
-        // ideas : 
-            // check if there is a not-started game in db 
-                // if exist update it to 'playing' and redirect to /multiplayer
-                // else create a new game with 'not-started' and wait for someone else to update it
+        const { type, data } = player
 
-        const startedGame = await startGame({
-            playerId : 'temp' // get it from usePlayer
-        })
+        async function handelSearch() {
+            // ideas :
+            // check if there is a not-started game in db
+            // if exist update it to 'playing' and redirect to /multiplayer
+            // else create a new game with 'not-started' and wait for someone else to update it
 
-        if (!startedGame) {
-            const createdGame = await createGame({
-                playerId : 'temp',
-                timer  ,
-                isForGuests : false // get it from usePlayer
+            const startedGame = await startGameIfExists({
+                playerId: data.id,
+                isForGuests: type === "guest",
             })
-            // ...
+
+            if (!startedGame) {
+                const createdGame = await createGame({
+                    playerId: data.id,
+                    timer,
+                    isForGuests: type === "guest",
+                })
+                // wait for someone else to start the game
+                supabase
+                    .channel("game-searching")
+                    .on(
+                        "postgres_changes",
+                        {
+                            event: "UPDATE",
+                            schema: "public",
+                            table: "games",
+                            filter : "id=eq."+createdGame.id
+                        },
+                        (payload) => {
+                            const newGame = payload.new
+                            setIsSearching(false)
+                            router.push("/multiplayer/"+newGame.id)
+                            console.log("new game (uptaded by someone else) : ",payload.new)
+                        }
+                    )
+                    .subscribe()
+            } else {
+                setIsSearching(false)
+                router.push("/multiplayer/" + startedGame.id)
+            }
+            // await delay(3000).then(() => {
+            //     // dispatch(replay())
+            //     setIsSearching(false)
+            // })
         }
-        setIsSearching(true)
-        await delay(3000).then(() => {
-            dispatch(replay())
-            setIsSearching(false)
-        })
-    }
+
+        handelSearch()
+
+        // TODOD : 
+            // cancel searching -> delete created game if so
+    }, [isSearching, player])
 
     return (
-        <Dialog>
+        <Dialog >
             <DialogTrigger asChild>
                 <Button className="lg:w-sm w-50 py-6 cursor-pointer">
                     Play Online
@@ -79,7 +114,13 @@ export default function MultiplayerOptionsDialog() {
                     <p className="font-semibold">Searching a game ...</p>
                 )}
                 <DialogFooter>
-                    <Button disabled={isSearching} className="" onClick={handelSearch}>
+                    <Button
+                        disabled={isSearching}
+                        className=""
+                        onClick={() => {
+                            setIsSearching(true)
+                        }}
+                    >
                         Start
                     </Button>
                 </DialogFooter>

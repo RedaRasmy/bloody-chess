@@ -16,8 +16,7 @@ export default async function createGame({
         isForGuests ,
         timer ,
         whiteId : playerId,
+    }).returning()
 
-    })
-
-    return newGame
+    return newGame[0]
 }

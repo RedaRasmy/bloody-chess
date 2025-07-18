@@ -1,18 +1,32 @@
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { getPlayer } from "../server-actions/player-actions"
-import { getGuest,createGuest } from "../server-actions/guest-actions"
+import { getGuest, createGuest } from "../server-actions/guest-actions"
 import { Player, Guest } from "@/db/types"
-import { useLocalStorage } from 'usehooks-ts'
+import { useLocalStorage } from "usehooks-ts"
 
-export default function usePlayer() {
+type Loading = {
+    type: "loading"
+}
+type PlayerResult = {
+    type: "player"
+    data: Player
+}
+type GuestResult = {
+    type: "guest"
+    data: Guest
+}
+type Result = Loading | PlayerResult | GuestResult
+
+export default function usePlayer(): Result {
     const { status, data } = useSession()
     const [player, setPlayer] = useState<Player | null>(null)
     const [guest, setGuest] = useState<Guest | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [guestId, setGuestId] = useLocalStorage("guest_id", "none")
 
     useEffect(() => {
-        if (status === "loading") return;
+        if (status === "loading") return
 
         async function getPlayerOrGuest() {
             try {
@@ -20,19 +34,27 @@ export default function usePlayer() {
                     const playerId = data.user.playerId // or playerId if you added it
 
                     const playerData = await getPlayer(playerId)
-                    if (!playerData) throw new Error("Player not exists in DB! id="+playerId)
+                    if (!playerData)
+                        throw new Error(
+                            "Player not exists in DB! id=" + playerId
+                        )
 
                     setPlayer(playerData)
+                    console.log("player : ", playerData)
                 } else {
-                    const [id, setId] = useLocalStorage('guest_id','none')
-                    if (id!=='none') { // guest exists
-                        const guest = await getGuest(id)
-                        if (!guest) throw new Error("Guest not exists in DB! id="+id);
+                    if (guestId !== "none") {
+                        // guest exists
+                        const guest = await getGuest(guestId)
+                        if (!guest)
+                            throw new Error(
+                                "Guest not exists in DB! id=" + guestId
+                            )
                         setGuest(guest)
+                        console.log("guest : ", guest)
                     } else {
                         // create new one
                         const newGuest = await createGuest()
-                        setId(newGuest.id)
+                        setGuestId(newGuest.id)
                         setGuest(newGuest)
                     }
                 }
@@ -48,21 +70,23 @@ export default function usePlayer() {
 
     if (isLoading) {
         return {
-            isLoading: true,
+            type: "loading",
         }
     }
 
     if (player) {
         return {
-            isLoading: false,
             type: "player",
-            player,
+            data: player,
         }
     }
 
-    return {
-        isLoading: false,
-        type: "guest",
-        guest,
+    if (guest) {
+        return {
+            type: "guest",
+            data: guest,
+        }
     }
+
+    throw new Error("usePlayer: no player or guest found!")
 }

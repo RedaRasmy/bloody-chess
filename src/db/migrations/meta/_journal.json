@@ -15,6 +15,13 @@
       "when": 1752835380573,
       "tag": "0001_quick_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752862884849,
+      "tag": "0002_tranquil_lady_ursula",
+      "breakpoints": true
     }
   ]
 }
