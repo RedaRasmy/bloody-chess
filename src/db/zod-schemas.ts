@@ -1,9 +1,9 @@
-import { createInsertSchema, createSelectSchema } from "drizzle-zod"
-import { users } from "./schema"
+// import { createInsertSchema, createSelectSchema } from "drizzle-zod"
+// import { players } from "./schema"
 
-export const insertUserSchema = createInsertSchema(users).omit({
-    createdAt: true,
-    updatedAt : true,
-    id: true,
-})
-export const selectUserSchema = createSelectSchema(users)
+// export const insertPlayerSchema = createInsertSchema(players).omit({
+//     createdAt: true,
+//     updatedAt : true,
+//     id: true,
+// })
+// export const selectPlayerSchema = createSelectSchema(players)

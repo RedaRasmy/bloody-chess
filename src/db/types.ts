@@ -1,5 +1,7 @@
-// import * as s from "./zod-schemas"
-// import { z } from "zod"
+import * as s from "./schema"
+import {  type InferSelectModel } from "drizzle-orm"
 
-// export type SUser = z.infer<typeof s.selectUserSchema>
-// export type IUser = z.infer<typeof s.insertUserSchema>
+export type Player = InferSelectModel<typeof s.players>
+export type Game = InferSelectModel<typeof s.games>
+export type Guest = InferSelectModel<typeof s.guests>
+// export type Move = InferSelectModel<typeof s.players>

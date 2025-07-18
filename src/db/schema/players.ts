@@ -1,5 +1,5 @@
 import { integer, pgTable, uuid, varchar } from "drizzle-orm/pg-core"
-import { relations } from "drizzle-orm"
+import { relations , InferSelectModel } from "drizzle-orm"
 
 import { timestamps } from "@/utils/timestamps"
 
@@ -17,3 +17,5 @@ const players = pgTable("players", {
 export default players
 
 export const playersRelations = relations(players, ({}) => ({}))
+
+

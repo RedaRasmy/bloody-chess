@@ -4,22 +4,9 @@ import CredentialsProvider from "next-auth/providers/credentials"
 // import GoogleProvider from "next-auth/providers/google"
 import { supabase } from "@/utils/supabase/client"
 // import tryCatch from "@/utils/try-catch"
-import {db} from '@/db/drizzle'
+import { db } from "@/db/drizzle"
 import { players } from "@/db/schema"
 
-interface User {
-    id: string
-    email: string
-    name: string
-}
-
-interface Session {
-    user: {
-        id: string
-        email: string
-    }
-    expires: string
-}
 
 const authHandlers = {
     async handleSignup(email: string, password: string) {
@@ -88,7 +75,7 @@ const authOptions: NextAuthOptions = {
                     placeholder: "signin, signup, or resetpassword",
                 },
             },
-            async authorize(credentials): Promise<User | null> {
+            async authorize(credentials) {
                 if (!credentials) throw new Error("No credentials")
                 if (credentials.mode === "resetpassword") {
                     try {
@@ -127,7 +114,6 @@ const authOptions: NextAuthOptions = {
                     return {
                         id: user.id,
                         email: user.email ?? email,
-                        name: user.email ?? email,
                     }
                 } catch (error) {
                     console.error("[AUTH] Authorization error:", {
@@ -158,12 +144,9 @@ const authOptions: NextAuthOptions = {
             // Only create player on first signup, not every signin
             if (account?.provider && user.email) {
                 // Check if player already exists
-                const existingPlayer = await db
-                    .query
-                    .players
-                    .findFirst({
-                        where : (players,{eq}) => eq(players.userId, user.id)
-                    })
+                const existingPlayer = await db.query.players.findFirst({
+                    where: (players, { eq }) => eq(players.userId, user.id),
+                })
 
                 if (!existingPlayer) {
                     // Create player profile
@@ -177,6 +160,7 @@ const authOptions: NextAuthOptions = {
                         losses: 0,
                         draws: 0,
                     })
+                } else {
                 }
             }
             return true
@@ -186,15 +170,46 @@ const authOptions: NextAuthOptions = {
                 token.userId = user.id
                 token.email = user.email
                 token.lastUpdated = new Date().toISOString()
+                const existingPlayer = await db.query.players.findFirst({
+                    where: (players, { eq }) => eq(players.userId, user.id),
+                })
+
+                if (!existingPlayer) {
+                    // Create player profile
+                    const result = await db
+                        .insert(players)
+                        .values({
+                            userId: user.id,
+                            username:
+                                user.name ||
+                                user.email?.split("@")[0] ||
+                                "Player",
+                            elo: 500,
+                            gamesPlayed: 0,
+                            wins: 0,
+                            losses: 0,
+                            draws: 0,
+                        })
+                        .returning()
+                    const player = result[0]
+                    token.playerId = player.id as string
+                    token.username = player.username as string
+                } else {
+                    token.playerId = existingPlayer.id as string
+                    token.username = existingPlayer.username as string
+                }
+
             }
             return token
         },
-        async session({ session, token }): Promise<Session> {
+        async session({ session, token }) {
             return {
                 ...session,
                 user: {
                     id: token.userId as string,
                     email: token.email as string,
+                    username: token.username as string,
+                    playerId: token.playerId as string,
                 },
             }
         },
