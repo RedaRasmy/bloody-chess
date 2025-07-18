@@ -17,10 +17,28 @@ import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
 import { replay } from "@/redux/slices/game-slice"
+import { useState } from "react"
+import delay from "@/utils/delay"
 
 export default function MultiplayerOptionsDialog() {
+    const [isSearching, setIsSearching] = useState(false)
+
+    // const [gameFound, setGameFound] = useState(false)
     const dispatch = useAppDispatch()
     const { timer } = useAppSelector(selectMultiplayerOptions)
+
+    async function handelSearch() {
+        // ideas : 
+            // check if there is a not-started game in db 
+                // if exist update it to 'playing' and redirect to /multiplayer
+                // else create a new game with 'not-started' and wait for someone else to update it
+        setIsSearching(true)
+        await delay(3000).then(() => {
+            dispatch(replay())
+            setIsSearching(false)
+
+        })
+    }
 
     return (
         <Dialog>
@@ -36,19 +54,17 @@ export default function MultiplayerOptionsDialog() {
                 <div className="flex flex-col gap-4">
                     <SelectTimer
                         required
-                        options={TIMER_OPTIONS}
+                        options={[...TIMER_OPTIONS]}
                         value={timer}
                         onChange={(op) => dispatch(changeTimer(op))}
                     />
                 </div>
+                {isSearching && (
+                    <p className="font-semibold">Searching a game ...</p>
+                )}
                 <DialogFooter>
-                    <Button asChild className="">
-                        <Link
-                            href={"/play/multiplayer"}
-                            onClick={() => dispatch(replay())}
-                        >
-                            Start
-                        </Link>
+                    <Button disabled={isSearching} className="" onClick={handelSearch}>
+                        Start
                     </Button>
                 </DialogFooter>
             </DialogContent>

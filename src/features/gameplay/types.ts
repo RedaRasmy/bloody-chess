@@ -1,4 +1,5 @@
 import { Color, PieceSymbol, Square } from "chess.js"
+import { TIMER_OPTIONS } from "./utils/constantes"
 
 export type BoardElement = {
     square: Square
@@ -45,22 +46,13 @@ export type MoveType = {
 }
 
 export type ChessTimer = {
-    type: "bullet" | "blitz" | "rapid" | "classical"
+    type: "bullet" | "blitz" | "rapid" 
     base: number
     plus: number
 }
 
-export type ChessTimerType = "bullet" | "blitz" | "rapid" | "classical"
-export type ChessTimerOption =
-    | "bullet 1+0"
-    | "bullet 2+1"
-    | "blitz 3+0"
-    | "blitz 3+2"
-    | "blitz 5+0"
-    | "blitz 5+3"
-    | "rapid 10+0"
-    | "rapid 10+5"
-    | "rapid 15+10"
+export type ChessTimerType = "bullet" | "blitz" | "rapid" 
+export type ChessTimerOption =  typeof TIMER_OPTIONS[number]
 
 export type Piece = {
     id : string,

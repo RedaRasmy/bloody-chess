@@ -71,7 +71,7 @@ export default function BotOptionsDialog() {
                         </RadioGroup>
                     </div>
                     <SelectTimer
-                        options={TIMER_OPTIONS}
+                        options={[...TIMER_OPTIONS]}
                         value={timer}
                         onChange={(op) => dispatch(changeTimer(op))}
                     />

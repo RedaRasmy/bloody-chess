@@ -1,5 +1,5 @@
 {
-  "id": "0b6d4252-f4ce-4637-98a7-18e1ea3e87ac",
+  "id": "1981ba22-cc36-4199-a933-a742f786ad28",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -15,35 +15,45 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "whiteId": {
-          "name": "whiteId",
+        "white_id": {
+          "name": "white_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "blackId": {
-          "name": "blackId",
+        "black_id": {
+          "name": "black_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "for_guests": {
+          "name": "for_guests",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
         },
         "result": {
           "name": "result",
-          "type": "varchar(50)",
+          "type": "result",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
         "status": {
           "name": "status",
-          "type": "varchar(50)",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'not-started'"
         },
         "timer": {
           "name": "timer",
-          "type": "varchar(50)",
+          "type": "timer_options",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -61,34 +71,47 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "games_whiteId_users_id_fk": {
-          "name": "games_whiteId_users_id_fk",
-          "tableFrom": "games",
-          "tableTo": "users",
-          "columnsFrom": [
-            "whiteId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.guests": {
+      "name": "guests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "games_blackId_users_id_fk": {
-          "name": "games_blackId_users_id_fk",
-          "tableFrom": "games",
-          "tableTo": "users",
-          "columnsFrom": [
-            "blackId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+        "display_name": {
+          "name": "display_name",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -99,10 +122,16 @@
       "name": "moves",
       "schema": "",
       "columns": {
-        "moveNumber": {
-          "name": "moveNumber",
-          "type": "serial",
+        "id": {
+          "name": "id",
+          "type": "uuid",
           "primaryKey": true,
+          "notNull": true
+        },
+        "move_number": {
+          "name": "move_number",
+          "type": "integer",
+          "primaryKey": false,
           "notNull": true
         },
         "gameId": {
@@ -147,8 +176,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.users": {
-      "name": "users",
+    "public.players": {
+      "name": "players",
       "schema": "",
       "columns": {
         "id": {
@@ -158,23 +187,52 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "email": {
-          "name": "email",
-          "type": "varchar(320)",
+        "username": {
+          "name": "username",
+          "type": "varchar(30)",
           "primaryKey": false,
           "notNull": true
         },
-        "password": {
-          "name": "password",
-          "type": "text",
+        "elo": {
+          "name": "elo",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 500
+        },
+        "games_played": {
+          "name": "games_played",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "wins": {
+          "name": "wins",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "losses": {
+          "name": "losses",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "draws": {
+          "name": "draws",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "created_at": {
           "name": "created_at",
@@ -195,11 +253,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_email_unique": {
-          "name": "users_email_unique",
+        "players_username_unique": {
+          "name": "players_username_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "email"
+            "username"
           ]
         }
       },
@@ -208,7 +266,41 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.result": {
+      "name": "result",
+      "schema": "public",
+      "values": [
+        "draw",
+        "white_won",
+        "black_won"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "not-started",
+        "playing",
+        "finished"
+      ]
+    },
+    "public.timer_options": {
+      "name": "timer_options",
+      "schema": "public",
+      "values": [
+        "bullet 1+0",
+        "bullet 2+1",
+        "blitz 3+0",
+        "blitz 3+2",
+        "blitz 5+0",
+        "blitz 5+3",
+        "rapid 10+0",
+        "rapid 10+5",
+        "rapid 15+10"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},
