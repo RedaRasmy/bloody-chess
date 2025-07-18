@@ -13,12 +13,15 @@ import {
     changeTimer,
     selectMultiplayerOptions,
 } from "@/redux/slices/game-options"
-import { Link } from "@/i18n/navigation"
+// import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
 import { replay } from "@/redux/slices/game-slice"
 import { useState } from "react"
 import delay from "@/utils/delay"
+// import {supabase} from '@/utils/supabase/client'
+import createGame from '../server-actions/create-game'
+import startGame from '../server-actions/start-game'
 
 export default function MultiplayerOptionsDialog() {
     const [isSearching, setIsSearching] = useState(false)
@@ -27,16 +30,29 @@ export default function MultiplayerOptionsDialog() {
     const dispatch = useAppDispatch()
     const { timer } = useAppSelector(selectMultiplayerOptions)
 
+
     async function handelSearch() {
         // ideas : 
             // check if there is a not-started game in db 
                 // if exist update it to 'playing' and redirect to /multiplayer
                 // else create a new game with 'not-started' and wait for someone else to update it
+
+        const startedGame = await startGame({
+            playerId : 'temp' // get it from usePlayer
+        })
+
+        if (!startedGame) {
+            const createdGame = await createGame({
+                playerId : 'temp',
+                timer  ,
+                isForGuests : false // get it from usePlayer
+            })
+            // ...
+        }
         setIsSearching(true)
         await delay(3000).then(() => {
             dispatch(replay())
             setIsSearching(false)
-
         })
     }
 
