@@ -20,8 +20,11 @@ import { TIMER_OPTIONS } from "../utils/constantes"
 import { useState, useEffect } from "react"
 // import delay from "@/utils/delay"
 import { supabase } from "@/utils/supabase/client"
-import createGame from "../server-actions/create-game"
-import startGameIfExists from "../server-actions/start-game"
+import {
+    createGame,
+    startGameIfExists,
+    deleteGameById,
+} from "../server-actions/games-actions"
 import usePlayer from "@/features/gameplay/hooks/use-player"
 import { useRouter } from "next/navigation"
 
@@ -30,19 +33,20 @@ export default function MultiplayerOptionsDialog() {
     const router = useRouter()
 
     // const [gameFound, setGameFound] = useState(false)
+    const [createdGameId, setCreatedGameId] = useState<string | null>(null)
     const dispatch = useAppDispatch()
     const { timer } = useAppSelector(selectMultiplayerOptions)
     const player = usePlayer()
 
     useEffect(() => {
-        if (player.type === "loading") return;
+        if (player.type === "loading") return
 
         const { type, data } = player
 
         async function handelSearch() {
             // ideas :
             // check if there is a not-started game in db
-            // if exist update it to 'playing' and redirect to /multiplayer
+            // if exist update it to 'playing' and redirect to /multiplayer/gameId
             // else create a new game with 'not-started' and wait for someone else to update it
 
             const startedGame = await startGameIfExists({
@@ -56,6 +60,7 @@ export default function MultiplayerOptionsDialog() {
                     timer,
                     isForGuests: type === "guest",
                 })
+                setCreatedGameId(createdGame.id)
                 // wait for someone else to start the game
                 supabase
                     .channel("game-searching")
@@ -65,13 +70,16 @@ export default function MultiplayerOptionsDialog() {
                             event: "UPDATE",
                             schema: "public",
                             table: "games",
-                            filter : "id=eq."+createdGame.id
+                            filter: "id=eq." + createdGame.id,
                         },
                         (payload) => {
                             const newGame = payload.new
                             setIsSearching(false)
-                            router.push("/multiplayer/"+newGame.id)
-                            console.log("new game (uptaded by someone else) : ",payload.new)
+                            router.push("/multiplayer/" + newGame.id)
+                            console.log(
+                                "new game (uptaded by someone else) : ",
+                                payload.new
+                            )
                         }
                     )
                     .subscribe()
@@ -86,13 +94,20 @@ export default function MultiplayerOptionsDialog() {
         }
 
         handelSearch()
-
-        // TODOD : 
-            // cancel searching -> delete created game if so
     }, [isSearching, player])
 
+    async function handleCancel() {
+        if (isSearching) {
+            setIsSearching(false)
+            if (createdGameId) {
+                await deleteGameById(createdGameId)
+                setCreatedGameId(null)
+            }
+        }
+    }
+
     return (
-        <Dialog >
+        <Dialog onOpenChange={handleCancel}>
             <DialogTrigger asChild>
                 <Button className="lg:w-sm w-50 py-6 cursor-pointer">
                     Play Online
@@ -114,6 +129,9 @@ export default function MultiplayerOptionsDialog() {
                     <p className="font-semibold">Searching a game ...</p>
                 )}
                 <DialogFooter>
+                    {isSearching && (
+                        <Button onClick={handleCancel}>Cancel</Button>
+                    )}
                     <Button
                         disabled={isSearching}
                         className=""

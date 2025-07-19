@@ -140,7 +140,7 @@ const authOptions: NextAuthOptions = {
         error: "auth/error",
     },
     callbacks: {
-        async signIn({ user, account, profile }) {
+        async signIn({ user, account }) {
             // Only create player on first signup, not every signin
             if (account?.provider && user.email) {
                 // Check if player already exists

@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import "next-auth";
 
 declare module "next-auth" {
   interface Session {
@@ -10,11 +10,4 @@ declare module "next-auth" {
       [key: string]: string;
     };
   }
-//   interface User {
-//       id: string;
-//       playerId : string
-//       username: string;
-//       email: string;
-//       [key: string]: string;
-//   }
 }
