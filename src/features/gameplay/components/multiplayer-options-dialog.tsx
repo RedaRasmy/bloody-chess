@@ -39,7 +39,8 @@ export default function MultiplayerOptionsDialog() {
     const player = usePlayer()
 
     useEffect(() => {
-        if (player.type === "loading") return
+        if (player.type === "loading") return;
+        if (!isSearching) return;
 
         const { type, data } = player
 
@@ -55,6 +56,7 @@ export default function MultiplayerOptionsDialog() {
             })
 
             if (!startedGame) {
+                console.log('there is no waiting game , create new one ...')
                 const createdGame = await createGame({
                     playerId: data.id,
                     timer,
@@ -94,7 +96,7 @@ export default function MultiplayerOptionsDialog() {
         }
 
         handelSearch()
-    }, [isSearching, player])
+    }, [isSearching, player.type])
 
     async function handleCancel() {
         if (isSearching) {

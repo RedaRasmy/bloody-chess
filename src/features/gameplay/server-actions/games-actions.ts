@@ -27,9 +27,10 @@ export async function startGameIfExists({
     isForGuests: boolean
 }) {
     const newGame = await db.query.games.findFirst({
-        where: (games, { eq ,and }) => and(
+        where: (games, { eq ,and ,ne}) => and(
             eq(games.status, "not-started"),
-            eq(games.isForGuests,isForGuests)
+            eq(games.isForGuests,isForGuests),
+            ne(games.whiteId,playerId)
         ),
         orderBy: (games, { asc }) => [asc(games.createdAt)],
     })

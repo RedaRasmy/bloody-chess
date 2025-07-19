@@ -23,7 +23,7 @@ export default function usePlayer(): Result {
     const [player, setPlayer] = useState<Player | null>(null)
     const [guest, setGuest] = useState<Guest | null>(null)
     const [isLoading, setIsLoading] = useState(true)
-    const [guestId, setGuestId] = useLocalStorage("guest_id", "none")
+    const [guestId, setGuestId] = useLocalStorage("guest_id", "")
 
     useEffect(() => {
         if (status === "loading") return
@@ -42,10 +42,12 @@ export default function usePlayer(): Result {
                     setPlayer(playerData)
                     console.log("player : ", playerData)
                 } else {
-                    if (guestId !== "none") {
-                        // guest exists
+                    if (guestId !== "") {
+                        // guest_id exists
                         const guest = await getGuest(guestId)
                         if (!guest)
+                            // maybe i should created again anyway with the same id
+                            // or update the id in localstorage
                             throw new Error(
                                 "Guest not exists in DB! id=" + guestId
                             )
@@ -66,7 +68,7 @@ export default function usePlayer(): Result {
         }
 
         getPlayerOrGuest()
-    }, [status, data])
+    }, [status])
 
     if (isLoading) {
         return {
