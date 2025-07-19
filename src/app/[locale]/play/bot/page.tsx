@@ -1,12 +1,10 @@
-'use client'
+"use client"
 import GameDetails from "@/features/gameplay/components/game-details"
 import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 import PlayerSection from "@/features/gameplay/components/player-section"
 import ChessBoard from "@/features/gameplay/components/chess-board"
 import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
-import { getEngineResponse } from "@/features/gameplay/server-actions/chess-engine"
-import { getBestMove } from "@/features/gameplay/utils/get-bestmove"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { parseTimer } from "@/features/gameplay/utils/parse-timer"
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
@@ -29,10 +27,9 @@ import {
     selectPreMoves,
     selectScore,
 } from "@/redux/slices/game-slice"
-import {selectShouldAnimate} from '@/redux/slices/settings'
+import { selectShouldAnimate } from "@/redux/slices/settings"
 import { Chess } from "chess.js"
-import { useEffect } from "react"
-// import delay from '@/utils/delay'
+import useBot from "@/features/gameplay/hooks/use-bot"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -49,30 +46,26 @@ export default function Page() {
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const preMoves = useAppSelector(selectPreMoves)
     const activePiece = useAppSelector(selectActivePiece)
-    const enabledMovesAnimation = useAppSelector(selectShouldAnimate('moves'))
+    const enabledMovesAnimation = useAppSelector(selectShouldAnimate("moves"))
 
     const timer = timerOption ? parseTimer(timerOption) : undefined
     const opponentColor = oppositeColor(playerColor)
 
-    useEffect(() => {
-        if (!isPlayerTurn && !isGameOver) {
-            async function fetchBestMove() {
-                // await delay(5000)
-                const res = await getEngineResponse(
-                    fen,
-                    level > 5 ? level - 5 : 1
-                )
-                if (res.success) {
-                    const bestMove = getBestMove(res, level, fen)
-                    dispatch(move(bestMove))
-                    const chess = new Chess(fen)
-                    const theMove = chess.move(bestMove)
-                    playMoveSound(theMove, chess.inCheck())
-                }
-            }
-            fetchBestMove()
-        }
-    }, [isPlayerTurn, fen, dispatch, level, isGameOver])
+    useBot({
+        fen,
+        isBotTurn: !isGameOver && !isPlayerTurn,
+        level,
+        onMove: (botMove, isCheck) => {
+            dispatch(
+                move({
+                    from: botMove.from,
+                    to: botMove.to,
+                    promotion: botMove.promotion,
+                })
+            )
+            playMoveSound(botMove, isCheck)
+        },
+    })
 
     return (
         <GameLayout
@@ -96,10 +89,9 @@ export default function Page() {
                             onMoveStart={(piece) => {
                                 if (isRedoable) {
                                     // do nothing for now
-                                    // maybe I should reset the latest state ? 
+                                    // maybe I should reset the latest state ?
                                 } else {
                                     dispatch(select(piece))
-
                                 }
                             }}
                             activePiece={activePiece}

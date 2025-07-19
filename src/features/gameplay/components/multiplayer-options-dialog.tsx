@@ -31,6 +31,7 @@ import { RealtimeChannel } from "@supabase/supabase-js"
 import {Game} from '@/db/types'
 
 export default function MultiplayerOptionsDialog() {
+    const MULTIPLAYER_PATH = 'play/multiplayer/'
     const [isSearching, setIsSearching] = useState(false)
     const router = useRouter()
 
@@ -118,7 +119,7 @@ export default function MultiplayerOptionsDialog() {
                                 }
                                 
                                 setIsSearching(false)
-                                router.push("/multiplayer/" + newGame.id)
+                                router.push(MULTIPLAYER_PATH + newGame.id)
                             }
                         )
                         .subscribe((status) => {
@@ -140,7 +141,7 @@ export default function MultiplayerOptionsDialog() {
                 } else {
                     console.log("Found existing game:", startedGame.id)
                     setIsSearching(false)
-                    router.push("/multiplayer/" + startedGame.id)
+                    router.push(MULTIPLAYER_PATH + startedGame.id)
                 }
             } catch (error) {
                 console.error("Search error:", error)
