@@ -4,6 +4,7 @@ import {db} from '@/db/drizzle'
 import {games} from '@/db/schema'
 import {ChessTimerOption} from '@/features/gameplay/types'
 import { eq } from "drizzle-orm"
+import { parseTimer } from '../utils/parse-timer'
 
 
 
@@ -54,17 +55,21 @@ export async function startGameIfExists({
 
 /// if there is no one waiting for u create one instead :
 export async function createGame({
-    isForGuests,timer,playerId
+    isForGuests,timerOption,playerId
 }:{
     isForGuests : boolean
-    timer : ChessTimerOption
+    timerOption : ChessTimerOption
     playerId : string
 }) {
+    const timer = parseTimer(timerOption)
 
     const newGame = await db.insert(games).values({
         isForGuests ,
-        timer ,
+        timer : timerOption,
         whiteId : playerId,
+        blackTimeLeft : timer.base * 1000,
+        whiteTimeLeft : timer.base * 1000,
+        currentTurn : "w",
     }).returning()
 
     return newGame[0]

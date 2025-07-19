@@ -13,12 +13,9 @@ import {
     changeTimer,
     selectMultiplayerOptions,
 } from "@/redux/slices/game-options"
-// import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
-// import { replay } from "@/redux/slices/game-slice"
 import { useState, useEffect, useRef } from "react"
-// import delay from "@/utils/delay"
 import { supabase } from "@/utils/supabase/client"
 import {
     createGame,
@@ -80,7 +77,7 @@ export default function MultiplayerOptionsDialog() {
                     
                     const createdGame = await createGame({
                         playerId: data.id,
-                        timer,
+                        timerOption : timer,
                         isForGuests: type === "guest",
                     })
                     
