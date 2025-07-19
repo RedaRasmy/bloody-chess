@@ -22,15 +22,18 @@ import { eq } from "drizzle-orm"
 export async function startGameIfExists({
     playerId,
     isForGuests,
+    timerOption
 }: {
     playerId: string
     isForGuests: boolean
+    timerOption : ChessTimerOption
 }) {
     const newGame = await db.query.games.findFirst({
         where: (games, { eq ,and ,ne}) => and(
             eq(games.status, "not-started"),
             eq(games.isForGuests,isForGuests),
-            ne(games.whiteId,playerId)
+            ne(games.whiteId,playerId),
+            eq(games.timer,timerOption)
         ),
         orderBy: (games, { asc }) => [asc(games.createdAt)],
     })

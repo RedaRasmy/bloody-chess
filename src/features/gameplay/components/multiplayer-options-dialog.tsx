@@ -72,6 +72,7 @@ export default function MultiplayerOptionsDialog() {
                 const startedGame = await startGameIfExists({
                     playerId: data.id,
                     isForGuests: type === "guest",
+                    timerOption : timer
                 })
 
                 if (!startedGame) {
