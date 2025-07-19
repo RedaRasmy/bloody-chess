@@ -1,5 +1,5 @@
 import { Color, PieceSymbol, Square } from "chess.js"
-import { TIMER_OPTIONS } from "./utils/constantes"
+import { GAMEOVER_REASONS, TIMER_OPTIONS } from "./utils/constantes"
 
 export type BoardElement = {
     square: Square
@@ -53,6 +53,7 @@ export type ChessTimer = {
 
 export type ChessTimerType = "bullet" | "blitz" | "rapid" 
 export type ChessTimerOption =  typeof TIMER_OPTIONS[number]
+export type GameOverReason = typeof GAMEOVER_REASONS[number]
 
 export type Piece = {
     id : string,
