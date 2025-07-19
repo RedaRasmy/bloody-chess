@@ -6,5 +6,6 @@ export {
     resultEnum,
     statusEnum,
     timerOptionsEnum,
+    gameOverReasonsEnum
 } from "./games"
 export { default as moves, movesRelations } from "./moves"

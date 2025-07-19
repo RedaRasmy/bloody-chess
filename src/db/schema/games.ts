@@ -2,7 +2,7 @@ import { pgTable, uuid ,pgEnum , boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 import {timestamps} from '@/utils/timestamps'
-import { TIMER_OPTIONS } from '@/features/gameplay/utils/constantes';
+import { GAMEOVER_REASONS, TIMER_OPTIONS } from '@/features/gameplay/utils/constantes';
 
 export const resultEnum = pgEnum("result",[
     'draw', 'white_won' , 'black_won'
@@ -11,6 +11,7 @@ export const statusEnum = pgEnum("status",[
     'not-started', 'playing' , 'finished'
 ])
 export const timerOptionsEnum = pgEnum("timer_option",TIMER_OPTIONS)
+export const gameOverReasonsEnum = pgEnum('gameover_reason',GAMEOVER_REASONS)
 
 
 const games = pgTable('games', {
@@ -19,6 +20,7 @@ const games = pgTable('games', {
     blackId : uuid('black_id'),
     isForGuests : boolean('for_guests').notNull(),
     result : resultEnum(),
+    gameOverReason : gameOverReasonsEnum(),
     status : statusEnum().default("not-started").notNull(),
     timer : timerOptionsEnum().notNull(),
     ...timestamps
@@ -26,5 +28,5 @@ const games = pgTable('games', {
 export default games
 
 export const gamesRelations = relations(games, ({ }) => ({
-
+    
 }));

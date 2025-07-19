@@ -8,7 +8,6 @@ export function getGameoverCause({
     isThreefoldRepetition,
     isResign,
     isTimeOut
-    
 }:RootState['game']['gameOver']) {
     if (isCheckmate) {
         return 'Checkmate'
@@ -24,5 +23,7 @@ export function getGameoverCause({
         return "Threefold repetition"
     } else if (isResign) {
         return "Resignation"
+    } else {
+        throw new Error("No gameover reason!")
     }
 }
