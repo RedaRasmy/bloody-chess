@@ -7,7 +7,7 @@ import {
     TIMER_OPTIONS,
 } from "@/features/gameplay/utils/constantes"
 import { DEFAULT_POSITION } from "chess.js"
-import { colorsEnum } from "./moves"
+import moves, { colorsEnum } from "./moves"
 
 export const resultEnum = pgEnum("result", ["draw", "white_won", "black_won"])
 export const statusEnum = pgEnum("status", [
@@ -36,4 +36,6 @@ const games = pgTable("games", {
 })
 export default games
 
-export const gamesRelations = relations(games, ({}) => ({}))
+export const gamesRelations = relations(games, ({many}) => ({
+    moves : many(moves)
+}))

@@ -37,4 +37,9 @@ const moves = pgTable("moves", {
 
 export default moves
 
-export const movesRelations = relations(moves, ({}) => ({}))
+export const movesRelations = relations(moves, ({one}) => ({
+    game : one(games,{
+        fields : [moves.gameId],
+        references : [games.id]
+    })
+}))
