@@ -1,7 +1,7 @@
-import { Chess } from "chess.js";
+import { Chess, DEFAULT_POSITION } from "chess.js";
 
-export default function getInitialPieces() {
-    const chess = new Chess();
+export default function getPieces(fen=DEFAULT_POSITION) {
+    const chess = new Chess(fen);
     const pieces = chess.board().flat().filter(el => !!el);
 
     // const pieceCount: Record<string, number> = {};

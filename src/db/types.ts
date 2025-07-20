@@ -7,16 +7,20 @@ export type Game = InferSelectModel<typeof s.games>
 export type Guest = InferSelectModel<typeof s.guests>
 export type SMove = InferSelectModel<typeof s.moves>
 
+export type StartedGame = Game & {
+    whiteId : string
+    blackId : string
+}
 
 
 export type FullGame = Prettify<
-    | (Game & {
+    | (StartedGame & {
           isForGuests: false
           white: Player
           black: Player
           moves: SMove[]
       })
-    | (Game & {
+    | (StartedGame & {
           isForGuests: true
           white: Guest
           black: Guest

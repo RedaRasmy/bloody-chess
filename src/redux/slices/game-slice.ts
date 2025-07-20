@@ -7,7 +7,7 @@ import { getGameoverCause } from "@/features/gameplay/utils/get-gameover-cause"
 import { BoardElement, DetailedMove, MoveType } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
-import getInitialPieces from "@/features/gameplay/utils/get-initial-pieces"
+import getInitialPieces from "@/features/gameplay/utils/get-pieces"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import updateScoreAndCapturedPieces from "@/features/gameplay/utils/update-score"
@@ -46,7 +46,7 @@ const initialState = {
         isCheckmate: false,
         winner: undefined as undefined | Color,
     },
-    newGame : false // should change on new game
+    newGame: false, // should change on new game
 }
 
 const gameSlice = createSlice({
@@ -54,7 +54,7 @@ const gameSlice = createSlice({
     initialState,
     reducers: {
         premove: (state, { payload: move }) => {
-            if (state.gameOver.isGameOver) return;
+            if (state.gameOver.isGameOver) return
             state.preMoves.push(move)
         },
         removePremove: (state) => {
@@ -91,7 +91,7 @@ const gameSlice = createSlice({
             ...initialState,
             playerColor: state.playerColor,
             isPlayerTurn: state.playerColor === "w",
-            newGame : !state.newGame
+            newGame: !state.newGame,
         }),
         select: (state, action: PayloadAction<Exclude<BoardElement, null>>) => {
             const piece = action.payload
@@ -260,4 +260,4 @@ export const selectActivePiece = createSelector(
     [(state: RootState) => state.game.activePiece],
     (activePiece) => activePiece
 )
-export const selectIsNewGame = (state:RootState) => state.game.newGame
+export const selectIsNewGame = (state: RootState) => state.game.newGame

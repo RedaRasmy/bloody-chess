@@ -82,7 +82,7 @@ export async function deleteGameById(id: string) {
     await db.delete(games).where(eq(games.id, id))
 }
 
-export async function getFullGame(id: string):Promise<FullGame> {
+export async function getFullGame(id: string): Promise<FullGame> {
     const game = await db.query.games.findFirst({
         where: (games, { eq }) => eq(games.id, id),
         with: {
@@ -91,7 +91,10 @@ export async function getFullGame(id: string):Promise<FullGame> {
             },
         },
     })
-    if (!game) throw new Error("no game found")
+
+    if (!game) throw new Error("No game found")
+    // if (!game.whiteId || !game.blackId) throw new Error("Game not started yet!")
+
     const { whiteId, blackId } = game
     if (!whiteId || !blackId) throw new Error("players should be both in game")
 
@@ -102,10 +105,13 @@ export async function getFullGame(id: string):Promise<FullGame> {
         const black = await db.query.guests.findFirst({
             where: (guests, { eq }) => eq(guests.id, blackId),
         })
-        if (!white || !black) throw new Error("players should be both in database [table:guests]")
+        if (!white || !black)
+            throw new Error("players should be both in database [table:guests]")
         return {
             ...game,
-            isForGuests : true,
+            whiteId ,
+            blackId,
+            isForGuests: true,
             white,
             black,
         }
@@ -116,10 +122,15 @@ export async function getFullGame(id: string):Promise<FullGame> {
         const black = await db.query.players.findFirst({
             where: (players, { eq }) => eq(players.id, blackId),
         })
-        if (!white || !black) throw new Error("players should be both in database [table:players]")
+        if (!white || !black)
+            throw new Error(
+                "players should be both in database [table:players]"
+            )
         return {
             ...game,
-            isForGuests : false,
+            whiteId,
+            blackId,
+            isForGuests: false,
             white,
             black,
         }
