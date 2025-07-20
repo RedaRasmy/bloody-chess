@@ -5,7 +5,7 @@ import { MoveType } from "../types"
 
 export const useMultiplayerGame = (gameId: string) => {
   const dispatch = useAppDispatch()
-  const gameState = useAppSelector((state) => state.multiplayer)
+  // const gameState = useAppSelector((state) => state.multiplayer)
 
   useEffect(() => {
     // Subscribe to game updates
@@ -34,7 +34,7 @@ export const useMultiplayerGame = (gameId: string) => {
     // Optimistic update
     // dispatch(localMove(move))
     
-    try {
+    try { 
       // Insert to Supabase
     //   const { error } = await supabase
     //     .from('moves')
@@ -55,5 +55,5 @@ export const useMultiplayerGame = (gameId: string) => {
     }
   }
 
-  return { gameState, makeMove }
+  // return { gameState, makeMove }
 }
