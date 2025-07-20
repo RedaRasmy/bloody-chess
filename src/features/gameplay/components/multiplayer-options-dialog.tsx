@@ -15,7 +15,7 @@ import {
 } from "@/redux/slices/game-options"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { supabase } from "@/utils/supabase/client"
 import {
     createGame,
@@ -25,10 +25,18 @@ import {
 import usePlayer from "@/features/gameplay/hooks/use-player"
 import { useRouter } from "next/navigation"
 import { RealtimeChannel } from "@supabase/supabase-js"
-import {Game} from '@/db/types'
+import { Game } from "@/db/types"
+import { useCountdown } from "usehooks-ts"
+import timerFormat from "@/utils/timer-format"
 
 export default function MultiplayerOptionsDialog() {
-    const MULTIPLAYER_PATH = 'play/multiplayer/'
+    const [count, { startCountdown, resetCountdown }] = useCountdown({
+        countStart: 0,
+        intervalMs: 1000,
+        isIncrement: true,
+        countStop:10000
+    })
+    const MULTIPLAYER_PATH = "play/multiplayer/"
     const [isSearching, setIsSearching] = useState(false)
     const router = useRouter()
 
@@ -63,30 +71,31 @@ export default function MultiplayerOptionsDialog() {
         const { type, data } = player
 
         async function handelSearch() {
+            startCountdown()
             try {
                 console.log("Starting search...")
-                
+
                 const startedGame = await startGameIfExists({
                     playerId: data.id,
                     isForGuests: type === "guest",
-                    timerOption : timer
+                    timerOption: timer,
                 })
 
                 if (!startedGame) {
                     console.log("No waiting game found, creating new one...")
-                    
+
                     const createdGame = await createGame({
                         playerId: data.id,
-                        timerOption : timer,
+                        timerOption: timer,
                         isForGuests: type === "guest",
                     })
-                    
+
                     setCreatedGameId(createdGame.id)
                     console.log("Created game with ID:", createdGame.id)
 
                     // Create unique channel name to avoid conflicts
                     const channelName = `game-searching-${createdGame.id}`
-                    
+
                     // Clean up any existing subscription
                     if (channelRef.current) {
                         channelRef.current.unsubscribe()
@@ -107,15 +116,15 @@ export default function MultiplayerOptionsDialog() {
                                 console.log("=== RECEIVED UPDATE ===")
                                 console.log("Payload:", payload)
                                 console.log("New game data:", payload.new)
-                                
+
                                 const newGame = payload.new as Game
-                                
+
                                 // Clean up subscription before redirecting
                                 if (channelRef.current) {
                                     channelRef.current.unsubscribe()
                                     channelRef.current = null
                                 }
-                                
+
                                 setIsSearching(false)
                                 router.push(MULTIPLAYER_PATH + newGame.id)
                             }
@@ -123,7 +132,9 @@ export default function MultiplayerOptionsDialog() {
                         .subscribe((status) => {
                             console.log("Subscription status:", status)
                             if (status === "SUBSCRIBED") {
-                                console.log("Subscription is now active and ready!")
+                                console.log(
+                                    "Subscription is now active and ready!"
+                                )
                             } else if (status === "CHANNEL_ERROR") {
                                 console.error("Subscription error")
                             } else if (status === "TIMED_OUT") {
@@ -135,7 +146,6 @@ export default function MultiplayerOptionsDialog() {
 
                     // Store channel reference for cleanup
                     channelRef.current = channel
-
                 } else {
                     console.log("Found existing game:", startedGame.id)
                     setIsSearching(false)
@@ -153,6 +163,7 @@ export default function MultiplayerOptionsDialog() {
 
     async function handleCancel() {
         if (isSearching) {
+            resetCountdown()
             console.log("Cancelling search...")
 
             // Clean up subscription
@@ -169,6 +180,8 @@ export default function MultiplayerOptionsDialog() {
             }
         }
     }
+
+    const searchTimer = useMemo(()=>timerFormat(count*1000),[count])
 
     return (
         <Dialog onOpenChange={handleCancel}>
@@ -189,9 +202,6 @@ export default function MultiplayerOptionsDialog() {
                         onChange={(op) => dispatch(changeTimer(op))}
                     />
                 </div>
-                {isSearching && (
-                    <p className="font-semibold">Searching a game ...</p>
-                )}
                 <DialogFooter>
                     {isSearching && (
                         <Button onClick={handleCancel}>Cancel</Button>
@@ -203,7 +213,7 @@ export default function MultiplayerOptionsDialog() {
                             setIsSearching(true)
                         }}
                     >
-                        Start
+                        {isSearching ? `Searching... [ ${searchTimer} ]` : "Start"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

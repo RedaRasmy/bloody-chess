@@ -36,6 +36,13 @@
       "when": 1752956546245,
       "tag": "0004_melted_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1752959514761,
+      "tag": "0005_gigantic_ultimates",
+      "breakpoints": true
     }
   ]
 }
