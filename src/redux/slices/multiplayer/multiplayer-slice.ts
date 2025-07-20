@@ -7,11 +7,13 @@ import {
     Piece,
     ChessTimerOption,
     MoveType,
+    CapturedPieces,
 } from "@/features/gameplay/types"
 import getPieces from "@/features/gameplay/utils/get-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Chess, Color, DEFAULT_POSITION } from "chess.js"
+import { Chess, Color, DEFAULT_POSITION, PieceSymbol } from "chess.js"
+import { calculatePoints, getCapturedPieces } from "@/features/gameplay/utils/get-captured-pieces"
 
 type ConnectionStatus = "connected" | "disconnected" | "reconnecting"
 
@@ -21,8 +23,20 @@ const initialState = {
     fen: DEFAULT_POSITION,
     history: [] as SMove[],
     players: {
-        white: { id: "", name: "", timeLeft: 3 * 60 * 1000 },
-        black: { id: "", name: "", timeLeft: 3 * 60 * 1000 },
+        white: {
+            id: "",
+            name: "",
+            timeLeft: 3 * 60 * 1000,
+            capturedPieces: [] as PieceSymbol[],
+            points : 0
+        },
+        black: {
+            id: "",
+            name: "",
+            timeLeft: 3 * 60 * 1000,
+            capturedPieces: [] as PieceSymbol[],
+            points  : 0,
+        },
     },
     connectionStatus: "connected" as ConnectionStatus,
     currentTurn: "w" as Color,
@@ -60,6 +74,7 @@ const multiplayerSlice = createSlice({
                 : game.black.username
             const playerColor = game.whiteId === playerId ? "w" : "b"
 
+            const capturedPieces = getCapturedPieces(game.moves)
             //
 
             state.gameId = game.id
@@ -71,11 +86,16 @@ const multiplayerSlice = createSlice({
                     id: game.whiteId,
                     name: whiteName,
                     timeLeft: game.whiteTimeLeft,
+                    capturedPieces : capturedPieces.black,
+                    points : calculatePoints(capturedPieces.black)
                 },
                 black: {
                     id: game.blackId,
                     name: blackName,
                     timeLeft: game.blackTimeLeft,
+                    capturedPieces : capturedPieces.white,
+                    points : calculatePoints(capturedPieces.white)
+
                 },
             }
             state.currentTurn = game.currentTurn
@@ -107,6 +127,10 @@ const multiplayerSlice = createSlice({
             state.isPlayerTurn = state.playerColor === game.currentTurn
             state.lastMoveAt = game.lastMoveAt
             state.legalMoves = getLegalMoves(chess)
+            state.pieces = getPieces(game.currentFen)
+        },
+        makeMove: (state, action: PayloadAction<MoveType>) => {
+            
         },
     },
 })

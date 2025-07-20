@@ -7,14 +7,22 @@ export function getGameoverCause({
     isStalemate,
     isThreefoldRepetition,
     isResign,
-    isTimeOut
-}:RootState['game']['gameOver']) {
+    isTimeOut,
+}: {
+    isCheckmate: boolean
+    isDrawByFiftyMoves: boolean
+    isInsufficientMaterial: boolean
+    isStalemate: boolean
+    isThreefoldRepetition: boolean
+    isResign: boolean
+    isTimeOut: boolean
+}) {
     if (isCheckmate) {
-        return 'Checkmate'
+        return "Checkmate"
     } else if (isTimeOut) {
         return "Timeout"
     } else if (isDrawByFiftyMoves) {
-        return 'Fifty moves rule'
+        return "Fifty moves rule"
     } else if (isInsufficientMaterial) {
         return "Insufficient material"
     } else if (isStalemate) {
@@ -23,5 +31,5 @@ export function getGameoverCause({
         return "Threefold repetition"
     } else if (isResign) {
         return "Resignation"
-    } 
+    }
 }

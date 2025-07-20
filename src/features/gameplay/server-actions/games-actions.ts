@@ -87,7 +87,7 @@ export async function getFullGame(id: string): Promise<FullGame> {
         where: (games, { eq }) => eq(games.id, id),
         with: {
             moves: {
-                orderBy: (moves, { asc }) => [asc(moves.moveNumber)],
+                orderBy: (moves, { asc }) => [asc(moves.createdAt)],
             },
         },
     })
