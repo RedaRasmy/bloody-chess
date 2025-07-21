@@ -32,6 +32,7 @@ const games = pgTable("games", {
     whiteTimeLeft: integer('white_time_left').notNull(), 
     blackTimeLeft: integer("black_time_left").notNull(), 
     lastMoveAt: timestamp("last_move_at"), 
+    gameStartedAt : timestamp("game_start_at"),
     ...timestamps,
 })
 export default games

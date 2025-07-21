@@ -43,6 +43,7 @@ export async function startGameIfExists({
             .set({
                 blackId: playerId,
                 status: "playing",
+                gameStartedAt : new Date()
             })
             .where(eq(games.id, newGame.id))
             .returning()

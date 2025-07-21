@@ -16,29 +16,29 @@ export async function addMove(move: MoveType) {
 
 export async function makeMove({
     gameId,
-    whiteTimeLeft,
-    blackTimeLeft,
-    lastMoveAt,
-    fen,
     move,
 }: {
     gameId: string
-    fen: string
     move: MoveType
-    whiteTimeLeft: number
-    blackTimeLeft: number
-    lastMoveAt: Date
-    // validate?: boolean
 }) {
-    const chess = new Chess(fen)
-    const currentTurn = chess.turn() // turn before the move
+    const game = await db.query.games.findFirst({
+        where: (games, { eq }) => eq(games.id, gameId),
+    })
+    if (!game) throw new Error("No game found with id: " + gameId)
+    const chess = new Chess(game.currentFen)
     const Move = chess.move(move)
 
+    const lastMoveAt = game.lastMoveAt || game.gameStartedAt
+    if (!lastMoveAt)
+        throw new Error(
+            "You cant make a move while game is not started yet : lastMoveAt and gameCreatedAt are null"
+        )
+
     const { black, white } = calculateTimeLeft({
-        blackTimeLeft,
-        whiteTimeLeft,
+        blackTimeLeft: game.whiteTimeLeft,
+        whiteTimeLeft: game.blackTimeLeft,
         lastMoveAt,
-        currentTurn,
+        currentTurn: game.currentTurn,
     })
 
     const gameOverCause = getGameoverCause({
@@ -71,7 +71,7 @@ export async function makeMove({
             result: isGameOver
                 ? isDraw
                     ? "draw"
-                    : currentTurn === "w"
+                    : game.currentTurn === "w"
                     ? "white_won"
                     : "black_won"
                 : null,
@@ -79,20 +79,23 @@ export async function makeMove({
         .where(eq(games.id, gameId))
 
     // add move
-    const newMoves = await db.insert(moves).values({
-        fenAfter: chess.fen(),
-        from: move.from,
-        to: move.to,
-        promotion: move.promotion as PromotionPiece,
-        moveTime: Date.now() - lastMoveDate.getTime(),
-        piece: Move.piece ,
-        gameId,
-        playerColor: currentTurn,
-        san: Move.san,
-        capturedPiece: Move.captured,
-        isCheck: chess.isCheck(),
-        isCheckmate: chess.isCheckmate(),
-    }).returning()
+    const newMoves = await db
+        .insert(moves)
+        .values({
+            fenAfter: chess.fen(),
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion as PromotionPiece,
+            moveTime: Date.now() - lastMoveDate.getTime(),
+            piece: Move.piece,
+            gameId,
+            playerColor: game.currentTurn,
+            san: Move.san,
+            capturedPiece: Move.captured,
+            isCheck: chess.isCheck(),
+            isCheckmate: chess.isCheckmate(),
+        })
+        .returning()
 
-    return { success: true, newMove : newMoves[0] }
+    return { success: true, newMove: newMoves[0] }
 }

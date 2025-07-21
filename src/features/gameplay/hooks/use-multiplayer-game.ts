@@ -53,8 +53,8 @@ export const useMultiplayerGame = (gameId: string) => {
             // Insert to Supabase
 
 
-            // const x = await makeMove({
-            //   whiteTimeLeft : gameState.whit
+            // const x = await makeMove({ 
+
             // })
 
               // const { error } = await supabase
