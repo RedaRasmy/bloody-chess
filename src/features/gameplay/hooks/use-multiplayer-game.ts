@@ -2,13 +2,31 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { supabase } from "@/utils/supabase/client"
 import { useEffect } from "react"
 import { MoveType } from "../types"
-import { sync } from "@/redux/slices/multiplayer/multiplayer-slice"
+import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { Game } from "@/db/types"
 import { makeMove } from "../server-actions/moves-actions"
+import { getFullGame } from "../server-actions/games-actions"
+import usePlayer from "./use-player"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
     const gameState = useAppSelector((state) => state.multiplayer)
+    const player = usePlayer()
+
+    useEffect(() => { 
+        if (gameState.gameId === '' && player.type !== 'loading') {
+            const {data} = player
+            async function setState(){
+                console.log('No gameId in state , setuping full game ...')
+                const game = await getFullGame(gameId)
+                dispatch(setup({
+                    game ,
+                    playerId : data.id
+                }))
+            }
+            setState()
+        }
+     },[player.type])
 
     useEffect(() => {
         // Subscribe to game updates

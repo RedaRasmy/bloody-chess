@@ -1,0 +1,1 @@
+ALTER TABLE "games" RENAME COLUMN "for_guests" TO "is_for_guests";

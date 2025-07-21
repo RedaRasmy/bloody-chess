@@ -2,38 +2,42 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import usePlayer from "./use-player"
 import { useCountdown } from "usehooks-ts"
 import { RealtimeChannel } from "@supabase/supabase-js"
-import { createGame, deleteGameById, startGameIfExists } from "../server-actions/games-actions"
+import {
+    createGame,
+    deleteGameById,
+    startGameIfExists,
+} from "../server-actions/games-actions"
 import { ChessTimerOption } from "../types"
 import { supabase } from "@/utils/supabase/client"
-import { Game } from "@/db/types"
+import {  Guest, Player, StartedGame } from "@/db/types"
 import isError from "@/utils/is-error"
 import timerFormat from "@/utils/timer-format"
+import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 
 export default function useGameSearching({
     timerOption,
-    maxDuration ,
-    onGameFound ,
-    onGameCanceled
-}:{
-    timerOption : ChessTimerOption
+    maxDuration,
+    onGameFound,
+    onGameCanceled,
+}: {
+    timerOption: ChessTimerOption
     maxDuration?: number
-    onGameFound : (game:Game) => void
-    onGameCanceled?: (gameId:string) => void
+    onGameFound: (game: StartedGame,player:{
+        type : 'player' | "guest",
+        data : Player | Guest
+    }) => Promise<void>
+    onGameCanceled?: (gameId: string) => Promise<void>
 }) {
     const [count, { startCountdown, resetCountdown }] = useCountdown({
         countStart: 0,
         intervalMs: 1000,
         isIncrement: true,
-        countStop: maxDuration || Infinity
+        countStop: maxDuration || Infinity,
     })
-    const MULTIPLAYER_PATH = "play/multiplayer/"
     const [isSearching, setIsSearching] = useState(false)
-    // const router = useRouter()
 
-    const [error, setError] = useState<null|Error>(null)
+    const [error, setError] = useState<null | Error>(null)
     const [createdGameId, setCreatedGameId] = useState<string | null>(null)
-    // const dispatch = useAppDispatch()
-    // const { timer } = useAppSelector(selectMultiplayerOptions)
     const player = usePlayer()
     const channelRef = useRef<RealtimeChannel>(null)
     const hasSearched = useRef(false)
@@ -105,10 +109,12 @@ export default function useGameSearching({
                             (payload) => {
                                 console.log("=== RECEIVED UPDATE ===")
                                 console.log("Payload:", payload)
+
+                        
+                                
+                                const newGame = supabaseToTypescript<StartedGame>(payload.new)
                                 console.log("New game data:", payload.new)
-
-                                const newGame = payload.new as Game
-
+                                
                                 // Clean up subscription before redirecting
                                 if (channelRef.current) {
                                     channelRef.current.unsubscribe()
@@ -116,11 +122,7 @@ export default function useGameSearching({
                                 }
 
                                 setIsSearching(false)
-                                onGameFound(newGame)
-                                // console.log('after router.push')
-
-                                // router.push(MULTIPLAYER_PATH + newGame.id)
-                                // console.log('after router.push')
+                                onGameFound(newGame,{type,data})
                             }
                         )
                         .subscribe((status) => {
@@ -141,10 +143,8 @@ export default function useGameSearching({
                     // Store channel reference for cleanup
                     channelRef.current = channel
                 } else {
-                    console.log("Found existing game:", startedGame.id)
                     setIsSearching(false)
-                    onGameFound(startedGame)
-                    // router.push(MULTIPLAYER_PATH + startedGame.id)
+                    await onGameFound(startedGame,{type,data})
                 }
             } catch (error) {
                 console.error("Search error:", error)
@@ -174,7 +174,7 @@ export default function useGameSearching({
             hasSearched.current = false
             if (createdGameId) {
                 await deleteGameById(createdGameId)
-                console.log('game deleted')
+                console.log("game deleted")
                 onGameCanceled?.(createdGameId)
                 setCreatedGameId(null)
             }
@@ -185,8 +185,7 @@ export default function useGameSearching({
         setIsSearching(true)
     }
 
-    const searchTimer = useMemo(()=>timerFormat(count*1000),[count])
-    
+    const searchTimer = useMemo(() => timerFormat(count * 1000), [count])
 
     return {
         error,
@@ -194,7 +193,6 @@ export default function useGameSearching({
         searchTimer,
         isSearching,
         cancelSearch,
-        startSearch
+        startSearch,
     }
-
 }

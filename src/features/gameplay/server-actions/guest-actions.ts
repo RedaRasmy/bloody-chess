@@ -7,6 +7,8 @@ export async function getGuest(id:string) {
     const guest = await db.query.guests.findFirst({
         where : (guests,{eq}) => eq(guests.id , id)
     })
+    if (!guest) throw new Error("No guest found with id="+id)
+
     return guest
 }
 

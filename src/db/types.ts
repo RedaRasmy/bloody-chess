@@ -7,11 +7,13 @@ export type Game = InferSelectModel<typeof s.games>
 export type Guest = InferSelectModel<typeof s.guests>
 export type SMove = InferSelectModel<typeof s.moves>
 
-export type StartedGame = Game & {
-    whiteId : string
-    blackId : string
-}
-
+export type StartedGame = Prettify<
+    Game & {
+        whiteId: string
+        blackId: string
+        gameStartedAt: Date
+    }
+>
 
 export type FullGame = Prettify<
     | (StartedGame & {

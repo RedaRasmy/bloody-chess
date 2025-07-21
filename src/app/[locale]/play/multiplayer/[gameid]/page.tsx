@@ -19,10 +19,9 @@ export default function Page() {
     const dispatch = useAppDispatch()
     const {gameState : {
         activePiece,
-        currentTurn,
         playerColor,
         pieces,
-        gameOver : {isGameOver},
+        // gameOver : {isGameOver},
         players : {
             white,
             black
@@ -102,7 +101,7 @@ export default function Page() {
                     PlayerSection={
                         <PlayerSection
                             score={score > 0 ? score : 0}
-                            username="Guest"
+                            username={player.name}
                             timer={timer}
                             capturedPieces={player.capturedPieces}
                             opponentColor={opponentColor}

@@ -8,10 +8,12 @@ import { eq } from "drizzle-orm"
 import { calculateTimeLeft } from "../utils/calculate-time-left"
 import { getGameoverCause } from "../utils/get-gameover-cause"
 
-export async function addMove(move: MoveType) {
-    // const newMove = await db.insert(moves).values({
-    //     moveNumber
-    // })
+export async function getMoves(gameId: string) {
+    const gameMoves = await db.query.moves.findMany({
+        where : (moves,{eq}) => eq(moves.gameId,gameId),
+        orderBy: (moves, { asc }) => [asc(moves.createdAt)]
+    })
+    return gameMoves
 }
 
 export async function makeMove({

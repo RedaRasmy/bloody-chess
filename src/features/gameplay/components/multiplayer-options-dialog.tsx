@@ -17,21 +17,61 @@ import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
 import { useRouter } from "next/navigation"
 import useGameSearching from "../hooks/use-game-searching"
+import { getGuest } from "../server-actions/guest-actions"
+import { getMoves } from "../server-actions/moves-actions"
+import { setup } from "@/redux/slices/multiplayer/multiplayer-slice"
+import { getPlayer } from "../server-actions/player-actions"
 
 export default function MultiplayerOptionsDialog() {
     const MULTIPLAYER_PATH = "play/multiplayer/"
     const router = useRouter()
     const { timer } = useAppSelector(selectMultiplayerOptions)
+    const dispatch = useAppDispatch()
 
     const { searchTimer, isSearching, startSearch, cancelSearch } =
         useGameSearching({
             timerOption: timer,
-            onGameFound: (game) => {
+            onGameFound: async (game, { type, data }) => {
                 router.push(MULTIPLAYER_PATH + game.id)
+                // setup the game
+                console.log('setuping the full game...')
+                console.log('the game getting from onGameFound : ',game)
+                console.log("isForGuests = " +game.isForGuests)
+                if (game.isForGuests) {
+                    console.log("fetching guests ...")
+                    const white = await getGuest(game.whiteId)
+                    const black = await getGuest(game.blackId)
+                    dispatch(
+                        setup({
+                            game: {
+                                ...game,
+                                isForGuests: true,
+                                white,
+                                black,
+                                moves : [], // no moves yet
+                            },
+                            playerId: data.id,
+                        })
+                    )
+                } else {
+                    console.log("fetching players ...")
+                    const white = await getPlayer(game.whiteId)
+                    const black = await getPlayer(game.blackId)
+                    dispatch(
+                        setup({
+                            game: {
+                                ...game,
+                                isForGuests: false,
+                                white,
+                                black,
+                                moves : [], // no moves yet
+                            },
+                            playerId: data.id,
+                        })
+                    )
+                }
             },
         })
-
-    const dispatch = useAppDispatch()
 
     return (
         <Dialog onOpenChange={cancelSearch}>

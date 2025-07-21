@@ -22,7 +22,7 @@ const games = pgTable("games", {
     id: uuid().primaryKey().defaultRandom(),
     whiteId: uuid("white_id"),
     blackId: uuid("black_id"),
-    isForGuests: boolean("for_guests").notNull(),
+    isForGuests: boolean("is_for_guests").notNull(),
     currentFen: text("current_fen").default(DEFAULT_POSITION).notNull(),
     result: resultEnum(),
     gameOverReason: gameOverReasonsEnum("gameover_reason"),

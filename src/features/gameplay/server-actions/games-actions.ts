@@ -5,7 +5,9 @@ import { games } from "@/db/schema"
 import { ChessTimerOption } from "@/features/gameplay/types"
 import { eq } from "drizzle-orm"
 import { parseTimer } from "../utils/parse-timer"
-import { FullGame } from "@/db/types"
+import { FullGame, StartedGame } from "@/db/types"
+import { getGuest } from "./guest-actions"
+import { getPlayer } from "./player-actions"
 
 // export async function getNewGame() {
 //     const newGame = await db.query.games.findFirst({
@@ -38,17 +40,18 @@ export async function startGameIfExists({
     })
 
     if (newGame) {
-        const startedGame = await db
+        const startedGames = await db
             .update(games)
             .set({
                 blackId: playerId,
                 status: "playing",
-                gameStartedAt : new Date()
+                gameStartedAt: new Date(),
             })
             .where(eq(games.id, newGame.id))
             .returning()
 
-        return startedGame[0]
+        const startedGame = startedGames[0]
+        return startedGame as StartedGame
     }
 }
 
@@ -94,43 +97,30 @@ export async function getFullGame(id: string): Promise<FullGame> {
     })
 
     if (!game) throw new Error("No game found")
-    // if (!game.whiteId || !game.blackId) throw new Error("Game not started yet!")
 
-    const { whiteId, blackId } = game
-    if (!whiteId || !blackId) throw new Error("players should be both in game")
+    const { whiteId, blackId ,gameStartedAt } = game
+    if (!whiteId || !blackId || !gameStartedAt) throw new Error("Game not started yet!")
 
     if (game.isForGuests) {
-        const white = await db.query.guests.findFirst({
-            where: (guests, { eq }) => eq(guests.id, whiteId),
-        })
-        const black = await db.query.guests.findFirst({
-            where: (guests, { eq }) => eq(guests.id, blackId),
-        })
-        if (!white || !black)
-            throw new Error("players should be both in database [table:guests]")
+        const white = await getGuest(whiteId)
+        const black = await getGuest(blackId)
         return {
             ...game,
-            whiteId ,
+            whiteId,
             blackId,
+            gameStartedAt,
             isForGuests: true,
             white,
             black,
         }
     } else {
-        const white = await db.query.players.findFirst({
-            where: (players, { eq }) => eq(players.id, whiteId),
-        })
-        const black = await db.query.players.findFirst({
-            where: (players, { eq }) => eq(players.id, blackId),
-        })
-        if (!white || !black)
-            throw new Error(
-                "players should be both in database [table:players]"
-            )
+        const white = await getPlayer(whiteId)
+        const black = await getPlayer(blackId)
         return {
             ...game,
             whiteId,
             blackId,
+            gameStartedAt,
             isForGuests: false,
             white,
             black,
