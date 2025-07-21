@@ -35,6 +35,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     filter: `game_id=eq.${gameId}`,
                 },
                 (payload) => {
+                    
                     //   dispatch(addMove(payload.new))
                 }
             )
@@ -52,24 +53,11 @@ export const useMultiplayerGame = (gameId: string) => {
         try {
             // Insert to Supabase
 
+            const response = await makeMove({
+                move,
+                gameId,
+            })
 
-            // const x = await makeMove({ 
-
-            // })
-
-              // const { error } = await supabase
-              //   .from('moves')
-              //   .insert({
-              //     game_id: gameId,
-              //     from_square: move.from,
-              //     to_square: move.to,
-              //     player_id: gameState.currentPlayerId,
-              //     fen_after: newFen
-              //   })
-              // if (error) {
-              //   Rollback optimistic update
-              //   dispatch(rollbackMove())
-              // }
         } catch (err) {
             //   dispatch(rollbackMove())
         }

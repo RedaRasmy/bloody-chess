@@ -14,6 +14,7 @@ import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Chess, Color, DEFAULT_POSITION, PieceSymbol } from "chess.js"
 import { calculatePoints, getCapturedPieces } from "@/features/gameplay/utils/get-captured-pieces"
+import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 
 type ConnectionStatus = "connected" | "disconnected" | "reconnecting"
 
@@ -27,14 +28,14 @@ const initialState = {
             id: "",
             name: "",
             timeLeft: 3 * 60 * 1000,
-            capturedPieces: [] as PieceSymbol[],
+            capturedPieces: initialCaputeredPieces.w as CapturedPieces['w'],
             points : 0
         },
         black: {
             id: "",
             name: "",
             timeLeft: 3 * 60 * 1000,
-            capturedPieces: [] as PieceSymbol[],
+            capturedPieces: initialCaputeredPieces.b as CapturedPieces['b'],
             points  : 0,
         },
     },
@@ -86,15 +87,15 @@ const multiplayerSlice = createSlice({
                     id: game.whiteId,
                     name: whiteName,
                     timeLeft: game.whiteTimeLeft,
-                    capturedPieces : capturedPieces.black,
-                    points : calculatePoints(capturedPieces.black)
+                    capturedPieces : capturedPieces.b,
+                    points : calculatePoints(capturedPieces.b)
                 },
                 black: {
                     id: game.blackId,
                     name: blackName,
                     timeLeft: game.blackTimeLeft,
-                    capturedPieces : capturedPieces.white,
-                    points : calculatePoints(capturedPieces.white)
+                    capturedPieces : capturedPieces.w,
+                    points : calculatePoints(capturedPieces.w)
 
                 },
             }

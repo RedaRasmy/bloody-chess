@@ -22,7 +22,7 @@ export default function ChessBoard({
     onMoveCancel,
     legalMoves,
     lastMove,
-    preMoves,
+    preMoves=[],
     isPlayerTurn,
     activePiece,
     animatedMoves
@@ -33,9 +33,9 @@ export default function ChessBoard({
     onMoveStart: (piece: Exclude<BoardElement, null>) => void
     onMoveCancel?: () => void
     onMoveEnd: (move: MoveType) => void
-    lastMove: MoveType | undefined
+    lastMove?: MoveType | undefined
     legalMoves : LegalMoves
-    preMoves: MoveType[]
+    preMoves?: MoveType[]
     isPlayerTurn: boolean,
     animatedMoves : boolean
 }) {
