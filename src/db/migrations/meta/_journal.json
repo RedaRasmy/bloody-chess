@@ -43,6 +43,13 @@
       "when": 1752959514761,
       "tag": "0005_gigantic_ultimates",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1753106178270,
+      "tag": "0006_gigantic_karen_page",
+      "breakpoints": true
     }
   ]
 }

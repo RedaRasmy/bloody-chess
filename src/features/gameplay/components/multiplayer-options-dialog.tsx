@@ -15,176 +15,26 @@ import {
 } from "@/redux/slices/game-options"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
-import { useState, useEffect, useRef, useMemo } from "react"
-import { supabase } from "@/utils/supabase/client"
-import {
-    createGame,
-    startGameIfExists,
-    deleteGameById,
-} from "../server-actions/games-actions"
-import usePlayer from "@/features/gameplay/hooks/use-player"
 import { useRouter } from "next/navigation"
-import { RealtimeChannel } from "@supabase/supabase-js"
-import { Game } from "@/db/types"
-import { useCountdown } from "usehooks-ts"
-import timerFormat from "@/utils/timer-format"
+import useGameSearching from "../hooks/use-game-searching"
 
 export default function MultiplayerOptionsDialog() {
-    const [count, { startCountdown, resetCountdown }] = useCountdown({
-        countStart: 0,
-        intervalMs: 1000,
-        isIncrement: true,
-        countStop:10000
-    })
     const MULTIPLAYER_PATH = "play/multiplayer/"
-    const [isSearching, setIsSearching] = useState(false)
     const router = useRouter()
-
-    // const [gameFound, setGameFound] = useState(false)
-    const [createdGameId, setCreatedGameId] = useState<string | null>(null)
-    const dispatch = useAppDispatch()
     const { timer } = useAppSelector(selectMultiplayerOptions)
-    const player = usePlayer()
-    const channelRef = useRef<RealtimeChannel>(null)
-    const hasSearched = useRef(false)
 
-    // Cleanup subscription on unmount
-    useEffect(() => {
-        return () => {
-            if (channelRef.current) {
-                console.log("Unsubscribing from channel")
-                channelRef.current.unsubscribe()
-                channelRef.current = null
-            }
-        }
-    }, [])
+    const { searchTimer, isSearching, startSearch, cancelSearch } =
+        useGameSearching({
+            timerOption: timer,
+            onGameFound: (game) => {
+                router.push(MULTIPLAYER_PATH + game.id)
+            },
+        })
 
-    useEffect(() => {
-        if (player.type === "loading") return
-        if (!isSearching) {
-            hasSearched.current = false // Reset when not searching
-            return
-        }
-        if (hasSearched.current) return // Prevent multiple searches
-
-        hasSearched.current = true
-        const { type, data } = player
-
-        async function handelSearch() {
-            startCountdown()
-            try {
-                console.log("Starting search...")
-
-                const startedGame = await startGameIfExists({
-                    playerId: data.id,
-                    isForGuests: type === "guest",
-                    timerOption: timer,
-                })
-
-                if (!startedGame) {
-                    console.log("No waiting game found, creating new one...")
-
-                    const createdGame = await createGame({
-                        playerId: data.id,
-                        timerOption: timer,
-                        isForGuests: type === "guest",
-                    })
-
-                    setCreatedGameId(createdGame.id)
-                    console.log("Created game with ID:", createdGame.id)
-
-                    // Create unique channel name to avoid conflicts
-                    const channelName = `game-searching-${createdGame.id}`
-
-                    // Clean up any existing subscription
-                    if (channelRef.current) {
-                        channelRef.current.unsubscribe()
-                    }
-
-                    // Create new subscription
-                    const channel = supabase
-                        .channel(channelName)
-                        .on(
-                            "postgres_changes",
-                            {
-                                event: "*",
-                                schema: "public",
-                                table: "games",
-                                filter: `id=eq.${createdGame.id}`,
-                            },
-                            (payload) => {
-                                console.log("=== RECEIVED UPDATE ===")
-                                console.log("Payload:", payload)
-                                console.log("New game data:", payload.new)
-
-                                const newGame = payload.new as Game
-
-                                // Clean up subscription before redirecting
-                                if (channelRef.current) {
-                                    channelRef.current.unsubscribe()
-                                    channelRef.current = null
-                                }
-
-                                setIsSearching(false)
-                                router.push(MULTIPLAYER_PATH + newGame.id)
-                            }
-                        )
-                        .subscribe((status) => {
-                            console.log("Subscription status:", status)
-                            if (status === "SUBSCRIBED") {
-                                console.log(
-                                    "Subscription is now active and ready!"
-                                )
-                            } else if (status === "CHANNEL_ERROR") {
-                                console.error("Subscription error")
-                            } else if (status === "TIMED_OUT") {
-                                console.error("Subscription timed out")
-                            } else if (status === "CLOSED") {
-                                console.log("Subscription closed")
-                            }
-                        })
-
-                    // Store channel reference for cleanup
-                    channelRef.current = channel
-                } else {
-                    console.log("Found existing game:", startedGame.id)
-                    setIsSearching(false)
-                    router.push(MULTIPLAYER_PATH + startedGame.id)
-                }
-            } catch (error) {
-                console.error("Search error:", error)
-                setIsSearching(false)
-                hasSearched.current = false
-            }
-        }
-
-        handelSearch()
-    }, [isSearching, player.type, timer])
-
-    async function handleCancel() {
-        if (isSearching) {
-            resetCountdown()
-            console.log("Cancelling search...")
-
-            // Clean up subscription
-            if (channelRef.current) {
-                channelRef.current.unsubscribe()
-                channelRef.current = null
-            }
-
-            setIsSearching(false)
-            hasSearched.current = false
-            if (createdGameId) {
-                await deleteGameById(createdGameId)
-                setCreatedGameId(null)
-            }
-        }
-    }
-
-    const searchTimer = useMemo(()=>timerFormat(count*1000),[count])
+    const dispatch = useAppDispatch()
 
     return (
-        <Dialog onOpenChange={handleCancel}>
+        <Dialog onOpenChange={cancelSearch}>
             <DialogTrigger asChild>
                 <Button className="lg:w-sm w-50 py-6 cursor-pointer">
                     Play Online
@@ -204,16 +54,16 @@ export default function MultiplayerOptionsDialog() {
                 </div>
                 <DialogFooter>
                     {isSearching && (
-                        <Button onClick={handleCancel}>Cancel</Button>
+                        <Button onClick={cancelSearch}>Cancel</Button>
                     )}
                     <Button
                         disabled={isSearching}
                         className=""
-                        onClick={() => {
-                            setIsSearching(true)
-                        }}
+                        onClick={startSearch}
                     >
-                        {isSearching ? `Searching... [ ${searchTimer} ]` : "Start"}
+                        {isSearching
+                            ? `Searching... [ ${searchTimer} ]`
+                            : "Start"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

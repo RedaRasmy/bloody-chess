@@ -1,3 +1,4 @@
+'use client'
 import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
 import GameDetails from "@/features/gameplay/components/game-details"
 import GameLayout from "@/features/gameplay/components/game-layout"
