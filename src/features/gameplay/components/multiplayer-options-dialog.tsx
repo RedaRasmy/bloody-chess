@@ -18,7 +18,6 @@ import { TIMER_OPTIONS } from "../utils/constantes"
 import { useRouter } from "next/navigation"
 import useGameSearching from "../hooks/use-game-searching"
 import { getGuest } from "../server-actions/guest-actions"
-import { getMoves } from "../server-actions/moves-actions"
 import { setup } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { getPlayer } from "../server-actions/player-actions"
 
@@ -31,16 +30,17 @@ export default function MultiplayerOptionsDialog() {
     const { searchTimer, isSearching, startSearch, cancelSearch } =
         useGameSearching({
             timerOption: timer,
-            onGameFound: async (game, { type, data }) => {
+            onGameFound: async (game, { data }) => {
                 router.push(MULTIPLAYER_PATH + game.id)
                 // setup the game
                 console.log('setuping the full game...')
                 console.log('the game getting from onGameFound : ',game)
                 console.log("isForGuests = " +game.isForGuests)
-                if (game.isForGuests) {
+                const playerId = data.id
+                if ("displayName" in data) { // if guest
                     console.log("fetching guests ...")
-                    const white = await getGuest(game.whiteId)
-                    const black = await getGuest(game.blackId)
+                    const white = playerId === game.whiteId ? data : await getGuest(game.whiteId)
+                    const black = playerId === game.blackId ? data : await getGuest(game.blackId)
                     dispatch(
                         setup({
                             game: {
@@ -55,8 +55,8 @@ export default function MultiplayerOptionsDialog() {
                     )
                 } else {
                     console.log("fetching players ...")
-                    const white = await getPlayer(game.whiteId)
-                    const black = await getPlayer(game.blackId)
+                    const white = playerId === game.whiteId ? data : await getPlayer(game.whiteId)
+                    const black = playerId === game.whiteId ? data : await getPlayer(game.blackId)
                     dispatch(
                         setup({
                             game: {
