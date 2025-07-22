@@ -78,35 +78,7 @@ export default function Page() {
                             timer={timer}
                         />
                     }
-                    ChessBoard={
-                        <ChessBoard
-                            lastMove={lastMove}
-                            pieces={pieces}
-                            playerColor={playerColor}
-                            onMoveStart={(piece) => {
-                                if (isRedoable) {
-                                    // do nothing for now
-                                    // maybe I should reset the latest state ?
-                                } else {
-                                    dispatch(select(piece))
-                                }
-                            }}
-                            activePiece={activePiece}
-                            legalMoves={legalMoves}
-                            onMoveEnd={(mv) => {
-                                if (!isPlayerTurn) {
-                                    dispatch(premove(mv))
-                                } else {
-                                    dispatch(move(mv))
-                                    const chess = new Chess(fen)
-                                    const theMove = chess.move(mv)
-                                    playMoveSound(theMove, chess.inCheck())
-                                }
-                            }}
-                            preMoves={preMoves}
-                            isPlayerTurn={isPlayerTurn}
-                        />
-                    }
+                    ChessBoard={<ChessBoard />}
                     PlayerSection={
                         <PlayerSection
                             score={score > 0 ? score : 0}

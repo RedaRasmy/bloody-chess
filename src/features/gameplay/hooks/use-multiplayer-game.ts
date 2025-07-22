@@ -10,7 +10,7 @@ import usePlayer from "./use-player"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
-    const gameState = useAppSelector((state) => state.multiplayer)
+    const gameState = useAppSelector((state) => state.game)
     const player = usePlayer()
 
     useEffect(() => { 

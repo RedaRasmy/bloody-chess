@@ -4,16 +4,16 @@ import { Square } from "chess.js"
 
 export default function ChessSquare({
     squareName,
-    isLastMove,
+    isLastMove = false,
     onClick,
     isTarget,
-    isPreMove,
+    isPreMove = false,
 }: {
     squareName: Square
-    isLastMove: boolean
+    isLastMove?: boolean
     onClick: (square: Square) => void
     isTarget: boolean
-    isPreMove: boolean
+    isPreMove?: boolean
 }) {
     const color = getSquareColor(squareName)
 

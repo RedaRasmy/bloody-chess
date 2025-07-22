@@ -38,7 +38,6 @@ const initialState = {
     currentTurn: "w" as Color,
     playerColor: "w" as Color,
     currentMoveIndex: -1,
-    capturedPieces: initialCaputeredPieces,
     legalMoves: getLegalMoves(new Chess()),
     pieces: getInitialPieces(),
     activePiece: null as BoardElement,
@@ -136,12 +135,20 @@ const gameSlice = createSlice({
             state.players.white.extraPoints = white.extraPoints
             state.players.black.extraPoints = black.extraPoints
 
-            state.capturedPieces = updateCapturedPieces({
+            ////
+            const {w,b} = updateCapturedPieces({
                 captured: validatedMove.captured,
-                capturedPieces: state.capturedPieces,
+                capturedPieces: {
+                    w: state.players.white.capturedPieces,
+                    b: state.players.black.capturedPieces,
+                },
                 movePlayer: validatedMove.color,
             })
+            state.players.white.capturedPieces = w
+            state.players.black.capturedPieces = b
+            ////
 
+            // udpate fen
             state.fen = chess.fen()
 
             // i should delete this later ?
