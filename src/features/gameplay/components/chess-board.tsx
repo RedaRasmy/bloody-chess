@@ -12,7 +12,9 @@ import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 import useChessBoardWidth from "@/hooks/useChessBoardWidth"
 import getSquares from "../utils/get-squares"
+import { useAppSelector } from "@/redux/hooks"
 const ChessPiece = dynamic(() => import("./chess-piece"))
+import {selectAnimationSetting} from '@/redux/slices/settings'
 
 export default function ChessBoard({
     pieces,
@@ -25,7 +27,6 @@ export default function ChessBoard({
     preMoves=[],
     isPlayerTurn,
     activePiece,
-    animatedMoves
 }: {
     activePiece : BoardElement
     pieces: Piece[]
@@ -37,8 +38,8 @@ export default function ChessBoard({
     legalMoves : LegalMoves
     preMoves?: MoveType[]
     isPlayerTurn: boolean,
-    animatedMoves : boolean
 }) {
+    const {enabled:animatedMoves,durationMs} = useAppSelector((selectAnimationSetting('moves')))
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
     const allowedSquares = activePiece ? legalMoves[activePiece.square]?.map(mv=>mv.to) ?? [] : []
@@ -175,6 +176,7 @@ export default function ChessBoard({
                         return (
                             <ChessPiece
                                 animated={animatedMoves}
+                                durationMs={durationMs}
                                 reversed={playerColor === "b"}
                                 boardWidth={boardWidth}
                                 key={piece.id}

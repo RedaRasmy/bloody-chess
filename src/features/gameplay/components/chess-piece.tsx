@@ -5,7 +5,7 @@ import { BoardElement } from "../types"
 import { useEffect, useState } from "react"
 import { squareToCoords } from "../utils/square-to-coords"
 import { motion } from "motion/react"
-import ChessPieceImage from './chess-piece-image'
+import ChessPieceImage from "./chess-piece-image"
 
 export default function ChessPiece({
     data,
@@ -13,14 +13,16 @@ export default function ChessPiece({
     boardWidth,
     reversed,
     animated,
+    durationMs = 200,
 }: {
     data: Exclude<BoardElement, null>
     className?: string
     boardWidth: number
     reversed: boolean
     animated: boolean
+    durationMs?: number
 }) {
-    const {square,type,color} = data
+    const { square, type, color } = data
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
             id: square,
@@ -70,9 +72,10 @@ export default function ChessPiece({
         >
             <ChessPieceImage
                 piece={{
-                    type,color
+                    type,
+                    color,
                 }}
-                size={boardWidth/8}
+                size={boardWidth / 8}
             />
         </div>
     )
@@ -85,7 +88,7 @@ export default function ChessPiece({
         <motion.div
             animate={targetPosition}
             transition={{
-                duration: justDropped ? 0 : 0.2, // Skip animation if just dropped
+                duration: justDropped ? 0 : durationMs / 1000, // Skip animation if just dropped
             }}
             className={cn("absolute z-10", {
                 "z-30": isDragging,

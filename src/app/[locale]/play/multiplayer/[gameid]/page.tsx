@@ -5,9 +5,8 @@ import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 import PlayerSection from "@/features/gameplay/components/player-section"
 import { useMultiplayerGame } from "@/features/gameplay/hooks/use-multiplayer-game"
-import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+// import { useAppDispatch } from "@/redux/hooks"
 import { useParams } from "next/navigation"
-import {selectShouldAnimate} from '@/redux/slices/settings'
 import { parseTimer } from "@/features/gameplay/utils/parse-timer"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import ChessBoard from "@/features/gameplay/components/chess-board"
@@ -16,7 +15,7 @@ import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 export default function Page() {
     const params = useParams()
     const gameId = params.id as string
-    const dispatch = useAppDispatch()
+    // const dispatch = useAppDispatch()
     const {gameState : {
         activePiece,
         playerColor,
@@ -45,7 +44,6 @@ export default function Page() {
     // const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     // const preMoves = useAppSelector(selectPreMoves)
     // const activePiece = useAppSelector(selectActivePiece)
-    const enabledMovesAnimation = useAppSelector(selectShouldAnimate("moves"))
 
     const timer = parseTimer(timerOption)
     const opponentColor = oppositeColor(playerColor)
@@ -70,7 +68,6 @@ export default function Page() {
                     }
                     ChessBoard={
                         <ChessBoard
-                            animatedMoves={enabledMovesAnimation}
                             // lastMove={lastMove}
                             pieces={pieces}
                             playerColor={playerColor}

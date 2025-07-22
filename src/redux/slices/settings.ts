@@ -1,6 +1,6 @@
 import { createSlice, createSelector } from "@reduxjs/toolkit"
 import { RootState } from "../store"
-import { Primitive , List} from "@/utils/global-types"
+import { Primitive, List } from "@/utils/global-types"
 
 type SettingValue = {
     enabled: boolean
@@ -9,10 +9,13 @@ type SettingValue = {
 type Settings = Record<string, SettingValue>
 
 const initialState = {
-  animation: {
-    enabled: true as boolean,
-    moves: true as boolean,
-  },
+    animation: {
+        enabled: true ,
+        moves: {
+            enabled: true ,
+            durationMs: 200,
+        },
+    },
 } satisfies Settings
 
 const settings = createSlice({
@@ -49,6 +52,12 @@ export const selectEnableAnimations = (state: RootState) =>
 export const selectShouldAnimate = (animationType: Type<"animation">) =>
     createSelector(
         [selectEnableAnimations, selectAnimationSettings],
-        (globalEnabled, animation) =>
-            globalEnabled && animation[animationType] === true
+        (globalEnabled, animation) => {
+            // const isSimple = typeof animation[animationType] === 'boolean'
+            return globalEnabled && animation[animationType].enabled === true
+        }
     )
+
+export const selectAnimationSetting =
+    (animationType: Type<"animation">) => (state: RootState) =>
+        state.settings.animation[animationType]
