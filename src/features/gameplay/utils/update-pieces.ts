@@ -1,10 +1,12 @@
 import { Square } from "chess.js"
-import { DetailedMove, Piece } from "../types"
+import { DetailedMove, DetailedPiece } from "../types"
 import { rank } from "./rank-file"
 
-export default function updatePieces(piecesToUpdate: Piece[], move: DetailedMove,reversed = false): Piece[] {
+export default function updatePieces(piecesToUpdate: DetailedPiece[], move: DetailedMove,reversed = false): DetailedPiece[] {
     const {from ,to ,promotion} = move
     const pieces = [...piecesToUpdate]
+
+
 
     if (reversed) {
         // Reverse the move

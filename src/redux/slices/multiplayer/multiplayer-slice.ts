@@ -1,60 +1,15 @@
-import { FullGame, Game, SMove } from "@/db/types"
-import {
-    BoardElement,
-    DetailedMove,
-    GameOverReason,
-    LegalMoves,
-    Piece,
-    ChessTimerOption,
-    MoveType,
-    CapturedPieces,
-} from "@/features/gameplay/types"
-import getPieces from "@/features/gameplay/utils/get-pieces"
-import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
+import { FullGame, Game } from "@/db/types"
+import { MoveType } from "@/features/gameplay/types"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Chess, Color, DEFAULT_POSITION, PieceSymbol } from "chess.js"
-import { calculatePoints, getCapturedPieces } from "@/features/gameplay/utils/get-captured-pieces"
-import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 
 type ConnectionStatus = "connected" | "disconnected" | "reconnecting"
 
 const initialState = {
     gameId: "",
-    timerOption: "blitz 3+0" as ChessTimerOption,
-    fen: DEFAULT_POSITION,
-    history: [] as SMove[],
-    players: {
-        white: {
-            id: "",
-            name: "",
-            timeLeft: 3 * 60 * 1000,
-            capturedPieces: initialCaputeredPieces.w as CapturedPieces['w'],
-            points : 0
-        },
-        black: {
-            id: "",
-            name: "",
-            timeLeft: 3 * 60 * 1000,
-            capturedPieces: initialCaputeredPieces.b as CapturedPieces['b'],
-            points  : 0,
-        },
-    },
+    whiteId: "",
+    blackId: "",
     connectionStatus: "connected" as ConnectionStatus,
-    currentTurn: "w" as Color,
-    gameOver: {
-        isGameOver: false,
-        winner: undefined as Color | undefined,
-        isDraw: false,
-        reason: undefined as GameOverReason | undefined,
-    },
-    isPlayerTurn: true,
-    lastMoveAt: null as Date | null,
-    // lastSyncedMoveIndex: -1,
-    legalMoves: {} as LegalMoves,
-    pieces: getPieces(),
-    playerColor: "w" as Color,
-    /// CLIENT ONLY
-    activePiece: null as BoardElement,
+
     pendingMoves: [] as MoveType[],
 }
 
@@ -66,73 +21,14 @@ const multiplayerSlice = createSlice({
             state,
             action: PayloadAction<{ game: FullGame; playerId: string }>
         ) => {
-            const { game, playerId } = action.payload
-            const whiteName = game.isForGuests
-                ? game.white.displayName
-                : game.white.username
-            const blackName = game.isForGuests
-                ? game.black.displayName
-                : game.black.username
-            const playerColor = game.whiteId === playerId ? "w" : "b"
-
-            const capturedPieces = getCapturedPieces(game.moves)
-            //
+            const { game } = action.payload
 
             state.gameId = game.id
-            state.timerOption = game.timer
-            state.fen = game.currentFen
-            state.history = game.moves
-            state.players = {
-                white: {
-                    id: game.whiteId,
-                    name: whiteName,
-                    timeLeft: game.whiteTimeLeft,
-                    capturedPieces : capturedPieces.b,
-                    points : calculatePoints(capturedPieces.b)
-                },
-                black: {
-                    id: game.blackId,
-                    name: blackName,
-                    timeLeft: game.blackTimeLeft,
-                    capturedPieces : capturedPieces.w,
-                    points : calculatePoints(capturedPieces.w)
-
-                },
-            }
-            state.currentTurn = game.currentTurn
-            state.lastMoveAt = game.lastMoveAt
-            state.legalMoves = getLegalMoves(new Chess(game.currentFen))
-            state.pieces = getPieces(game.currentFen)
-            state.playerColor = playerColor
-            state.isPlayerTurn = playerColor === game.currentTurn
+            state.whiteId = game.whiteId
+            state.blackId = game.blackId
         },
-        sync: (state, action: PayloadAction<Game>) => {
-            const game = action.payload
-            const chess = new Chess(game.currentFen)
-
-            state.fen = game.currentFen
-            state.players.white.timeLeft = game.whiteTimeLeft
-            state.players.black.timeLeft = game.blackTimeLeft
-            state.currentTurn = game.currentTurn
-            state.gameOver = {
-                isGameOver: game.status === "finished",
-                isDraw: game.result === "draw",
-                reason: game.gameOverReason || undefined,
-                winner:
-                    game.result === "white_won"
-                        ? "w"
-                        : game.result === "black_won"
-                        ? "b"
-                        : undefined,
-            }
-            state.isPlayerTurn = state.playerColor === game.currentTurn
-            state.lastMoveAt = game.lastMoveAt
-            state.legalMoves = getLegalMoves(chess)
-            state.pieces = getPieces(game.currentFen)
-        },
-        makeMove: (state, action: PayloadAction<MoveType>) => {
-            
-        },
+        sync: (state, action: PayloadAction<Game>) => {},
+        makeMove: (state, action: PayloadAction<MoveType>) => {},
     },
 })
 

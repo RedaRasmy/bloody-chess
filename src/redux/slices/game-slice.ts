@@ -10,7 +10,7 @@ import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import getInitialPieces from "@/features/gameplay/utils/get-pieces"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
-import updateScoreAndCapturedPieces from "@/features/gameplay/utils/update-score"
+import updateScoreAndCapturedPieces from "@/features/gameplay/utils/update-captured-pieces"
 import safeMove from "@/features/gameplay/utils/safe-move"
 // import { ChessTimerOption } from "@/features/gameplay/types"
 
@@ -129,16 +129,16 @@ const gameSlice = createSlice({
             state.pieces = updatePieces(state.pieces, detailedMove)
 
             // update score and captured pieces
-            const { score, capturedPieces } = updateScoreAndCapturedPieces({
-                captured: theMove.captured,
-                promotion: theMove.promotion,
-                capturedPieces: state.capturedPieces,
-                movePlayer: theMove.color,
-                playerColor: state.playerColor,
-                score: state.score,
-            })
-            state.score = score
-            state.capturedPieces = capturedPieces
+            // const { score, capturedPieces } = updateScoreAndCapturedPieces({
+            //     captured: theMove.captured,
+            //     promotion: theMove.promotion,
+            //     capturedPieces: state.capturedPieces,
+            //     movePlayer: theMove.color,
+            //     playerColor: state.playerColor,
+            //     score: state.score,
+            // })
+            // state.score = score
+            // state.capturedPieces = capturedPieces
 
             state.fen = chess.fen()
             if (!state.isPlayerTurn) {
