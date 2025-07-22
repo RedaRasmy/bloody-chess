@@ -9,8 +9,13 @@ const ChessPiece = dynamic(() => import("./chess-piece"))
 import { selectAnimationSetting } from "@/redux/slices/settings"
 import useChessBoard from "../hooks/use-chess-board"
 import ChessSquare from "./chess-square"
+import { MoveType } from "../types"
 
-export default function ChessBoard() {
+export default function ChessBoard({
+    onMoveEnd,
+}: {
+    onMoveEnd?: (move: MoveType) => Promise<void>
+}) {
     const { enabled: animatedMoves, durationMs } = useAppSelector(
         selectAnimationSetting("moves")
     )
@@ -28,7 +33,7 @@ export default function ChessBoard() {
         lastMove,
         allowedSquares,
         pieces,
-    } = useChessBoard()
+    } = useChessBoard({onMoveEnd})
 
     return (
         <DndContext

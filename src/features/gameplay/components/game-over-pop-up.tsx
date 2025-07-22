@@ -1,6 +1,7 @@
 "use client"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { replay, selectGameOverData } from "@/redux/slices/game-slice"
+import { selectGameOverData } from "@/redux/slices/game/game-selectors"
+import { replay } from "@/redux/slices/game/game-slice"
 import {
     Dialog,
     DialogContent,
@@ -13,7 +14,7 @@ import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 
 export default function GameOverPopUp() {
-    const { isWin, isDraw, cause ,isGameOver } = useAppSelector(selectGameOverData)
+    const { isWin, isDraw, reason ,isGameOver } = useAppSelector(selectGameOverData)
     const dispatch = useAppDispatch()
 
 
@@ -24,7 +25,7 @@ export default function GameOverPopUp() {
                     <DialogTitle>
                         {isDraw ? "You Draw" : isWin ? 'You Won' : 'You Lost'}
                     </DialogTitle>
-                    <DialogDescription>By {cause}</DialogDescription>
+                    <DialogDescription>By {reason}</DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <Button asChild variant="outline">

@@ -3,18 +3,21 @@ import { supabase } from "@/utils/supabase/client"
 import { useEffect } from "react"
 import { MoveType } from "../types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
+import { move as localMove } from "@/redux/slices/game/game-slice"
 import { Game } from "@/db/types"
 import { makeMove } from "../server-actions/moves-actions"
 import { getFullGame } from "../server-actions/games-actions"
 import usePlayer from "./use-player"
+import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
-    const gameState = useAppSelector((state) => state.game)
+    const multiplayerState = useAppSelector((state) => state.multiplayer)
+    const playerColor = useAppSelector(selectPlayerColor)
     const player = usePlayer()
 
     useEffect(() => { 
-        if (gameState.gameId === '' && player.type !== 'loading') {
+        if (multiplayerState.gameId === '' && player.type !== 'loading') {
             const {data} = player
             async function setState(){
                 console.log('No gameId in state , setuping full game ...')
@@ -64,15 +67,15 @@ export const useMultiplayerGame = (gameId: string) => {
         }
     }, [gameId])
 
-    const move = async (move: MoveType) => {
+    const move = async (mv: MoveType) => {
         // Optimistic update
-        // dispatch(localMove(move))
+        // dispatch(localMove(mv))
 
         try {
             // Insert to Supabase
 
             const response = await makeMove({
-                move,
+                move : mv,
                 gameId,
             })
 
@@ -81,5 +84,5 @@ export const useMultiplayerGame = (gameId: string) => {
         }
     }
 
-    return { gameState, move }
+    return { multiplayerState, move , playerColor }
 }

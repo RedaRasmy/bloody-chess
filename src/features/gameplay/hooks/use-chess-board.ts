@@ -6,7 +6,9 @@ import {
     selectActivePiece,
     selectLegalMoves,
     selectPlayerColor,
-    selectIsPlayerTurn,selectLastMove,selectPieces
+    selectIsPlayerTurn,
+    selectLastMove,
+    selectPieces,
 } from "@/redux/slices/game/game-selectors"
 import getSquares from "../utils/get-squares"
 import { BoardElement, MoveType } from "../types"
@@ -15,7 +17,11 @@ import { rank } from "../utils/rank-file"
 import { move, select } from "@/redux/slices/game/game-slice"
 import { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 
-export default function useChessBoard() {
+export default function useChessBoard({
+    onMoveEnd,
+}: {
+    onMoveEnd?: (move: MoveType) => Promise<void>
+}) {
     const dispatch = useAppDispatch()
     const activePiece = useAppSelector(selectActivePiece)
     const legalMoves = useAppSelector(selectLegalMoves)
@@ -33,22 +39,22 @@ export default function useChessBoard() {
 
     const squares = getSquares(playerColor === "b")
 
-    function promote(promotion: string) {
+    async function promote(promotion: string) {
         if (!activePiece || !targetSquare) return
 
-        dispatch(
-            move({
-                from: activePiece.square,
-                to: targetSquare,
-                promotion: promotion as PieceSymbol,
-            })
-        )
+        const mv = {
+            from: activePiece.square,
+            to: targetSquare,
+            promotion: promotion as PieceSymbol,
+        }
+
+        dispatch(move(mv))
         setIsPromoting(false)
         setTargetSquare(null)
-
+        await onMoveEnd?.(mv)
     }
 
-    function clickSquare(square: Square) {
+    async function clickSquare(square: Square) {
         // clicking a square should only : cancel a move or play a move
 
         if (activePiece && allowedSquares.length > 0) {
@@ -60,12 +66,12 @@ export default function useChessBoard() {
                     setTargetSquare(square)
                     setIsPromoting(true)
                 } else {
-                    dispatch(
-                        move({
-                            from: activePiece.square,
-                            to: square,
-                        })
-                    )
+                    const mv = {
+                        from: activePiece.square,
+                        to: square,
+                    }
+                    dispatch(move(mv))
+                    await onMoveEnd?.(mv)
                 }
             } else {
                 // cancel move , active piece should return to null
@@ -86,7 +92,7 @@ export default function useChessBoard() {
         dispatch(select(piece))
     }
 
-    function drop(event: DragEndEvent) {
+    async function drop(event: DragEndEvent) {
         if (!activePiece) return
 
         const { over } = event
@@ -103,12 +109,12 @@ export default function useChessBoard() {
                     setTargetSquare(targetSquare)
                     setIsPromoting(true)
                 } else {
-                    dispatch(
-                        move({
-                            from: activePiece.square,
-                            to: targetSquare,
-                        })
-                    )
+                    const mv = {
+                        from: activePiece.square,
+                        to: targetSquare,
+                    }
+                    dispatch(move(mv))
+                    await onMoveEnd?.(mv)
                 }
             }
         } else {
@@ -119,12 +125,12 @@ export default function useChessBoard() {
                 setTargetSquare(targetSquare)
                 setIsPromoting(true)
             } else {
-                dispatch(
-                    move({
-                        from: activePiece.square,
-                        to: targetSquare,
-                    })
-                )
+                const mv = {
+                    from: activePiece.square,
+                    to: targetSquare,
+                }
+                dispatch(move(mv))
+                await onMoveEnd?.(mv)
             }
         }
     }
@@ -145,6 +151,6 @@ export default function useChessBoard() {
         cancelPromotion,
         lastMove,
         allowedSquares,
-        pieces
+        pieces,
     }
 }

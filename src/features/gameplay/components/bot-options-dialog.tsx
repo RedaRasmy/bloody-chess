@@ -21,7 +21,7 @@ import {
 import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
 import { TIMER_OPTIONS } from "../utils/constantes"
-import { replay } from "@/redux/slices/game-slice"
+import { replay } from "@/redux/slices/game/game-slice"
 import {ColorOption} from '../types'
 
 export default function BotOptionsDialog() {
