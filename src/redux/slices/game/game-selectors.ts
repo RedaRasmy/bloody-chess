@@ -31,8 +31,8 @@ export const selectLastMove = (state: RootState) => {
 export const selectIsGameOver = (state: RootState) =>
     state.game.gameOver.isGameOver
 
-export const selectPlayer = (color: 'white' | 'black') => (state: RootState) =>
-    state.game.players[color]
+export const selectPlayer = (color: Color) => (state: RootState) =>
+    state.game.players[color === 'w' ? 'white' : 'black']
 
 
 export const selectCurrentPlayer = (state: RootState) => state.game.currentTurn
@@ -51,12 +51,14 @@ export const selectIsUndoRedoable = createSelector(
         }
     }
 )
-export const selectPreMoves = createSelector(
-    [(state: RootState) => state.game.preMoves],
-    (premoves) => premoves
-)
+// export const selectPreMoves = createSelector(
+//     [(state: RootState) => state.game.preMoves],
+//     (premoves) => premoves
+// )
 export const selectActivePiece = createSelector(
     [(state: RootState) => state.game.activePiece],
     (activePiece) => activePiece
 )
 export const selectIsNewGame = (state: RootState) => state.game.newGame
+
+export const selectTimerOption = (state:RootState) => state.game.timerOption

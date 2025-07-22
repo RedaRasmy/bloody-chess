@@ -2,21 +2,23 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
     selectCurrentPlayer,
     selectIsGameOver,
-    timeOut,
     selectIsNewGame,
-} from "@/redux/slices/game-slice"
+} from "@/redux/slices/game/game-selectors"
+import { selectTimerOption } from "@/redux/slices/game/game-selectors"
 import { Color } from "chess.js"
 import { useEffect, useRef, useState } from "react"
+import { parseTimer } from "../utils/parse-timer"
+import { timeOut } from "@/redux/slices/game/game-slice"
 
 export default function Timer({
     duration,
-    plus,
-    player,
+    playerColor,
 }: {
     duration: number
-    player: Color
-    plus: number
+    playerColor: Color
 }) {
+    const timerOption = useAppSelector(selectTimerOption)
+    const {plus} = timerOption ? parseTimer(timerOption) : {plus:0}
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
@@ -24,13 +26,13 @@ export default function Timer({
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
     const startTimeRef = useRef<number | null>(null)
 
-    const isRunning = currentPlayer === player && !isGameOver
+    const isRunning = currentPlayer === playerColor && !isGameOver
 
     const [didPlay, setDidPlay] = useState(false)
 
     useEffect(() => {
         if (!isGameOver) {
-            setTime(duration*1000)
+            setTime(duration * 1000)
         }
     }, [isGameOver, duration, isNewGame])
 
@@ -41,7 +43,7 @@ export default function Timer({
             intervalRef.current = setInterval(() => {
                 const now = Date.now()
                 const elapsed = now - (startTimeRef.current || now)
-                setTime(prev => Math.max(prev-elapsed,0))
+                setTime((prev) => Math.max(prev - elapsed, 0))
                 startTimeRef.current = now
             }, 100)
         } else if (!isRunning && didPlay) {
@@ -71,13 +73,7 @@ export default function Timer({
     return (
         <div className="bg-gray-300 py-0.5 px-3 rounded-md font-bold">
             {minutes}:{seconds.toString().padStart(2, "0")}
-            {
-                time <= duration*100 && 
-                <>
-                    :
-                    {hundredMs}
-                </>
-            }
+            {time <= duration * 100 && <>:{hundredMs}</>}
         </div>
     )
 }

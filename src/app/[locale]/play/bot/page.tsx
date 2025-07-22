@@ -6,47 +6,27 @@ import PlayerSection from "@/features/gameplay/components/player-section"
 import ChessBoard from "@/features/gameplay/components/chess-board"
 import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
-import { parseTimer } from "@/features/gameplay/utils/parse-timer"
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectBotOptions } from "@/redux/slices/game-options"
 import {
-    move,
-    premove,
-    select,
-    selectActivePiece,
-    selectCapturedPieces,
     selectFEN,
     selectIsGameOver,
     selectIsPlayerTurn,
-    selectIsUndoRedoable,
-    selectLastMove,
-    selectLegalMoves,
-    selectPieces,
     selectPlayerColor,
-    selectPreMoves,
-    selectScore,
-} from "@/redux/slices/game-slice"
-import { Chess } from "chess.js"
+ 
+} from "@/redux/slices/game/game-selectors"
 import useBot from "@/features/gameplay/hooks/use-bot"
+import { move  } from "@/redux/slices/game/game-slice"
 
 export default function Page() {
     const dispatch = useAppDispatch()
     const playerColor = useAppSelector(selectPlayerColor)
     const fen = useAppSelector(selectFEN)
-    const pieces = useAppSelector(selectPieces)
-    const { level, timer: timerOption } = useAppSelector(selectBotOptions)
-    const lastMove = useAppSelector(selectLastMove)
+    const { level } = useAppSelector(selectBotOptions)
     const isGameOver = useAppSelector(selectIsGameOver)
-    const capturedPieces = useAppSelector(selectCapturedPieces)
-    const score = useAppSelector(selectScore)
-    const legalMoves = useAppSelector(selectLegalMoves)
-    const { isRedoable } = useAppSelector(selectIsUndoRedoable)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
-    const preMoves = useAppSelector(selectPreMoves)
-    const activePiece = useAppSelector(selectActivePiece)
 
-    const timer = timerOption ? parseTimer(timerOption) : undefined
     const opponentColor = oppositeColor(playerColor)
 
     useBot({
@@ -71,21 +51,13 @@ export default function Page() {
                 <ChessBoardLayout
                     OpponentSection={
                         <PlayerSection
-                            capturedPieces={capturedPieces[playerColor]}
-                            opponentColor={playerColor}
-                            score={score < 0 ? -score : 0}
-                            username={`bot-${level}`}
-                            timer={timer}
+                            color={opponentColor}
                         />
                     }
                     ChessBoard={<ChessBoard />}
                     PlayerSection={
                         <PlayerSection
-                            score={score > 0 ? score : 0}
-                            username="Guest"
-                            timer={timer}
-                            capturedPieces={capturedPieces[opponentColor]}
-                            opponentColor={opponentColor}
+                            color={playerColor}
                         />
                     }
                 />
