@@ -46,13 +46,13 @@ const initialState = {
         white: {
             name: "guest",
             timeLeft: null as null | number,
-            capturedPieces: initialCaputeredPieces.w as CapturedPieces["w"],
+            capturedPieces: initialCaputeredPieces.b as CapturedPieces["w"],
             extraPoints: 0,
         },
         black: {
             name: "bot",
             timeLeft: null as null | number,
-            capturedPieces: initialCaputeredPieces.b as CapturedPieces["b"],
+            capturedPieces: initialCaputeredPieces.w as CapturedPieces["b"],
             extraPoints: 0,
         },
     },
