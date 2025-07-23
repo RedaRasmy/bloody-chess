@@ -1,8 +1,10 @@
 import { configureStore , combineReducers } from "@reduxjs/toolkit"
-import gameSlice from "./slices/game/game-slice"
-import gameOptions from "./slices/game-options"
-import settings from "./slices/settings"
-import multiplayer from "./slices/multiplayer/multiplayer-slice"
+// import gameSlice from "./slices/game/game-slice"
+// import gameOptions from "./slices/game-options"
+// import settings from "./slices/settings/settings-slice"
+// import multiplayer from "./slices/multiplayer/multiplayer-slice"
+import * as reducers from './slices'
+
 import {
   persistReducer,
   FLUSH,
@@ -19,12 +21,7 @@ const persistConfig = {
     storage,
 }
 
-const rootReducer = combineReducers({
-    game: gameSlice,
-    options: gameOptions,
-    settings,
-    multiplayer
-})
+const rootReducer = combineReducers(reducers)
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

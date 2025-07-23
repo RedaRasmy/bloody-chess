@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 import { useAppSelector } from "@/redux/hooks"
 const ChessPiece = dynamic(() => import("./chess-piece"))
-import { selectAnimationSetting } from "@/redux/slices/settings"
+import { selectAnimationSetting } from "@/redux/slices/settings/settings-selectors"
 import useChessBoard from "../hooks/use-chess-board"
 import ChessSquare from "./chess-square"
 import { MoveType } from "../types"
@@ -33,7 +33,7 @@ export default function ChessBoard({
         lastMove,
         allowedSquares,
         pieces,
-    } = useChessBoard({onMoveEnd})
+    } = useChessBoard({ onMoveEnd })
 
     return (
         <DndContext
