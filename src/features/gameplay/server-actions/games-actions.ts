@@ -4,7 +4,7 @@ import { db } from "@/db/drizzle"
 import { games } from "@/db/schema"
 import { ChessTimerOption } from "@/features/gameplay/types"
 import { eq } from "drizzle-orm"
-import { parseTimer } from "../utils/parse-timer"
+import parseTimerOption from "../utils/parse-timer-option"
 import { FullGame, StartedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
 import { getPlayer } from "./player-actions"
@@ -65,7 +65,7 @@ export async function createGame({
     timerOption: ChessTimerOption
     playerId: string
 }) {
-    const timer = parseTimer(timerOption)
+    const timer = parseTimerOption(timerOption)
 
     const newGame = await db
         .insert(games)
@@ -98,8 +98,9 @@ export async function getFullGame(id: string): Promise<FullGame> {
 
     if (!game) throw new Error("No game found")
 
-    const { whiteId, blackId ,gameStartedAt } = game
-    if (!whiteId || !blackId || !gameStartedAt) throw new Error("Game not started yet!")
+    const { whiteId, blackId, gameStartedAt } = game
+    if (!whiteId || !blackId || !gameStartedAt)
+        throw new Error("Game not started yet!")
 
     if (game.isForGuests) {
         const white = await getGuest(whiteId)

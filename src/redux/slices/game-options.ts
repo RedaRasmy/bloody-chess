@@ -26,22 +26,27 @@ const gameOptions = createSlice({
             const color = action.payload
             state.bot.color = color
         },
-        changeTimer: (
+        changeBotTimer: (
             state,
             action: PayloadAction<ChessTimerOption | null>
         ) => {
-            const timerOption = action.payload
-            state.bot.timer = timerOption
-            if (timerOption) state.multiplayer.timer = timerOption
+            state.bot.timer = action.payload
+        },
+        changeMultiplayerTimer: (
+            state,
+            action: PayloadAction<ChessTimerOption>
+        ) => {
+            state.multiplayer.timer = action.payload
         },
     },
 })
 
-export const { changeColor, changeLevel, changeTimer } = gameOptions.actions
+export const { changeColor, changeLevel, changeBotTimer, changeMultiplayerTimer } = gameOptions.actions
 
 export default gameOptions.reducer
 
 // Selectors
 
 export const selectBotOptions = (state: RootState) => state.options.bot
-export const selectMultiplayerOptions = (state: RootState) => state.options.multiplayer
+export const selectMultiplayerOptions = (state: RootState) =>
+    state.options.multiplayer

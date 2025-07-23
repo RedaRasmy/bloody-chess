@@ -31,9 +31,17 @@ export const selectLastMove = (state: RootState) => {
 export const selectIsGameOver = (state: RootState) =>
     state.game.gameOver.isGameOver
 
-export const selectPlayer = (color: Color) => (state: RootState) =>
-    state.game.players[color === 'w' ? 'white' : 'black']
+export const selectPlayers = (state: RootState) => state.game.players
 
+export const selectWhitePlayer = createSelector(
+  [selectPlayers],
+  (players) => players.white
+);
+
+export const selectBlackPlayer = createSelector(
+  [selectPlayers],
+  (players) => players.black
+);
 
 export const selectCurrentPlayer = (state: RootState) => state.game.currentTurn
 

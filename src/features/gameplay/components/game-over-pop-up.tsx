@@ -1,7 +1,7 @@
 "use client"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectGameOverData } from "@/redux/slices/game/game-selectors"
-import { replay } from "@/redux/slices/game/game-slice"
+import { play } from "@/redux/slices/game/game-slice"
 import {
     Dialog,
     DialogContent,
@@ -31,7 +31,7 @@ export default function GameOverPopUp() {
                     <Button asChild variant="outline">
                         <Link href={'/'}>Home</Link>
                     </Button>
-                    <Button className="cursor-pointer" onClick={()=>dispatch(replay())}>Replay</Button>
+                    <Button className="cursor-pointer" onClick={()=>dispatch(play())}>Replay</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

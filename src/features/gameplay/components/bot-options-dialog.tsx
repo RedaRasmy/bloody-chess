@@ -15,13 +15,12 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
     changeColor,
     changeLevel,
-    changeTimer,
+    changeBotTimer,
     selectBotOptions,
 } from "@/redux/slices/game-options"
 import { Link } from "@/i18n/navigation"
 import SelectTimer from "./select-timer"
-import { TIMER_OPTIONS } from "../utils/constantes"
-import { replay } from "@/redux/slices/game/game-slice"
+import { play } from "@/redux/slices/game/game-slice"
 import {ColorOption} from '../types'
 
 export default function BotOptionsDialog() {
@@ -71,16 +70,15 @@ export default function BotOptionsDialog() {
                         </RadioGroup>
                     </div>
                     <SelectTimer
-                        options={[...TIMER_OPTIONS]}
                         value={timer}
-                        onChange={(op) => dispatch(changeTimer(op))}
+                        onChange={(op) => dispatch(changeBotTimer(op))}
                     />
                 </div>
                 <DialogFooter>
                     <Button asChild className="">
                         <Link
                             href={"/play/bot"}
-                            onClick={() => dispatch(replay())}
+                            onClick={() => dispatch(play())}
                         >
                             Start
                         </Link>

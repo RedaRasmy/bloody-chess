@@ -7,7 +7,7 @@ import {
 import { selectTimerOption } from "@/redux/slices/game/game-selectors"
 import { Color } from "chess.js"
 import { useEffect, useRef, useState } from "react"
-import { parseTimer } from "../utils/parse-timer"
+import parseTimerOption from "../utils/parse-timer-option"
 import { timeOut } from "@/redux/slices/game/game-slice"
 
 export default function Timer({
@@ -18,7 +18,7 @@ export default function Timer({
     playerColor: Color
 }) {
     const timerOption = useAppSelector(selectTimerOption)
-    const {plus} = timerOption ? parseTimer(timerOption) : {plus:0}
+    const {plus} = timerOption ? parseTimerOption(timerOption) : {plus:0}
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)

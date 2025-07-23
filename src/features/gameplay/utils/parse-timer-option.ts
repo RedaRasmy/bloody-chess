@@ -1,6 +1,7 @@
 import { ChessTimer, ChessTimerOption, ChessTimerType } from "../types";
 
-export function parseTimer(timerOption:ChessTimerOption):ChessTimer {
+export default function parseTimerOption(timerOption:ChessTimerOption):ChessTimer {
+
     const [type,time] = timerOption.split(" ")
     const [base,plus] = time.split("+")
 

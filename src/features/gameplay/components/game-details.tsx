@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {  selectIsGameOver } from "@/redux/slices/game/game-selectors";
-import {  replay , resign } from "@/redux/slices/game/game-slice";
+import {  play , resign } from "@/redux/slices/game/game-slice";
 
 export default function GameDetails() {
     const dispatch = useAppDispatch()
@@ -12,7 +12,7 @@ export default function GameDetails() {
     return (
         <div className="bg-gray-300 flex gap-2 flex-wrap landscape:min-w-[20%] landscape:lg:w-[30%] landscape:xl:w-[30%]  portrait:h-full  border-l-1 border-black/30 py-4 px-3">
             <Button disabled={isGameOver} className="cursor-pointer" onClick={()=>dispatch(resign())}>Resign</Button>
-            <Button className="cursor-pointer" onClick={()=>dispatch(replay())}>Replay</Button>
+            <Button className="cursor-pointer" onClick={()=>dispatch(play())}>Replay</Button>
             {/* <Button disabled={!isUndoable} className="cursor-pointer" onClick={()=>dispatch(undo())}>Undo</Button>
             <Button disabled={!isRedoable} className="cursor-pointer" onClick={()=>dispatch(redo())}>Redo</Button> */}
         </div>

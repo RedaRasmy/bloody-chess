@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
-    changeTimer,
+    changeMultiplayerTimer,
     selectMultiplayerOptions,
 } from "@/redux/slices/game-options"
 import SelectTimer from "./select-timer"
@@ -87,9 +87,8 @@ export default function MultiplayerOptionsDialog() {
                 <div className="flex flex-col gap-4">
                     <SelectTimer
                         required
-                        options={[...TIMER_OPTIONS]}
                         value={timer}
-                        onChange={(op) => dispatch(changeTimer(op))}
+                        onChange={(op) => dispatch(changeMultiplayerTimer(op))}
                     />
                 </div>
                 <DialogFooter>

@@ -2,7 +2,7 @@ import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice, createSelector } from "@reduxjs/toolkit"
 import { Chess, Color, DEFAULT_POSITION, Move, Square } from "chess.js"
 import { RootState } from "../../store"
-import { changeColor } from "../game-options"
+import { changeBotTimer, changeColor } from "../game-options"
 import {
     getGameoverCause,
     getGameOverState,
@@ -30,6 +30,7 @@ import { setup, sync } from "../multiplayer/multiplayer-slice"
 import { getCapturedPieces } from "@/features/gameplay/utils/get-captured-pieces"
 import getPieces from "@/features/gameplay/utils/get-pieces"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
+import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 
 const initialState = {
     fen: DEFAULT_POSITION,
@@ -94,12 +95,45 @@ const gameSlice = createSlice({
             state.gameOver.isGameOver = true
             state.gameOver.winner = state.playerColor === "w" ? "b" : "w"
         },
-        replay: (state) => ({
-            ...initialState,
-            playerColor: state.playerColor,
-            isPlayerTurn: state.playerColor === "w",
-            newGame: !state.newGame,
-        }),
+        // play: (state) => ({
+        //     ...initialState,
+        //     // timerOption : state.timerOption ,
+        //     playerColor: state.playerColor,
+        //     isPlayerTurn: state.playerColor === "w",
+        //     newGame: !state.newGame,
+        //     timerOption : state.timerOption,
+        //     players : {
+
+        //     }
+        // }),
+        play: (state) => {
+            const timerOption = state.timerOption
+            const timer = timerOption
+                ? parseTimerOption(timerOption)
+                : { base: null }
+
+            return {
+                ...initialState,
+                playerColor: state.playerColor,
+                isPlayerTurn: state.playerColor === "w",
+                newGame: !state.newGame,
+                timerOption: state.timerOption,
+                players : {
+                    white : {
+                        capturedPieces : initialCaputeredPieces.w,
+                        timeLeft : timer.base,
+                        name : state.players.white.name,
+                        extraPoints : 0
+                    },
+                    black : {
+                        capturedPieces : initialCaputeredPieces.w,
+                        timeLeft : timer.base,
+                        name : state.players.black.name,
+                        extraPoints : 0
+                    },
+                }
+            }
+        },
         select: (state, action: PayloadAction<Exclude<BoardElement, null>>) => {
             const piece = action.payload
             state.activePiece = piece
@@ -136,7 +170,7 @@ const gameSlice = createSlice({
             state.players.black.extraPoints = black.extraPoints
 
             ////
-            const {w,b} = updateCapturedPieces({
+            const { w, b } = updateCapturedPieces({
                 captured: validatedMove.captured,
                 capturedPieces: {
                     w: state.players.white.capturedPieces,
@@ -179,6 +213,11 @@ const gameSlice = createSlice({
             } else {
                 state.playerColor = "w"
             }
+        })
+        builder.addCase(changeBotTimer, (state, action) => {
+            const timerOption = action.payload
+
+            state.timerOption = timerOption
         })
         builder.addCase(setup, (state, action) => {
             const { game, playerId } = action.payload
@@ -227,11 +266,11 @@ const gameSlice = createSlice({
             const game = action.payload
             const chess = new Chess(game.currentFen)
 
-            const {white,black} = calculateTimeLeft({
-                whiteTimeLeft : game.whiteTimeLeft,
-                blackTimeLeft : game.blackTimeLeft,
-                currentTurn : game.currentTurn,
-                lastMoveAt : game.lastMoveAt || game.gameStartedAt || new Date()
+            const { white, black } = calculateTimeLeft({
+                whiteTimeLeft: game.whiteTimeLeft,
+                blackTimeLeft: game.blackTimeLeft,
+                currentTurn: game.currentTurn,
+                lastMoveAt: game.lastMoveAt || game.gameStartedAt || new Date(),
             })
 
             state.fen = game.currentFen
@@ -239,13 +278,13 @@ const gameSlice = createSlice({
             state.players.black.timeLeft = black
             state.currentTurn = game.currentTurn
             state.gameOver = getGameOverState(chess)
-            state.currentTurn =  game.currentTurn
+            state.currentTurn = game.currentTurn
             state.legalMoves = getLegalMoves(chess)
             state.pieces = getPieces(game.currentFen)
         })
     },
 })
 
-export const { timeOut, move, replay, resign, select } = gameSlice.actions
+export const { timeOut, move, play, resign, select } = gameSlice.actions
 
 export default gameSlice.reducer
