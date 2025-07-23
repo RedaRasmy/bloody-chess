@@ -173,13 +173,13 @@ const gameSlice = createSlice({
             const { w, b } = updateCapturedPieces({
                 captured: validatedMove.captured,
                 capturedPieces: {
-                    w: state.players.white.capturedPieces,
-                    b: state.players.black.capturedPieces,
+                    w: state.players.black.capturedPieces, // white capture black pieces 
+                    b: state.players.white.capturedPieces,  // the opposite
                 },
                 movePlayer: validatedMove.color,
             })
-            state.players.white.capturedPieces = w
-            state.players.black.capturedPieces = b
+            state.players.white.capturedPieces = b // white capture black pieces 
+            state.players.black.capturedPieces = w // the opposite
             ////
 
             // udpate fen
