@@ -70,3 +70,6 @@ export const selectActivePiece = createSelector(
 export const selectIsNewGame = (state: RootState) => state.game.newGame
 
 export const selectTimerOption = (state:RootState) => state.game.timerOption
+
+export const selectLastMoveAt = (state:RootState) => state.game.lastMoveAt
+export const selectGameStartedAt = (state:RootState) => state.game.gameStartedAt

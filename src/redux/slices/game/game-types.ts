@@ -17,3 +17,10 @@ export type GameOverState = {
     isDraw : false
     reason : null
 }
+
+export type Timings = {
+    whiteTimeLeft : number | null
+    blackTimeLeft : number | null
+    gameStartedAt : number | null
+    lastMoveAt : number | null
+}

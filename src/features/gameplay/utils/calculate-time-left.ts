@@ -12,13 +12,13 @@ export const calculateTimeLeft = (
   
   if (gameState.currentTurn === 'w') {
     return {
-      white: Math.max(0, gameState.whiteTimeLeft - timeSinceLastMove),
-      black: gameState.blackTimeLeft
+      whiteTimeLeft: Math.max(0, gameState.whiteTimeLeft - timeSinceLastMove),
+      blackTimeLeft: gameState.blackTimeLeft
     }
   } else {
     return {
-      white: gameState.whiteTimeLeft,
-      black: Math.max(0, gameState.blackTimeLeft - timeSinceLastMove)
+      whiteTimeLeft: gameState.whiteTimeLeft,
+      blackTimeLeft: Math.max(0, gameState.blackTimeLeft - timeSinceLastMove)
     }
   }
 }

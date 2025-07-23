@@ -1,17 +1,13 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { createSlice, createSelector } from "@reduxjs/toolkit"
+import { createSlice } from "@reduxjs/toolkit"
 import { Chess, Color, DEFAULT_POSITION, Move, Square } from "chess.js"
-import { RootState } from "../../store"
 import { changeBotTimer, changeColor } from "../game-options"
 import {
-    getGameoverCause,
     getGameOverState,
 } from "@/features/gameplay/utils/get-gameover-cause"
 import {
     BoardElement,
     CapturedPieces,
-    DetailedMove,
-    GameOverReason,
     MoveType,
     History,
 } from "@/features/gameplay/types"
@@ -22,7 +18,7 @@ import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import updateCapturedPieces from "@/features/gameplay/utils/update-captured-pieces"
 import safeMove from "@/features/gameplay/utils/safe-move"
-import { GameOverState } from "./game-types"
+import { GameOverState, Timings } from "./game-types"
 import { ChessTimerOption } from "@/features/gameplay/types"
 import getExtraPoints from "@/features/gameplay/utils/get-extra-points"
 import getDetailedMove from "@/features/gameplay/utils/get-detailed-move"
@@ -63,13 +59,19 @@ const initialState = {
         isDraw: false,
         reason: null,
     } as GameOverState,
-    newGame: false, // should change on new game
+    newGame: false, // should change on new game // remove this later ?
+    lastMoveAt: null as null | number,
+    gameStartedAt: null as null | number,
 }
 
 const gameSlice = createSlice({
     name: "game",
     initialState,
     reducers: {
+        updateTimings: (state, action: PayloadAction<Partial<Timings>>) => ({
+            ...state,
+            ...action.payload,
+        }),
         // undo: (state) => {
         //     state.pieces = updatePieces(
         //         state.pieces,
@@ -112,26 +114,28 @@ const gameSlice = createSlice({
                 ? parseTimerOption(timerOption)
                 : { base: null }
 
+            const base = timer.base ? timer.base * 1000 : timer.base
             return {
                 ...initialState,
                 playerColor: state.playerColor,
                 isPlayerTurn: state.playerColor === "w",
                 newGame: !state.newGame,
                 timerOption: state.timerOption,
-                players : {
-                    white : {
-                        capturedPieces : initialCaputeredPieces.w,
-                        timeLeft : timer.base,
-                        name : state.players.white.name,
-                        extraPoints : 0
+                gameStartedAt: Date.now(),
+                players: {
+                    white: {
+                        capturedPieces: initialCaputeredPieces.w,
+                        timeLeft: base,
+                        name: state.players.white.name,
+                        extraPoints: 0,
                     },
-                    black : {
-                        capturedPieces : initialCaputeredPieces.w,
-                        timeLeft : timer.base,
-                        name : state.players.black.name,
-                        extraPoints : 0
+                    black: {
+                        capturedPieces: initialCaputeredPieces.w,
+                        timeLeft: base,
+                        name: state.players.black.name,
+                        extraPoints: 0,
                     },
-                }
+                },
             }
         },
         select: (state, action: PayloadAction<Exclude<BoardElement, null>>) => {
@@ -155,6 +159,22 @@ const gameSlice = createSlice({
             if (!validatedMove) {
                 return
             }
+            const wtl = state.players.white.timeLeft
+            const btl = state.players.black.timeLeft
+            const gameStartedAt = state.gameStartedAt
+            if (wtl !== null && btl !== null && gameStartedAt !== null) {
+
+                const { whiteTimeLeft , blackTimeLeft} = calculateTimeLeft({
+                    whiteTimeLeft : wtl ,
+                    blackTimeLeft : btl,
+                    currentTurn : state.currentTurn,
+                    lastMoveAt: state.lastMoveAt
+                        ? new Date(state.lastMoveAt)
+                        : new Date(gameStartedAt),
+                })
+                state.players.white.timeLeft = whiteTimeLeft
+                state.players.black.timeLeft = blackTimeLeft
+            }
 
             const detailedMove = getDetailedMove(validatedMove, state.pieces)
             state.history.push({
@@ -173,12 +193,12 @@ const gameSlice = createSlice({
             const { w, b } = updateCapturedPieces({
                 captured: validatedMove.captured,
                 capturedPieces: {
-                    w: state.players.black.capturedPieces, // white capture black pieces 
-                    b: state.players.white.capturedPieces,  // the opposite
+                    w: state.players.black.capturedPieces, // white capture black pieces
+                    b: state.players.white.capturedPieces, // the opposite
                 },
                 movePlayer: validatedMove.color,
             })
-            state.players.white.capturedPieces = b // white capture black pieces 
+            state.players.white.capturedPieces = b // white capture black pieces
             state.players.black.capturedPieces = w // the opposite
             ////
 
@@ -199,6 +219,9 @@ const gameSlice = createSlice({
             state.currentMoveIndex = state.history.length - 1
 
             state.activePiece = null
+
+            // update timing
+            state.lastMoveAt = Date.now()
         },
     },
     extraReducers: (builder) => {
@@ -266,7 +289,7 @@ const gameSlice = createSlice({
             const game = action.payload
             const chess = new Chess(game.currentFen)
 
-            const { white, black } = calculateTimeLeft({
+            const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
                 whiteTimeLeft: game.whiteTimeLeft,
                 blackTimeLeft: game.blackTimeLeft,
                 currentTurn: game.currentTurn,
@@ -274,8 +297,8 @@ const gameSlice = createSlice({
             })
 
             state.fen = game.currentFen
-            state.players.white.timeLeft = white
-            state.players.black.timeLeft = black
+            state.players.white.timeLeft = whiteTimeLeft
+            state.players.black.timeLeft = blackTimeLeft
             state.currentTurn = game.currentTurn
             state.gameOver = getGameOverState(chess)
             state.currentTurn = game.currentTurn
@@ -285,6 +308,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, play, resign, select } = gameSlice.actions
+export const { timeOut, move, play, resign, select, updateTimings } =
+    gameSlice.actions
 
 export default gameSlice.reducer

@@ -11,18 +11,18 @@ import parseTimerOption from "../utils/parse-timer-option"
 import { timeOut } from "@/redux/slices/game/game-slice"
 
 export default function Timer({
-    duration,
+    timeLeft,
     playerColor,
 }: {
-    duration: number
+    timeLeft: number
     playerColor: Color
 }) {
     const timerOption = useAppSelector(selectTimerOption)
-    const {plus} = timerOption ? parseTimerOption(timerOption) : {plus:0}
+    const { plus } = timerOption ? parseTimerOption(timerOption) : { plus: 0 }
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
-    const [time, setTime] = useState(duration * 1000)
+    const [time, setTime] = useState(timeLeft)
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
     const startTimeRef = useRef<number | null>(null)
 
@@ -32,9 +32,9 @@ export default function Timer({
 
     useEffect(() => {
         if (!isGameOver) {
-            setTime(duration * 1000)
+            setTime(timeLeft)
         }
-    }, [isGameOver, duration, isNewGame])
+    }, [isGameOver, timeLeft, isNewGame])
 
     useEffect(() => {
         if (isRunning) {
@@ -48,6 +48,7 @@ export default function Timer({
             }, 100)
         } else if (!isRunning && didPlay) {
             setTime((prev) => prev + plus * 1000)
+            // update timings
         }
 
         return () => {
@@ -73,7 +74,7 @@ export default function Timer({
     return (
         <div className="bg-gray-300 py-0.5 px-3 rounded-md font-bold">
             {minutes}:{seconds.toString().padStart(2, "0")}
-            {time <= duration * 100 && <>:{hundredMs}</>}
+            {time <= timeLeft * 100 && <>:{hundredMs}</>}
         </div>
     )
 }
