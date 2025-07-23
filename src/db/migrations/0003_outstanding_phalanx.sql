@@ -1,2 +1,0 @@
-CREATE TYPE "public"."gameover_reason" AS ENUM('Checkmate', 'Timeout', 'Fifty moves rule', 'Insufficient material', 'Stalemate', 'Threefold repetition', 'Resignation');--> statement-breakpoint
-ALTER TABLE "games" ADD COLUMN "gameOverReason" "gameover_reason";

@@ -1,5 +1,5 @@
 {
-  "id": "1981ba22-cc36-4199-a933-a742f786ad28",
+  "id": "c63b2fbf-080c-444d-ad77-db80eb1923ff",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -27,15 +27,29 @@
           "primaryKey": false,
           "notNull": false
         },
-        "for_guests": {
-          "name": "for_guests",
+        "is_for_guests": {
+          "name": "is_for_guests",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true
         },
+        "current_fen": {
+          "name": "current_fen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'"
+        },
         "result": {
           "name": "result",
           "type": "result",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gameover_reason": {
+          "name": "gameover_reason",
+          "type": "gameover_reason",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
@@ -50,10 +64,41 @@
         },
         "timer": {
           "name": "timer",
-          "type": "timer_options",
+          "type": "timer_option",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "current_turn": {
+          "name": "current_turn",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "white_time_left": {
+          "name": "white_time_left",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "black_time_left": {
+          "name": "black_time_left",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_move_at": {
+          "name": "last_move_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_started_at": {
+          "name": "game_started_at",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -101,13 +146,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -126,25 +164,86 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "fen_after": {
+          "name": "fen_after",
+          "type": "text",
+          "primaryKey": false,
           "notNull": true
         },
-        "move_number": {
-          "name": "move_number",
+        "game_id": {
+          "name": "game_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from": {
+          "name": "from",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to": {
+          "name": "to",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "promotion": {
+          "name": "promotion",
+          "type": "promotion_piece",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_color": {
+          "name": "player_color",
+          "type": "color",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "piece": {
+          "name": "piece",
+          "type": "piece",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "captured_piece": {
+          "name": "captured_piece",
+          "type": "piece",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_check": {
+          "name": "is_check",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_checkmate": {
+          "name": "is_checkmate",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "move_time": {
+          "name": "move_time",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "gameId": {
-          "name": "gameId",
-          "type": "uuid",
+        "san": {
+          "name": "san",
+          "type": "varchar(10)",
           "primaryKey": false,
-          "notNull": false
-        },
-        "fen": {
-          "name": "fen",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -156,12 +255,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "moves_gameId_games_id_fk": {
-          "name": "moves_gameId_games_id_fk",
+        "moves_game_id_games_id_fk": {
+          "name": "moves_game_id_games_id_fk",
           "tableFrom": "moves",
           "tableTo": "games",
           "columnsFrom": [
-            "gameId"
+            "game_id"
           ],
           "columnsTo": [
             "id"
@@ -267,6 +366,19 @@
     }
   },
   "enums": {
+    "public.gameover_reason": {
+      "name": "gameover_reason",
+      "schema": "public",
+      "values": [
+        "Checkmate",
+        "Timeout",
+        "Fifty moves rule",
+        "Insufficient material",
+        "Stalemate",
+        "Threefold repetition",
+        "Resignation"
+      ]
+    },
     "public.result": {
       "name": "result",
       "schema": "public",
@@ -285,8 +397,8 @@
         "finished"
       ]
     },
-    "public.timer_options": {
-      "name": "timer_options",
+    "public.timer_option": {
+      "name": "timer_option",
       "schema": "public",
       "values": [
         "bullet 1+0",
@@ -298,6 +410,36 @@
         "rapid 10+0",
         "rapid 10+5",
         "rapid 15+10"
+      ]
+    },
+    "public.color": {
+      "name": "color",
+      "schema": "public",
+      "values": [
+        "w",
+        "b"
+      ]
+    },
+    "public.piece": {
+      "name": "piece",
+      "schema": "public",
+      "values": [
+        "q",
+        "r",
+        "n",
+        "b",
+        "k",
+        "p"
+      ]
+    },
+    "public.promotion_piece": {
+      "name": "promotion_piece",
+      "schema": "public",
+      "values": [
+        "q",
+        "r",
+        "n",
+        "b"
       ]
     }
   },

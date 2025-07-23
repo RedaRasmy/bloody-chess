@@ -289,16 +289,18 @@ const gameSlice = createSlice({
             const game = action.payload
             const chess = new Chess(game.currentFen)
 
-            const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-                whiteTimeLeft: game.whiteTimeLeft,
-                blackTimeLeft: game.blackTimeLeft,
-                currentTurn: game.currentTurn,
-                lastMoveAt: game.lastMoveAt || game.gameStartedAt || new Date(),
-            })
+            if (game.gameStartedAt) {
+                const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
+                    whiteTimeLeft: game.whiteTimeLeft,
+                    blackTimeLeft: game.blackTimeLeft,
+                    currentTurn: game.currentTurn,
+                    lastMoveAt: game.lastMoveAt ? new Date(game.lastMoveAt) : new Date(game.gameStartedAt),
+                })
+                state.players.white.timeLeft = whiteTimeLeft
+                state.players.black.timeLeft = blackTimeLeft
+            }
 
             state.fen = game.currentFen
-            state.players.white.timeLeft = whiteTimeLeft
-            state.players.black.timeLeft = blackTimeLeft
             state.currentTurn = game.currentTurn
             state.gameOver = getGameOverState(chess)
             state.currentTurn = game.currentTurn

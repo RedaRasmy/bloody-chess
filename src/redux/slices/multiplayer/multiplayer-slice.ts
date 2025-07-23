@@ -28,7 +28,6 @@ const multiplayerSlice = createSlice({
             state.blackId = game.blackId
         },
         sync: (state, action: PayloadAction<Game>) => {},
-        makeMove: (state, action: PayloadAction<MoveType>) => {},
     },
 })
 

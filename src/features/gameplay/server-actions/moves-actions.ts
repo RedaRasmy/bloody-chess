@@ -36,10 +36,10 @@ export async function makeMove({
             "You cant make a move while game is not started yet : lastMoveAt and gameCreatedAt are null"
         )
 
-    const { black, white } = calculateTimeLeft({
+    const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
         blackTimeLeft: game.whiteTimeLeft,
         whiteTimeLeft: game.blackTimeLeft,
-        lastMoveAt,
+        lastMoveAt : new Date(lastMoveAt),
         currentTurn: game.currentTurn,
     })
 
@@ -65,9 +65,9 @@ export async function makeMove({
         .set({
             currentFen: chess.fen(),
             currentTurn: chess.turn(),
-            whiteTimeLeft: white,
-            blackTimeLeft: black,
-            lastMoveAt: new Date(),
+            whiteTimeLeft,
+            blackTimeLeft,
+            lastMoveAt: Date.now(),
             gameOverReason: gameOverCause,
             status: isGameOver ? "finished" : "playing",
             result: isGameOver

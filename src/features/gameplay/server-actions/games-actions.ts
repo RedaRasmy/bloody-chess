@@ -45,13 +45,17 @@ export async function startGameIfExists({
             .set({
                 blackId: playerId,
                 status: "playing",
-                gameStartedAt: new Date(),
+                gameStartedAt: Date.now(),
             })
             .where(eq(games.id, newGame.id))
             .returning()
 
         const startedGame = startedGames[0]
-        return startedGame as StartedGame
+        return {
+            ...startedGame,
+            createdAt: startedGame.createdAt.getTime(),
+            updatedAt: startedGame.updatedAt.getTime(),
+        } as StartedGame
     }
 }
 
@@ -113,6 +117,8 @@ export async function getFullGame(id: string): Promise<FullGame> {
             isForGuests: true,
             white,
             black,
+            createdAt: game.createdAt.getTime(),
+            updatedAt: game.updatedAt.getTime(),
         }
     } else {
         const white = await getPlayer(whiteId)
@@ -125,6 +131,8 @@ export async function getFullGame(id: string): Promise<FullGame> {
             isForGuests: false,
             white,
             black,
+            createdAt: game.createdAt.getTime(),
+            updatedAt: game.updatedAt.getTime(),
         }
     }
 }

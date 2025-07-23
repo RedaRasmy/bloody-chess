@@ -14,7 +14,6 @@ import {
     selectMultiplayerOptions,
 } from "@/redux/slices/game-options"
 import SelectTimer from "./select-timer"
-import { TIMER_OPTIONS } from "../utils/constantes"
 import { useRouter } from "next/navigation"
 import useGameSearching from "../hooks/use-game-searching"
 import { getGuest } from "../server-actions/guest-actions"

@@ -11,7 +11,8 @@ import ChessBoard from "@/features/gameplay/components/chess-board"
 
 export default function Page() {
     const params = useParams()
-    const gameId = params.id as string
+    const gameId = params.gameid as string
+    console.log('gameId in path :',gameId)
     const {
         move,
         playerColor

@@ -63,10 +63,11 @@ export default function Timer({
 
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
-    const hundredMs = Math.floor((time % 1000) / 100)
+    // const hundredMs = Math.floor((time % 1000) / 100)
 
     useEffect(() => {
         if (time <= 0) {
+            console.log('timeout , time =',time)
             dispatch(timeOut())
         }
     }, [time, dispatch])
@@ -74,7 +75,7 @@ export default function Timer({
     return (
         <div className="bg-gray-300 py-0.5 px-3 rounded-md font-bold">
             {minutes}:{seconds.toString().padStart(2, "0")}
-            {time <= timeLeft * 100 && <>:{hundredMs}</>}
+            {/* {time <= timeLeft * 100 && <>:{hundredMs}</>} */}
         </div>
     )
 }

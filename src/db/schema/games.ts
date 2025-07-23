@@ -1,4 +1,4 @@
-import { pgTable, uuid, pgEnum, boolean, text ,integer , timestamp } from "drizzle-orm/pg-core"
+import { pgTable, uuid, pgEnum, boolean, text ,integer , timestamp, bigint } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 
 import { timestamps } from "@/utils/timestamps"
@@ -31,8 +31,8 @@ const games = pgTable("games", {
     currentTurn: colorsEnum("current_turn").notNull(),
     whiteTimeLeft: integer('white_time_left').notNull(), 
     blackTimeLeft: integer("black_time_left").notNull(), 
-    lastMoveAt: timestamp("last_move_at"), 
-    gameStartedAt : timestamp("game_start_at"),
+    lastMoveAt: bigint('last_move_at', { mode: 'number' }), 
+    gameStartedAt : bigint('game_started_at', { mode: 'number' }),
     ...timestamps,
 })
 export default games

@@ -93,7 +93,9 @@ export function supabaseToTypescript<T = any>(obj: any): T {
 
             // Handle date strings (common in Supabase)
             if (typeof value === "string" && isDateString(value)) {
-                converted[camelKey] = new Date(value)
+                converted[camelKey] = new Date(value).getTime()
+            } else if (value instanceof Date) {
+                converted[camelKey] = value.getTime()
             } else {
                 converted[camelKey] = supabaseToTypescript(value)
             }

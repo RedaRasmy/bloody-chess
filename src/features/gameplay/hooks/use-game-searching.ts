@@ -110,9 +110,9 @@ export default function useGameSearching({
                                 console.log("=== RECEIVED UPDATE ===")
                                 console.log("Payload:", payload)
 
-                        
                                 
                                 const newGame = supabaseToTypescript<StartedGame>(payload.new)
+
                                 console.log("New game data:", payload.new)
                                 
                                 // Clean up subscription before redirecting

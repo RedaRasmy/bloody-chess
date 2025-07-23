@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1752834492033,
-      "tag": "0000_big_genesis",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1752835380573,
-      "tag": "0001_quick_rictor",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1752862884849,
-      "tag": "0002_tranquil_lady_ursula",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1752935830218,
-      "tag": "0003_outstanding_phalanx",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1752956546245,
-      "tag": "0004_melted_bishop",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1752959514761,
-      "tag": "0005_gigantic_ultimates",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1753106178270,
-      "tag": "0006_gigantic_karen_page",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1753126184835,
-      "tag": "0007_clean_corsair",
+      "when": 1753292229306,
+      "tag": "0000_concerned_aaron_stack",
       "breakpoints": true
     }
   ]

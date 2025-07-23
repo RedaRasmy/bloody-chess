@@ -8,10 +8,12 @@ export type Guest = InferSelectModel<typeof s.guests>
 export type SMove = InferSelectModel<typeof s.moves>
 
 export type StartedGame = Prettify<
-    Game & {
+    Omit<Game, "createdAt" | "updatedAt"> & {
         whiteId: string
         blackId: string
-        gameStartedAt: Date
+        gameStartedAt: number
+        createdAt: number
+        updatedAt: number
     }
 >
 
