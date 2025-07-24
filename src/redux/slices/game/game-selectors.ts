@@ -1,6 +1,6 @@
 import { RootState } from "@/redux/store"
 import { createSelector } from "@reduxjs/toolkit"
-import { Color } from "chess.js"
+// import { Color } from "chess.js"
 
 export const selectPieces = (state: RootState) => state.game.pieces
 export const selectFEN = (state: RootState) => state.game.fen

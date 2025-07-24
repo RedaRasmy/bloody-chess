@@ -1,6 +1,6 @@
 import { GameOverState } from "@/redux/slices/game/game-types"
 import { Chess } from "chess.js"
-import { DrawReason, WinReason } from "../types"
+import { DrawReason } from "../types"
 
 export function getGameoverCause({
     isCheckmate,

@@ -8,6 +8,6 @@ export type CamelToSnakeCase<S extends string> =
   `${T extends Capitalize<T> ? "_" : ""}${Lowercase<T>}${CamelToSnakeCase<U>}` :
   S
 
-type SnakeToCamelCaseNested<T> = T extends object ? {
+export type SnakeToCamelCaseNested<T> = T extends object ? {
   [K in keyof T as SnakeToCamelCase<K & string>]: SnakeToCamelCaseNested<T[K]>
 } : T

@@ -1,4 +1,4 @@
-import { FullGame, Game, StartedGame } from "@/db/types"
+import { FullGame, StartedGame } from "@/db/types"
 import { MoveType } from "@/features/gameplay/types"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
@@ -27,7 +27,9 @@ const multiplayerSlice = createSlice({
             state.whiteId = game.whiteId
             state.blackId = game.blackId
         },
-        sync: (state, action: PayloadAction<StartedGame>) => {},
+        sync: (state, action: PayloadAction<StartedGame>) => {
+            state.gameId = action.payload.id
+        },
     },
 })
 

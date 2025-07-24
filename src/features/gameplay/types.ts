@@ -1,6 +1,6 @@
 import { Color, PieceSymbol, Square } from "chess.js"
 import { GAMEOVER_REASONS, TIMER_OPTIONS } from "./utils/constantes"
-import { Prettify } from "@/utils/global-types"
+// import { Prettify } from "@/utils/global-types"
 
 export type BoardElement = {
     square: Square

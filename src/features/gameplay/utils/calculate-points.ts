@@ -10,7 +10,7 @@ export default function calculatePoints(pieces: Piece[]): number {
         k: 0,
     }
     return pieces.reduce(
-        (total, piece, i) => total + (valueByPieceSymbol[piece.type]),
+        (total, piece) => total + (valueByPieceSymbol[piece.type]),
         0
     )
 }

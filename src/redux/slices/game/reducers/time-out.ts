@@ -13,7 +13,6 @@ export const timeOut = (state: WritableDraft<GameState>) => {
         }
 
         // Stop all timers by setting current time
-        const now = Date.now()
         if (
             state.currentTurn === "w" &&
             state.players.white.timeLeft !== null
@@ -25,6 +24,5 @@ export const timeOut = (state: WritableDraft<GameState>) => {
         ) {
             state.players.black.timeLeft = 0
         }
-        // state.lastMoveAt = now
     }
 }

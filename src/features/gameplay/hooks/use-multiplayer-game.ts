@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { MoveType } from "../types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { move as localMove } from "@/redux/slices/game/game-slice"
-import { Game, SMove, StartedGame } from "@/db/types"
+import {  SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../server-actions/moves-actions"
 import { getFullGame } from "../server-actions/games-actions"
 import usePlayer from "./use-player"
@@ -100,12 +100,7 @@ export const useMultiplayerGame = (gameId: string) => {
         }
     }, [gameId])
 
-    useEffect(() => {})
-
     const move = async (mv: MoveType) => {
-        // Optimistic update
-        // dispatch(localMove(mv))
-
         try {
             // Insert to Supabase
 
@@ -114,6 +109,8 @@ export const useMultiplayerGame = (gameId: string) => {
                 gameId,
             })
         } catch (err) {
+            console.error(err)
+            // TODO!
             //   dispatch(rollbackMove())
         }
     }
