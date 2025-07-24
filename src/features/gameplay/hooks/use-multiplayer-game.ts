@@ -8,7 +8,7 @@ import {  SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../server-actions/moves-actions"
 import { getFullGame } from "../server-actions/games-actions"
 import usePlayer from "./use-player"
-import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
+import { selectFEN, selectPlayerColor } from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 
 export const useMultiplayerGame = (gameId: string) => {
@@ -19,18 +19,21 @@ export const useMultiplayerGame = (gameId: string) => {
     const [isLoading, setIsLoading] = useState(true)
     const [newGame, setNewGame] = useState<StartedGame | null>(null)
     const [newMove, setNewMove] = useState<SMove | null>(null)
+    const fen = useAppSelector(selectFEN)
 
     useEffect(() => {
         if (newGame && newMove) {
             console.log("[✔] Both game + move received.")
             console.log("sync...")
-            dispatch(
-                localMove({
-                    from: newMove.from,
-                    to: newMove.to,
-                    promotion: newMove.promotion || undefined,
-                })
-            )
+            if (fen !== newGame.currentFen) {
+                dispatch(
+                    localMove({
+                        from: newMove.from,
+                        to: newMove.to,
+                        promotion: newMove.promotion || undefined,
+                    })
+                )
+            }
             dispatch(sync(newGame))
             setNewGame(null)
             setNewMove(null)
