@@ -5,6 +5,7 @@ import { getGuest, createGuest } from "../server-actions/guest-actions"
 import { Player, Guest } from "@/db/types"
 import { useLocalStorage } from "usehooks-ts"
 import tryCatch from "@/utils/try-catch"
+import { serializeTimestamps } from "@/utils/serialize"
 
 type Loading = {
     type: "loading"
@@ -39,8 +40,7 @@ export default function usePlayer(): Result {
                         throw new Error(
                             "Player not exists in DB! id=" + playerId
                         )
-
-                    setPlayer(playerData)
+                    setPlayer(serializeTimestamps(playerData))
                     console.log("player : ", playerData)
                 } else {
                     if (guestId !== "") {
@@ -51,16 +51,16 @@ export default function usePlayer(): Result {
                             // create new one
                             const newGuest = await createGuest()
                             setGuestId(newGuest.id)
-                            setGuest(newGuest)
+                            setGuest(serializeTimestamps(newGuest))
                         } else {
-                            setGuest(guest)
+                            setGuest(serializeTimestamps(guest))
                             console.log("guest : ", guest)
                         }
                     } else {
                         // create new one
                         const newGuest = await createGuest()
                         setGuestId(newGuest.id)
-                        setGuest(newGuest)
+                        setGuest(serializeTimestamps(newGuest))
                     }
                 }
             } catch (error) {

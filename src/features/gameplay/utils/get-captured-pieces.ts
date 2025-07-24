@@ -1,20 +1,21 @@
-import { SMove } from "@/db/types"
-import { PieceSymbol } from "chess.js"
-import { CapturedPieces } from "../types"
+import { Chess, PieceSymbol } from "chess.js"
+import { CapturedPieces, MoveType } from "../types"
 import parseCapturedPieces from "./parse-captured-pieces"
 
-export function getCapturedPieces(moves: SMove[]): CapturedPieces {
+export function getCapturedPieces(moves: MoveType[]): CapturedPieces {
     const captured: { white: PieceSymbol[]; black: PieceSymbol[] } = {
         white: [],
         black: [],
     }
+    const chess = new Chess()
 
     moves.forEach((move) => {
-        if (move.capturedPiece) {
-            if (move.playerColor === "b") {
-                captured.white.push(move.capturedPiece)
+        const Move = chess.move(move)
+        if (Move.captured) {
+            if (Move.color === "b") {
+                captured.white.push(Move.captured)
             } else {
-                captured.black.push(move.capturedPiece)
+                captured.black.push(Move.captured)
             }
         }
     })

@@ -14,11 +14,11 @@ export function onSetup(
 ) {
     const { game, playerId } = action.payload
     const whiteName = game.isForGuests
-        ? game.white.displayName
-        : game.white.username
+        ? game.whiteName
+        : game.whiteName
     const blackName = game.isForGuests
-        ? game.black.displayName
-        : game.black.username
+        ? game.blackName
+        : game.blackName
     const playerColor = game.whiteId === playerId ? "w" : "b"
 
     const capturedPieces = getCapturedPieces(game.moves)
@@ -32,7 +32,7 @@ export function onSetup(
         from: mv.from as Square,
         to: mv.to as Square,
         promotion: mv.promotion || undefined,
-        fenAfter: mv.fenAfter,
+        fenAfter: '', // for now  
     }))
     state.players = {
         white: {
