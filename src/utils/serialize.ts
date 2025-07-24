@@ -1,16 +1,18 @@
-// export const serializeTimestamps = <T extends Record<string, any>>(obj: T) => {
-//   const result = { ...obj };
+export const serializeTimestamps = <T extends Record<string, any>>(
+  obj: T
+): { [K in keyof T]: T[K] extends Date ? number : T[K] } => {
+  const result = { ...obj } as any;
   
-//   Object.keys(result).forEach(key => {
-//     if (result[key] instanceof Date) {
-//       result[key] = result[key].getTime();
-//     }
-//   });
+  Object.keys(result).forEach(key => {
+    if (result[key] instanceof Date) {
+      result[key] = result[key].getTime();
+    }
+  });
   
-//   return result;
-// };
+  return result;
+};
 
-// export const deserializeTimestamps = <T extends Record<string, any>>(
+// export const deserializeTimestamps = <T extends Record<string, unknown>>(
 //   obj: T, 
 //   dateFields: (keyof T)[]
 // ) => {

@@ -4,34 +4,57 @@ import { useEffect, useState } from "react"
 import { MoveType } from "../types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { move as localMove } from "@/redux/slices/game/game-slice"
-import { Game } from "@/db/types"
+import { Game, SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../server-actions/moves-actions"
 import { getFullGame } from "../server-actions/games-actions"
 import usePlayer from "./use-player"
 import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
+import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
     const multiplayerState = useAppSelector((state) => state.multiplayer)
     const playerColor = useAppSelector(selectPlayerColor)
     const player = usePlayer()
-    const [isLoading,setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(true)
+    const [newGame, setNewGame] = useState<StartedGame | null>(null)
+    const [newMove, setNewMove] = useState<SMove | null>(null)
 
-    useEffect(() => { 
-        if (player.type !== 'loading') {
-            const {data} = player
-            async function setState(){
-                console.log('setuping the game ...')
+    useEffect(() => {
+        if (newGame && newMove) {
+            console.log("[✔] Both game + move received.")
+            console.log("sync...")
+            dispatch(
+                localMove({
+                    from: newMove.from,
+                    to: newMove.to,
+                    promotion: newMove.promotion || undefined,
+                })
+            )
+            dispatch(sync(newGame))
+            setNewGame(null)
+            setNewMove(null)
+            console.log("sync done")
+        }
+    }, [newGame, newMove])
+
+    useEffect(() => {
+        if (player.type !== "loading") {
+            const { data } = player
+            async function setState() {
+                console.log("setuping the game ...")
                 const game = await getFullGame(gameId)
-                dispatch(setup({
-                    game ,
-                    playerId : data.id
-                }))
+                dispatch(
+                    setup({
+                        game,
+                        playerId: data.id,
+                    })
+                )
                 setIsLoading(false)
             }
             setState()
         }
-     },[player.type])
+    }, [player.type])
 
     useEffect(() => {
         // Subscribe to game updates
@@ -46,7 +69,12 @@ export const useMultiplayerGame = (gameId: string) => {
                     filter: `id=eq.${gameId}`,
                 },
                 (payload) => {
-                    dispatch(sync(payload.new as Game))
+                    console.log("NEW UPDATE IN [[ GAMES ]] TABEL RECEIVED")
+                    const newGame = supabaseToTypescript<StartedGame>(
+                        payload.new
+                    )
+                    console.log("new Game : ", newGame)
+                    setNewGame(newGame)
                 }
             )
             .on(
@@ -58,8 +86,11 @@ export const useMultiplayerGame = (gameId: string) => {
                     filter: `game_id=eq.${gameId}`,
                 },
                 (payload) => {
-                    
-                    //   dispatch(addMove(payload.new))
+                    console.log("NEW UPDATE IN [[ MOVES ]] TABEL RECEIVED")
+                    const newMove = supabaseToTypescript<SMove>(payload.new)
+
+                    console.log("new move : ", newMove)
+                    setNewMove(newMove)
                 }
             )
             .subscribe()
@@ -69,6 +100,8 @@ export const useMultiplayerGame = (gameId: string) => {
         }
     }, [gameId])
 
+    useEffect(() => {})
+
     const move = async (mv: MoveType) => {
         // Optimistic update
         // dispatch(localMove(mv))
@@ -76,15 +109,14 @@ export const useMultiplayerGame = (gameId: string) => {
         try {
             // Insert to Supabase
 
-            const response = await makeMove({
-                move : mv,
+            await makeMove({
+                move: mv,
                 gameId,
             })
-
         } catch (err) {
             //   dispatch(rollbackMove())
         }
     }
 
-    return { multiplayerState, move , playerColor  , isSetuping : isLoading }
+    return { multiplayerState, move, playerColor, isSetuping: isLoading }
 }

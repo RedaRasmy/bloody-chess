@@ -1,19 +1,23 @@
-import { Prettify } from "@/utils/global-types"
+import { Prettify, SerializedTimestamps } from "@/utils/global-types"
 import * as s from "./schema"
 import { type InferSelectModel } from "drizzle-orm"
+import { Square } from "chess.js"
 
-export type Player = InferSelectModel<typeof s.players>
-export type Game = InferSelectModel<typeof s.games>
-export type Guest = InferSelectModel<typeof s.guests>
-export type SMove = InferSelectModel<typeof s.moves>
+export type Player = SerializedTimestamps<InferSelectModel<typeof s.players>>
+export type Game = SerializedTimestamps<InferSelectModel<typeof s.games>>
+export type Guest = SerializedTimestamps<InferSelectModel<typeof s.guests>>
+export type SMove = Prettify<SerializedTimestamps<InferSelectModel<typeof s.moves>> & {
+    from : Square
+    to : Square
+}>
+
+
 
 export type StartedGame = Prettify<
-    Omit<Game, "createdAt" | "updatedAt"> & {
+    Game & {
         whiteId: string
         blackId: string
-        gameStartedAt: number
-        createdAt: number
-        updatedAt: number
+        gameStartedAt : number
     }
 >
 
