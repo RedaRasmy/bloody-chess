@@ -22,55 +22,76 @@ export default function Timer({
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
-    const [time, setTime] = useState(timeLeft)
+    const [displayTime, setDisplayTime] = useState(timeLeft)
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
     const startTimeRef = useRef<number | null>(null)
+    const lastUpdateRef = useRef<number>(Date.now())
 
-    const isRunning = currentPlayer === playerColor && !isGameOver
 
-    const [didPlay, setDidPlay] = useState(false)
+    const isMyTurn = currentPlayer === playerColor && !isGameOver
+
+    // Sync display time with Redux store
+    useEffect(() => {
+        setDisplayTime(timeLeft)
+        lastUpdateRef.current = Date.now()
+    }, [timeLeft, isNewGame])
+
+    // useEffect(() => {
+    //     if (!isGameOver) {
+    //         setTime(timeLeft)
+    //     }
+    // }, [isGameOver, timeLeft, isNewGame])
 
     useEffect(() => {
-        if (!isGameOver) {
-            setTime(timeLeft)
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current)
         }
-    }, [isGameOver, timeLeft, isNewGame])
-
-    useEffect(() => {
-        if (isRunning) {
-            setDidPlay(true)
+        if (isMyTurn && timeLeft > 0) {
+            lastUpdateRef.current = Date.now()
             startTimeRef.current = Date.now()
             intervalRef.current = setInterval(() => {
                 const now = Date.now()
-                const elapsed = now - (startTimeRef.current || now)
-                setTime((prev) => Math.max(prev - elapsed, 0))
-                startTimeRef.current = now
+                const elapsed = now - lastUpdateRef.current
+                // setTime((prev) => Math.max(prev - elapsed, 0))
+                setDisplayTime((prev) => {
+                    const newTime = Math.max(prev - elapsed, 0)
+
+                    // Dispatch timeout if time runs out
+                    if (newTime <= 0 && prev > 0) {
+                        console.log(`Timeout for ${playerColor}:`, newTime)
+                        dispatch(timeOut())
+                    }
+
+                    return newTime
+                })
+                lastUpdateRef.current = now
             }, 100)
-        } else if (!isRunning && didPlay) {
-            setTime((prev) => prev + plus * 1000)
-            // update timings
         }
+        // else if (!isMyTurn && (lastUpdateRef.current > Date.now())) {
+        //     setTime((prev) => prev + plus * 1000)
+        //     // update timings
+        // }
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current)
-            startTimeRef.current = null
         }
-    }, [isRunning, plus, didPlay])
+    }, [isMyTurn, plus, timeLeft, playerColor])
+
+    // Clean up on game over
+    useEffect(() => {
+        if (isGameOver && intervalRef.current) {
+            clearInterval(intervalRef.current)
+        }
+    }, [isGameOver])
 
     const dispatch = useAppDispatch()
 
-    const totalSeconds = Math.floor(time / 1000)
+    const totalSeconds = Math.floor(displayTime  / 1000)
 
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
     // const hundredMs = Math.floor((time % 1000) / 100)
 
-    useEffect(() => {
-        if (time <= 0) {
-            console.log('timeout , time =',time)
-            dispatch(timeOut())
-        }
-    }, [time, dispatch])
 
     return (
         <div className="bg-gray-300 py-0.5 px-3 rounded-md font-bold">

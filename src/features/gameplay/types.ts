@@ -53,11 +53,7 @@ export type MoveType = {
     promotion?: PieceSymbol
 }
 
-export type History = Prettify<
-    MoveType & {
-        fenAfter: string
-    }
->[]
+
 
 export type ChessTimer = {
     type: "bullet" | "blitz" | "rapid"

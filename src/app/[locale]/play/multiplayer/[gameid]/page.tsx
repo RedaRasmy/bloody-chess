@@ -15,10 +15,14 @@ export default function Page() {
     console.log('gameId in path :',gameId)
     const {
         move,
-        playerColor
+        playerColor,
+        isSetuping
     } = useMultiplayerGame(gameId)
 
+    
     const opponentColor = oppositeColor(playerColor)
+
+    if (isSetuping) return <div>loading...</div>
 
     return (
         <GameLayout

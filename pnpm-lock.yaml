@@ -74,6 +74,9 @@ importers:
       drizzle-zod:
         specifier: ^0.8.2
         version: 0.8.2(drizzle-orm@0.44.3(@neondatabase/serverless@1.0.1)(@types/pg@8.15.4)(postgres@3.4.7))(zod@3.25.61)
+      immer:
+        specifier: ^10.1.1
+        version: 10.1.1
       install:
         specifier: ^0.13.0
         version: 0.13.0

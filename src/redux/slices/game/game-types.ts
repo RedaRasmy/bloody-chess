@@ -1,4 +1,5 @@
-import { DrawReason, WinReason } from "@/features/gameplay/types"
+import { BoardElement, CapturedPieces, ChessTimerOption, DetailedPiece, DrawReason, LegalMoves, MoveType, WinReason } from "@/features/gameplay/types"
+import { Prettify } from "@/utils/global-types"
 import { Color } from "chess.js"
 
 export type GameOverState = {
@@ -23,4 +24,41 @@ export type Timings = {
     blackTimeLeft : number | null
     gameStartedAt : number | null
     lastMoveAt : number | null
+}
+
+export type History = Prettify<
+    MoveType & {
+        fenAfter: string
+    }
+>[]
+
+export type GameState = {
+    fen: string;
+    history: History;
+    isCheck: boolean;
+    currentTurn: Color;
+    playerColor: Color;
+    currentMoveIndex: number;
+    legalMoves: LegalMoves;
+    pieces: DetailedPiece[];
+    activePiece: BoardElement;
+    timerOption: ChessTimerOption | null;
+    players: {
+        white: {
+            name: string;
+            timeLeft: number | null;
+            capturedPieces: CapturedPieces["w"];
+            extraPoints: number;
+        };
+        black: {
+            name: string;
+            timeLeft: number | null;
+            capturedPieces: CapturedPieces["b"];
+            extraPoints: number;
+        };
+    };
+    gameOver: GameOverState;
+    newGame: boolean;
+    lastMoveAt: number | null;
+    gameStartedAt: number | null;
 }

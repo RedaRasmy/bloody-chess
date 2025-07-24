@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { supabase } from "@/utils/supabase/client"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { MoveType } from "../types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { move as localMove } from "@/redux/slices/game/game-slice"
@@ -15,17 +15,19 @@ export const useMultiplayerGame = (gameId: string) => {
     const multiplayerState = useAppSelector((state) => state.multiplayer)
     const playerColor = useAppSelector(selectPlayerColor)
     const player = usePlayer()
+    const [isLoading,setIsLoading] = useState(true)
 
     useEffect(() => { 
-        if (multiplayerState.gameId === '' && player.type !== 'loading') {
+        if (player.type !== 'loading') {
             const {data} = player
             async function setState(){
-                console.log('No gameId in state , setuping full game ...')
+                console.log('setuping the game ...')
                 const game = await getFullGame(gameId)
                 dispatch(setup({
                     game ,
                     playerId : data.id
                 }))
+                setIsLoading(false)
             }
             setState()
         }
@@ -84,5 +86,5 @@ export const useMultiplayerGame = (gameId: string) => {
         }
     }
 
-    return { multiplayerState, move , playerColor }
+    return { multiplayerState, move , playerColor  , isSetuping : isLoading }
 }

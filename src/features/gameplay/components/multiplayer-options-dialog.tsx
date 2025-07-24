@@ -16,9 +16,6 @@ import {
 import SelectTimer from "./select-timer"
 import { useRouter } from "next/navigation"
 import useGameSearching from "../hooks/use-game-searching"
-import { getGuest } from "../server-actions/guest-actions"
-import { setup } from "@/redux/slices/multiplayer/multiplayer-slice"
-import { getPlayer } from "../server-actions/player-actions"
 
 export default function MultiplayerOptionsDialog() {
     const MULTIPLAYER_PATH = "play/multiplayer/"
@@ -26,49 +23,51 @@ export default function MultiplayerOptionsDialog() {
     const { timer } = useAppSelector(selectMultiplayerOptions)
     const dispatch = useAppDispatch()
 
-    const { searchTimer, isSearching, startSearch, cancelSearch } =
+    const { searchTimer , isSearching, startSearch, cancelSearch } =
         useGameSearching({
             timerOption: timer,
-            onGameFound: async (game, { data }) => {
+            onGameFound: async (game, {}) => {
                 router.push(MULTIPLAYER_PATH + game.id)
+                // setup only in game page for simplicity
+
                 // setup the game
-                console.log('setuping the full game...')
-                console.log('the game getting from onGameFound : ',game)
-                console.log("isForGuests = " +game.isForGuests)
-                const playerId = data.id
-                if ("displayName" in data) { // if guest
-                    console.log("fetching guests ...")
-                    const white = playerId === game.whiteId ? data : await getGuest(game.whiteId)
-                    const black = playerId === game.blackId ? data : await getGuest(game.blackId)
-                    dispatch(
-                        setup({
-                            game: {
-                                ...game,
-                                isForGuests: true,
-                                white,
-                                black,
-                                moves : [], // no moves yet
-                            },
-                            playerId: data.id,
-                        })
-                    )
-                } else {
-                    console.log("fetching players ...")
-                    const white = playerId === game.whiteId ? data : await getPlayer(game.whiteId)
-                    const black = playerId === game.whiteId ? data : await getPlayer(game.blackId)
-                    dispatch(
-                        setup({
-                            game: {
-                                ...game,
-                                isForGuests: false,
-                                white,
-                                black,
-                                moves : [], // no moves yet
-                            },
-                            playerId: data.id,
-                        })
-                    )
-                }
+                // console.log('setuping the full game...')
+                // console.log('the game getting from onGameFound : ',game)
+                // console.log("isForGuests = " +game.isForGuests)
+                // const playerId = data.id
+                // if ("displayName" in data) { // if guest
+                //     console.log("fetching guests ...")
+                //     const white = playerId === game.whiteId ? data : await getGuest(game.whiteId)
+                //     const black = playerId === game.blackId ? data : await getGuest(game.blackId)
+                //     dispatch(
+                //         setup({
+                //             game: {
+                //                 ...game,
+                //                 isForGuests: true,
+                //                 white,
+                //                 black,
+                //                 moves : [], // no moves yet
+                //             },
+                //             playerId: data.id,
+                //         })
+                //     )
+                // } else {
+                //     console.log("fetching players ...")
+                //     const white = playerId === game.whiteId ? data : await getPlayer(game.whiteId)
+                //     const black = playerId === game.whiteId ? data : await getPlayer(game.blackId)
+                //     dispatch(
+                //         setup({
+                //             game: {
+                //                 ...game,
+                //                 isForGuests: false,
+                //                 white,
+                //                 black,
+                //                 moves : [], // no moves yet
+                //             },
+                //             playerId: data.id,
+                //         })
+                //     )
+                // }
             },
         })
 

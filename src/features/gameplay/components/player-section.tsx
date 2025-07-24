@@ -32,7 +32,7 @@ export default function PlayerSection({ color }: { color: Color }) {
                 {extraPoints > 0 && <p>+{extraPoints}</p>}
             </div>
             <div>
-                {timeLeft && <Timer timeLeft={timeLeft} playerColor={color} />}
+                {timeLeft !== null && <Timer timeLeft={timeLeft} playerColor={color} />}
             </div>
         </div>
     )

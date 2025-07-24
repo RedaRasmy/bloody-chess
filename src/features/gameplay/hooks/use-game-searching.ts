@@ -22,7 +22,7 @@ export default function useGameSearching({
 }: {
     timerOption: ChessTimerOption
     maxDuration?: number
-    onGameFound: (game: StartedGame,player:{
+    onGameFound?: (game: StartedGame,player:{
         type : 'player' | "guest",
         data : Player | Guest
     }) => Promise<void>
@@ -122,17 +122,17 @@ export default function useGameSearching({
                                 }
 
                                 setIsSearching(false)
-                                onGameFound(newGame,{type,data})
+                                onGameFound?.(newGame,{type,data})
                             }
                         )
-                        .subscribe((status) => {
+                        .subscribe((status,err) => {
                             console.log("Subscription status:", status)
                             if (status === "SUBSCRIBED") {
                                 console.log(
                                     "Subscription is now active and ready!"
                                 )
                             } else if (status === "CHANNEL_ERROR") {
-                                console.error("Subscription error")
+                                console.error("Subscription error : ",err)
                             } else if (status === "TIMED_OUT") {
                                 console.error("Subscription timed out")
                             } else if (status === "CLOSED") {
@@ -144,7 +144,7 @@ export default function useGameSearching({
                     channelRef.current = channel
                 } else {
                     setIsSearching(false)
-                    await onGameFound(startedGame,{type,data})
+                    await onGameFound?.(startedGame,{type,data})
                 }
             } catch (error) {
                 console.error("Search error:", error)
