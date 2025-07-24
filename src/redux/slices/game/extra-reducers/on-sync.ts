@@ -3,18 +3,15 @@ import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left
 import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import getPieces from "@/features/gameplay/utils/get-pieces"
-import { RootState } from "@/redux/store"
 import { PayloadAction } from "@reduxjs/toolkit"
 import { Chess } from "chess.js"
 import { GameState } from "../game-types"
-import { WritableDraft } from 'immer'
+import { WritableDraft } from "immer"
 
 export const onSync = (
     state: WritableDraft<GameState>,
     action: PayloadAction<StartedGame>
 ) => {
-
-
     const game = action.payload
     const chess = new Chess(game.currentFen)
 

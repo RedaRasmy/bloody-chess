@@ -12,13 +12,7 @@ export default function getExtraPoints(pieces: Piece[]) {
         blackPoints > whitePoints ? blackPoints - whitePoints : 0
 
     return {
-        white: {
-            points: whitePoints,
-            extraPoints: whiteExtraPoints,
-        },
-        black: {
-            points: blackPoints,
-            extraPoints: blackExtraPoints,
-        },
+        whiteExtraPoints,
+        blackExtraPoints
     }
 }
