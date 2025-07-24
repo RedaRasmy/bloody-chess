@@ -13,12 +13,13 @@ export function onSetup(
     action: PayloadAction<{ game: FullGame; playerId: string }>
 ) {
     const { game, playerId } = action.payload
-    const whiteName = game.isForGuests
-        ? game.whiteName
-        : game.whiteName
-    const blackName = game.isForGuests
-        ? game.blackName
-        : game.blackName
+    console.log("Setup - White time left:", game.whiteTimeLeft)
+    console.log("Setup - Black time left:", game.blackTimeLeft)
+    console.log("Setup - Current turn:", game.currentTurn)
+    console.log("Setup - Player ID:", playerId)
+    console.log("Setup - White ID:", game.whiteId)
+    const whiteName = game.isForGuests ? game.whiteName : game.whiteName
+    const blackName = game.isForGuests ? game.blackName : game.blackName
     const playerColor = game.whiteId === playerId ? "w" : "b"
 
     const capturedPieces = getCapturedPieces(game.moves)
@@ -32,8 +33,9 @@ export function onSetup(
         from: mv.from as Square,
         to: mv.to as Square,
         promotion: mv.promotion || undefined,
-        fenAfter: '', // for now  
+        fenAfter: "", // for now
     }))
+
     state.players = {
         white: {
             name: whiteName,

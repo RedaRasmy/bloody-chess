@@ -106,11 +106,12 @@ export const useMultiplayerGame = (gameId: string) => {
     const move = async (mv: MoveType) => {
         try {
             // Insert to Supabase
-
+            console.log('sending move...')
             await makeMove({
                 move: mv,
                 gameId,
             })
+            console.log('move sent')
         } catch (err) {
             console.error(err)
             // TODO!

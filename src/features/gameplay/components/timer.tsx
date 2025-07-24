@@ -17,18 +17,23 @@ export default function Timer({
     timeLeft: number
     playerColor: Color
 }) {
+    const dispatch = useAppDispatch()
+
     const timerOption = useAppSelector(selectTimerOption)
-    const { plus } = timerOption ? parseTimerOption(timerOption) : { plus: 0 }
+    // const { plus } = timerOption ? parseTimerOption(timerOption) : { plus: 0 }
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
     const [displayTime, setDisplayTime] = useState(timeLeft)
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
-    const startTimeRef = useRef<number | null>(null)
+    // const startTimeRef = useRef<number | null>(null)
     const lastUpdateRef = useRef<number>(Date.now())
 
 
     const isMyTurn = currentPlayer === playerColor && !isGameOver
+
+    // console.log('timer - playerColor (this client) : ',playerColor)
+    // console.log('timer - currentPlayer (currentTurn) : ',currentPlayer)
 
     // Sync display time with Redux store
     useEffect(() => {
@@ -36,11 +41,6 @@ export default function Timer({
         lastUpdateRef.current = Date.now()
     }, [timeLeft, isNewGame])
 
-    // useEffect(() => {
-    //     if (!isGameOver) {
-    //         setTime(timeLeft)
-    //     }
-    // }, [isGameOver, timeLeft, isNewGame])
 
     useEffect(() => {
         if (intervalRef.current) {
@@ -48,11 +48,10 @@ export default function Timer({
         }
         if (isMyTurn && timeLeft > 0) {
             lastUpdateRef.current = Date.now()
-            startTimeRef.current = Date.now()
+            // startTimeRef.current = Date.now()
             intervalRef.current = setInterval(() => {
                 const now = Date.now()
                 const elapsed = now - lastUpdateRef.current
-                // setTime((prev) => Math.max(prev - elapsed, 0))
                 setDisplayTime((prev) => {
                     const newTime = Math.max(prev - elapsed, 0)
 
@@ -74,8 +73,10 @@ export default function Timer({
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current)
+            intervalRef.current = null
+
         }
-    }, [isMyTurn, plus, timeLeft, playerColor])
+    }, [isMyTurn, timeLeft, playerColor])
 
     // Clean up on game over
     useEffect(() => {
@@ -84,7 +85,6 @@ export default function Timer({
         }
     }, [isGameOver])
 
-    const dispatch = useAppDispatch()
 
     const totalSeconds = Math.floor(displayTime  / 1000)
 
