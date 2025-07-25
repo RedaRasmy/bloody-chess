@@ -3,7 +3,7 @@ import { GameState } from "../game-types"
 import { MoveType } from "@/features/gameplay/types"
 import { PayloadAction } from "@reduxjs/toolkit"
 import { Chess } from "chess.js"
-import safeMove from "@/features/gameplay/utils/safe-move"
+// import safeMove from "@/features/gameplay/utils/safe-move"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 import getDetailedMove from "@/features/gameplay/utils/get-detailed-move"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
@@ -18,21 +18,29 @@ export function move(
     state: WritableDraft<GameState>,
     action: PayloadAction<MoveType>
 ) {
-    if (
-        state.gameOver.isGameOver ||
-        state.currentMoveIndex < state.history.length - 1
-    )
-        return
-
-    const move = action.payload
-    const chess = new Chess()
-    const validatedMove = safeMove(chess, move)
-    if (!validatedMove) {
+    if (state.gameOver.isGameOver) {
+        console.log("cant move , game is over!")
         return
     }
+    if (state.currentMoveIndex < state.history.length - 1) {
+        console.log("cant move while undo !")
+        return
+    }
+    const move = action.payload
+    const chess = new Chess()
+    state.history.forEach((mv) => chess.move({
+        from : mv.from,
+        to : mv.to,
+        promotion : mv.promotion
+    }))
+
+    const validatedMove = chess.move(move)
+    // const validatedMove = safeMove(chess, move)
+    // if (!validatedMove) {
+    //     return
+    // }
     const playerColor = validatedMove.color
 
-    state.history.forEach((mv) => chess.move(mv))
 
     const { plus } = state.timerOption
         ? parseTimerOption(state.timerOption)

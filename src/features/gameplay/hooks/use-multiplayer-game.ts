@@ -2,13 +2,13 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { supabase } from "@/utils/supabase/client"
 import { useEffect, useState } from "react"
 import { MoveType } from "../types"
-import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
+import { setup } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { move as localMove } from "@/redux/slices/game/game-slice"
 import {  SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../server-actions/moves-actions"
 import { getFullGame } from "../server-actions/games-actions"
 import usePlayer from "./use-player"
-import { selectFEN, selectPlayerColor } from "@/redux/slices/game/game-selectors"
+import {  selectPlayerColor } from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 
 export const useMultiplayerGame = (gameId: string) => {
@@ -19,13 +19,13 @@ export const useMultiplayerGame = (gameId: string) => {
     const [isLoading, setIsLoading] = useState(true)
     const [newGame, setNewGame] = useState<StartedGame | null>(null)
     const [newMove, setNewMove] = useState<SMove | null>(null)
-    const fen = useAppSelector(selectFEN)
 
     useEffect(() => {
         if (newGame && newMove) {
             console.log("[✔] Both game + move received.")
-            console.log("sync...")
-            if (fen !== newGame.currentFen) {
+            // console.log("sync...")
+            if (newMove.playerColor !== playerColor) {
+                console.log('run other player move :',newMove)
                 dispatch(
                     localMove({
                         from: newMove.from,
@@ -34,10 +34,10 @@ export const useMultiplayerGame = (gameId: string) => {
                     })
                 )
             }
-            dispatch(sync(newGame))
+            // dispatch(sync(newGame))
             setNewGame(null)
             setNewMove(null)
-            console.log("sync done")
+            // console.log("sync done")
         }
     }, [newGame, newMove])
 

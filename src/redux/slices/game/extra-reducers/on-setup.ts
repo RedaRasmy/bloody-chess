@@ -54,6 +54,7 @@ export function onSetup(
     state.pieces = pieces
     state.playerColor = playerColor
     state.currentTurn = game.currentTurn
+    state.activePiece = null
 
     // set game over states
     if (game.status === "finished") {

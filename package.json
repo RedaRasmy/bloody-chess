@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "rerun" : "next build && next start",
     "lint": "next lint",
     "db:push": "npx drizzle-kit push",
     "db:generate": "npx drizzle-kit generate",

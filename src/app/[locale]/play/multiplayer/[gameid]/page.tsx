@@ -12,14 +12,12 @@ import ChessBoard from "@/features/gameplay/components/chess-board"
 export default function Page() {
     const params = useParams()
     const gameId = params.gameid as string
-    console.log('gameId in path :',gameId)
     const {
         move,
         playerColor,
         isSetuping
     } = useMultiplayerGame(gameId)
 
-    
     const opponentColor = oppositeColor(playerColor)
 
     if (isSetuping) return <div>loading...</div>
