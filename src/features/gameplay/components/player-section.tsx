@@ -13,7 +13,6 @@ export default function PlayerSection({ color }: { color: Color }) {
     )
     console.log("player : ",{ name, extraPoints, timeLeft, capturedPieces })
 
-    console.log('timer left : ',timeLeft)
 
     const image = undefined // for now
 

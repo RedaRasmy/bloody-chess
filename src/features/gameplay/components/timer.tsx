@@ -18,6 +18,13 @@ export default function Timer({
     playerColor: Color
 }) {
     const dispatch = useAppDispatch()
+    // const [canStart, setCanStart] = useState(false)
+
+    // useEffect(() => {
+    //     // Small delay to ensure Redux state is fully synchronized
+    //     const timer = setTimeout(() => setCanStart(true), 500)
+    //     return () => clearTimeout(timer)
+    // }, [])
 
     // const timerOption = useAppSelector(selectTimerOption)
     // const { plus } = timerOption ? parseTimerOption(timerOption) : { plus: 0 }
@@ -29,9 +36,9 @@ export default function Timer({
     // const startTimeRef = useRef<number | null>(null)
     const lastUpdateRef = useRef<number>(Date.now())
 
-
     const isMyTurn = currentPlayer === playerColor && !isGameOver
 
+    ///
     // console.log('timer - playerColor (this client) : ',playerColor)
     // console.log('timer - currentPlayer (currentTurn) : ',currentPlayer)
 
@@ -41,8 +48,15 @@ export default function Timer({
         lastUpdateRef.current = Date.now()
     }, [timeLeft, isNewGame])
 
-
     useEffect(() => {
+        console.log("Timer effect triggered:", {
+            isMyTurn,
+            timeLeft,
+            playerColor,
+            displayTime,
+            isGameOver,
+            isNewGame,
+        })
         if (intervalRef.current) {
             clearInterval(intervalRef.current)
         }
@@ -74,9 +88,8 @@ export default function Timer({
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current)
             intervalRef.current = null
-
         }
-    }, [isMyTurn, timeLeft, playerColor])
+    }, [isMyTurn, playerColor])
 
     // Clean up on game over
     useEffect(() => {
@@ -85,13 +98,11 @@ export default function Timer({
         }
     }, [isGameOver])
 
-
-    const totalSeconds = Math.floor(displayTime  / 1000)
+    const totalSeconds = Math.floor(displayTime / 1000)
 
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
     // const hundredMs = Math.floor((time % 1000) / 100)
-
 
     return (
         <div className="bg-gray-300 py-0.5 px-3 rounded-md font-bold">

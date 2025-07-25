@@ -7,6 +7,7 @@ import getPieces from "@/features/gameplay/utils/get-pieces"
 import getExtraPoints from "@/features/gameplay/utils/get-extra-points"
 import { Chess, Square } from "chess.js"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
+import { DrawReason, WinReason } from "@/features/gameplay/types"
 
 export function onSetup(
     state: WritableDraft<GameState>,
@@ -18,8 +19,6 @@ export function onSetup(
     console.log("Setup - Current turn:", game.currentTurn)
     console.log("Setup - Player ID:", playerId)
     console.log("Setup - White ID:", game.whiteId)
-    const whiteName = game.isForGuests ? game.whiteName : game.whiteName
-    const blackName = game.isForGuests ? game.blackName : game.blackName
     const playerColor = game.whiteId === playerId ? "w" : "b"
 
     const capturedPieces = getCapturedPieces(game.moves)
@@ -33,18 +32,18 @@ export function onSetup(
         from: mv.from as Square,
         to: mv.to as Square,
         promotion: mv.promotion || undefined,
-        fenAfter: "", // for now
+        fenAfter: "", // TODO
     }))
 
     state.players = {
         white: {
-            name: whiteName,
+            name: game.whiteName,
             timeLeft: game.whiteTimeLeft,
             capturedPieces: capturedPieces.b,
             extraPoints: whiteExtraPoints,
         },
         black: {
-            name: blackName,
+            name: game.blackName,
             timeLeft: game.blackTimeLeft,
             capturedPieces: capturedPieces.w,
             extraPoints: blackExtraPoints,
@@ -55,4 +54,30 @@ export function onSetup(
     state.pieces = pieces
     state.playerColor = playerColor
     state.currentTurn = game.currentTurn
+
+    // set game over states
+    if (game.status === "finished") {
+        if (game.result === "draw") {
+            state.gameOver = {
+                isGameOver: true,
+                isDraw: true,
+                winner: null,
+                reason: game.gameOverReason as DrawReason,
+            }
+        } else {
+            state.gameOver = {
+                isGameOver: true,
+                isDraw: false,
+                winner: game.result === "white_won" ? "w" : "b",
+                reason: game.gameOverReason as WinReason,
+            }
+        }
+    } else {
+        state.gameOver = {
+            isGameOver: false,
+            isDraw: false,
+            winner: null,
+            reason: null,
+        }
+    }
 }

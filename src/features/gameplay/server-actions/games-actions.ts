@@ -5,7 +5,7 @@ import { games } from "@/db/schema"
 import { ChessTimerOption } from "@/features/gameplay/types"
 import { eq } from "drizzle-orm"
 import parseTimerOption from "../utils/parse-timer-option"
-import { FullGame,  StartedGame } from "@/db/types"
+import { FullGame, StartedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
 import { getPlayer } from "./player-actions"
 import { Square } from "chess.js"
@@ -142,8 +142,8 @@ export async function getFullGame(id: string): Promise<FullGame> {
                 to: mv.to as Square,
                 promotion: mv.promotion || undefined,
             })),
-            createdAt : game.createdAt.getTime(),
-            updatedAt : game.updatedAt.getTime(),
+            createdAt: game.createdAt.getTime(),
+            updatedAt: game.updatedAt.getTime(),
         }
     }
 }

@@ -17,6 +17,9 @@ export default function GameOverPopUp() {
     const { isWin, isDraw, reason ,isGameOver } = useAppSelector(selectGameOverData)
     const dispatch = useAppDispatch()
 
+    console.log('gameOver pop up : ',{
+        isWin, isDraw, reason ,isGameOver
+    })
 
     if (isGameOver) return (
         <Dialog defaultOpen >

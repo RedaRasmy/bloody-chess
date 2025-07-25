@@ -96,7 +96,9 @@ export const useMultiplayerGame = (gameId: string) => {
                     setNewMove(newMove)
                 }
             )
-            .subscribe()
+            .subscribe((status)=>{
+                console.log("SUBSCRIPTION STATUS : ",status)
+            })
 
         return () => {
             supabase.removeChannel(channel)
