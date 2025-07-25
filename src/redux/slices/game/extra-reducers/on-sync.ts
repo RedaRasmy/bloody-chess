@@ -1,10 +1,10 @@
 import { StartedGame } from "@/db/types"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
-import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
-import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
-import getPieces from "@/features/gameplay/utils/get-pieces"
+// import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
+// import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
+// import getPieces from "@/features/gameplay/utils/get-pieces"
 import { PayloadAction } from "@reduxjs/toolkit"
-import { Chess } from "chess.js"
+// import { Chess } from "chess.js"
 import { GameState } from "../game-types"
 import { WritableDraft } from "immer"
 
@@ -13,7 +13,7 @@ export const onSync = (
     action: PayloadAction<StartedGame>
 ) => {
     const game = action.payload
-    const chess = new Chess(game.currentFen)
+    // const chess = new Chess(game.currentFen)
 
     // Only update timers if game is active
     if (game.gameStartedAt && !state.gameOver.isGameOver) {
@@ -33,16 +33,18 @@ export const onSync = (
         }
     }
 
-    state.fen = game.currentFen
-    state.currentTurn = game.currentTurn
+    // console.log('-- sync : new fen : ',game.currentFen)
+    // console.log('-- sync : new turn : ',game.currentTurn)
+    // state.fen = game.currentFen
+    // state.currentTurn = game.currentTurn
 
-    // Check for game over states
-    const gameOverState = getGameOverState(chess)
-    if (!state.gameOver.isGameOver) {
-        state.gameOver = gameOverState
-    }
+    // // Check for game over states
+    // const gameOverState = getGameOverState(chess)
+    // if (!state.gameOver.isGameOver) {
+    //     state.gameOver = gameOverState
+    // }
 
-    state.legalMoves = getLegalMoves(chess)
-    state.pieces = getPieces(game.currentFen)
+    // state.legalMoves = getLegalMoves(chess)
+    // // state.pieces = getPieces(game.currentFen)
     state.lastMoveAt = game.lastMoveAt
 }

@@ -129,7 +129,10 @@ export default function useChessBoard({
                     from: activePiece.square,
                     to: targetSquare,
                 }
+                console.log('dispatching move : ',mv)
                 dispatch(move(mv))
+                console.log('dispatch move done')
+                console.log('sending move')
                 await onMoveEnd?.(mv)
             }
         }
