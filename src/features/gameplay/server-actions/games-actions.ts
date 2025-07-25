@@ -122,6 +122,7 @@ export async function getFullGame(id: string): Promise<FullGame> {
                 from: mv.from as Square,
                 to: mv.to as Square,
                 promotion: mv.promotion || undefined,
+                fenAfter : mv.fenAfter
             })),
             createdAt: game.createdAt.getTime(),
             updatedAt: game.updatedAt.getTime(),
@@ -141,6 +142,7 @@ export async function getFullGame(id: string): Promise<FullGame> {
                 from: mv.from as Square,
                 to: mv.to as Square,
                 promotion: mv.promotion || undefined,
+                fenAfter : mv.fenAfter
             })),
             createdAt: game.createdAt.getTime(),
             updatedAt: game.updatedAt.getTime(),

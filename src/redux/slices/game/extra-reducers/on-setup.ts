@@ -32,7 +32,7 @@ export function onSetup(
         from: mv.from as Square,
         to: mv.to as Square,
         promotion: mv.promotion || undefined,
-        fenAfter: "", // TODO
+        fenAfter: mv.fenAfter, // TODO
     }))
 
     state.players = {
@@ -55,6 +55,7 @@ export function onSetup(
     state.playerColor = playerColor
     state.currentTurn = game.currentTurn
     state.activePiece = null
+    state.currentMoveIndex = game.moves.length - 1
 
     // set game over states
     if (game.status === "finished") {
