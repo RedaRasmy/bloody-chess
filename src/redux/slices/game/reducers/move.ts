@@ -12,6 +12,7 @@ import updateCapturedPieces from "@/features/gameplay/utils/update-captured-piec
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
+import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 
 export function move(
     state: WritableDraft<GameState>,
@@ -25,21 +26,25 @@ export function move(
 
     const move = action.payload
     const chess = new Chess()
-
-    state.history.forEach((mv) => chess.move(mv))
-
     const validatedMove = safeMove(chess, move)
-
     if (!validatedMove) {
         return
     }
+    const playerColor = validatedMove.color
+
+    state.history.forEach((mv) => chess.move(mv))
+
+    const { plus } = state.timerOption
+        ? parseTimerOption(state.timerOption)
+        : { plus: 0 }
+
     const wtl = state.players.white.timeLeft
     const btl = state.players.black.timeLeft
     const gameStartedAt = state.gameStartedAt
     if (wtl !== null && btl !== null && gameStartedAt !== null) {
         const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-            whiteTimeLeft: wtl,
-            blackTimeLeft: btl,
+            whiteTimeLeft: playerColor === "w" ? wtl + plus : wtl,
+            blackTimeLeft: playerColor === "b" ? btl + plus : btl,
             currentTurn: state.currentTurn,
             lastMoveAt: state.lastMoveAt
                 ? new Date(state.lastMoveAt)
