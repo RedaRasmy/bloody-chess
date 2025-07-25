@@ -7,6 +7,7 @@ import { Chess } from "chess.js"
 import { eq } from "drizzle-orm"
 import { calculateTimeLeft } from "../utils/calculate-time-left"
 import { getGameoverCause } from "../utils/get-gameover-cause"
+import parseTimerOption from "../utils/parse-timer-option"
 
 export async function getMoves(gameId: string) {
     const gameMoves = await db.query.moves.findMany({
@@ -28,7 +29,10 @@ export async function makeMove({
     })
     if (!game) throw new Error("No game found with id: " + gameId)
     const chess = new Chess(game.currentFen)
-    const Move = chess.move(move)
+    const validatedMove = chess.move(move)
+    const playerColor = validatedMove.color
+
+    const {plus} = parseTimerOption(game.timer) 
 
     const lastMoveAt = game.lastMoveAt || game.gameStartedAt
     if (!lastMoveAt)
@@ -57,7 +61,6 @@ export async function makeMove({
     const lastMoveDate = new Date(lastMoveAt)
     const isGameOver = chess.isGameOver()
     const isDraw = chess.isDraw()
-    // const turn = chess.turn()
 
     // Update game
     await db
@@ -65,8 +68,8 @@ export async function makeMove({
         .set({
             currentFen: chess.fen(),
             currentTurn: chess.turn(),
-            whiteTimeLeft,
-            blackTimeLeft,
+            whiteTimeLeft : playerColor === 'w' ? whiteTimeLeft + plus : whiteTimeLeft,
+            blackTimeLeft : playerColor === 'b' ? blackTimeLeft + plus : whiteTimeLeft,
             lastMoveAt: Date.now(),
             gameOverReason: gameOverCause,
             status: isGameOver ? "finished" : "playing",
@@ -80,7 +83,7 @@ export async function makeMove({
         })
         .where(eq(games.id, gameId))
 
-    // add move
+    // insert move
     const newMoves = await db
         .insert(moves)
         .values({
@@ -89,11 +92,11 @@ export async function makeMove({
             to: move.to,
             promotion: move.promotion as PromotionPiece,
             moveTime: Date.now() - lastMoveDate.getTime(),
-            piece: Move.piece,
+            piece: validatedMove.piece,
             gameId,
             playerColor: game.currentTurn,
-            san: Move.san,
-            capturedPiece: Move.captured,
+            san: validatedMove.san,
+            capturedPiece: validatedMove.captured,
             isCheck: chess.isCheck(),
             isCheckmate: chess.isCheckmate(),
         })
