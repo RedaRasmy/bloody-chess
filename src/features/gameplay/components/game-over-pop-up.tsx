@@ -12,27 +12,49 @@ import {
 } from "@/components/ui/dialog"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
+import { selectBotOptions } from "@/redux/slices/game-options"
 
 export default function GameOverPopUp() {
-    const { isWin, isDraw, reason ,isGameOver } = useAppSelector(selectGameOverData)
+    const { isWin, isDraw, reason, isGameOver } =
+        useAppSelector(selectGameOverData)
+    const { level } = useAppSelector(selectBotOptions)
     const dispatch = useAppDispatch()
 
-    if (isGameOver) return (
-        <Dialog defaultOpen >
-            <DialogContent className="">
-                <DialogHeader>
-                    <DialogTitle>
-                        {isDraw ? "You Draw" : isWin ? 'You Won' : 'You Lost'}
-                    </DialogTitle>
-                    <DialogDescription>By {reason}</DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                    <Button asChild variant="outline">
-                        <Link href={'/'}>Home</Link>
-                    </Button>
-                    <Button className="cursor-pointer" onClick={()=>dispatch(play())}>Replay</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
+    function handleReplay() {
+        dispatch(
+            play({
+                playerName: "player",
+                opponentName: `bot - lvl ${level}`,
+            })
+        )
+    }
+
+    if (isGameOver)
+        return (
+            <Dialog defaultOpen>
+                <DialogContent className="">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {isDraw
+                                ? "You Draw"
+                                : isWin
+                                ? "You Won"
+                                : "You Lost"}
+                        </DialogTitle>
+                        <DialogDescription>By {reason}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button asChild variant="outline">
+                            <Link href={"/"}>Home</Link>
+                        </Button>
+                        <Button
+                            className="cursor-pointer"
+                            onClick={handleReplay}
+                        >
+                            Replay
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        )
 }

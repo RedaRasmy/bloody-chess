@@ -1,16 +1,28 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+import { selectBotOptions } from "@/redux/slices/game-options"
 import { selectIsGameOver } from "@/redux/slices/game/game-selectors"
 import { play, resign } from "@/redux/slices/game/game-slice"
 
 export default function BotController() {
     const dispatch = useAppDispatch()
     const isGameOver = useAppSelector(selectIsGameOver)
+    const { level } = useAppSelector(selectBotOptions)
+
     // const { isUndoable, isRedoable } = useAppSelector(selectIsUndoRedoable)
 
-    async function handleResign() {
+    function handleResign() {
         dispatch(resign())
+    }
+
+    function handleReplay() {
+        dispatch(
+            play({
+                playerName: "player",
+                opponentName: `bot - lvl ${level}`,
+            })
+        )
     }
 
     return (
@@ -22,7 +34,7 @@ export default function BotController() {
             >
                 Resign
             </Button>
-            <Button className="cursor-pointer" onClick={() => dispatch(play())}>
+            <Button className="cursor-pointer" onClick={handleReplay}>
                 Replay
             </Button>
             {/* <Button disabled={!isUndoable} className="cursor-pointer" onClick={()=>dispatch(undo())}>Undo</Button>

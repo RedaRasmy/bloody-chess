@@ -77,13 +77,20 @@ const gameSlice = createSlice({
             state.gameOver.isGameOver = true
             state.gameOver.winner = state.playerColor === "w" ? "b" : "w"
         },
-        play: (state) => {
+        play: (state,action:PayloadAction<{
+            playerName:string,
+            opponentName: string
+        }>) => {
+            const {playerName,opponentName} = action.payload 
             const timerOption = state.timerOption
             const timer = timerOption
                 ? parseTimerOption(timerOption)
                 : { base: null }
 
             const base = timer.base ? timer.base * 1000 : timer.base
+            const playerColor = state.playerColor
+            const whiteName = playerColor === 'w' ? playerName : opponentName
+            const blackName = playerColor === 'w' ? opponentName : playerName
             return {
                 ...initialState,
                 playerColor: state.playerColor,
@@ -95,13 +102,13 @@ const gameSlice = createSlice({
                     white: {
                         capturedPieces: initialCaputeredPieces.w,
                         timeLeft: base,
-                        name: state.players.white.name,
+                        name: whiteName,
                         extraPoints: 0,
                     },
                     black: {
                         capturedPieces: initialCaputeredPieces.w,
                         timeLeft: base,
-                        name: state.players.black.name,
+                        name: blackName,
                         extraPoints: 0,
                     },
                 },
