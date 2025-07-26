@@ -8,7 +8,7 @@ import parseTimerOption from "../utils/parse-timer-option"
 import { FullGame, StartedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
 import { getPlayer } from "./player-actions"
-import { Square } from "chess.js"
+import { Color, Square } from "chess.js"
 
 // export async function getNewGame() {
 //     const newGame = await db.query.games.findFirst({
@@ -122,7 +122,7 @@ export async function getFullGame(id: string): Promise<FullGame> {
                 from: mv.from as Square,
                 to: mv.to as Square,
                 promotion: mv.promotion || undefined,
-                fenAfter : mv.fenAfter
+                fenAfter: mv.fenAfter,
             })),
             createdAt: game.createdAt.getTime(),
             updatedAt: game.updatedAt.getTime(),
@@ -142,10 +142,32 @@ export async function getFullGame(id: string): Promise<FullGame> {
                 from: mv.from as Square,
                 to: mv.to as Square,
                 promotion: mv.promotion || undefined,
-                fenAfter : mv.fenAfter
+                fenAfter: mv.fenAfter,
             })),
             createdAt: game.createdAt.getTime(),
             updatedAt: game.updatedAt.getTime(),
         }
     }
 }
+
+export async function sendTimeOut(gameId: string, playerColor: Color) {
+    /// i should protect this 
+    const updateData =
+        playerColor === "w" ? { whiteTimeLeft: 0 } : { blackTimeLeft: 0 }
+    await db.update(games).set({
+        ...updateData,
+        status : 'finished',
+        gameOverReason: "Timeout",
+        result: playerColor === "w" ? "black_won" : "white_won",
+    }).where(eq(games.id,gameId))
+}
+export async function sendResign(gameId: string, playerColor: Color) {
+    /// i should protect this 
+
+    await db.update(games).set({
+        status : "finished",
+        gameOverReason : "Resignation",
+        result : playerColor === 'w' ? 'black_won' : 'white_won'
+    })
+}
+

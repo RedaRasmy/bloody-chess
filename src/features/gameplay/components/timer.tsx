@@ -18,16 +18,7 @@ export default function Timer({
     playerColor: Color
 }) {
     const dispatch = useAppDispatch()
-    // const [canStart, setCanStart] = useState(false)
 
-    // useEffect(() => {
-    //     // Small delay to ensure Redux state is fully synchronized
-    //     const timer = setTimeout(() => setCanStart(true), 500)
-    //     return () => clearTimeout(timer)
-    // }, [])
-
-    // const timerOption = useAppSelector(selectTimerOption)
-    // const { plus } = timerOption ? parseTimerOption(timerOption) : { plus: 0 }
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
@@ -38,9 +29,6 @@ export default function Timer({
 
     const isMyTurn = currentPlayer === playerColor && !isGameOver
 
-    ///
-    // console.log('timer - playerColor (this client) : ',playerColor)
-    // console.log('timer - currentPlayer (currentTurn) : ',currentPlayer)
 
     // Sync display time with Redux store
     useEffect(() => {
@@ -49,14 +37,6 @@ export default function Timer({
     }, [timeLeft, isNewGame])
 
     useEffect(() => {
-        console.log("Timer effect triggered:", {
-            isMyTurn,
-            timeLeft,
-            playerColor,
-            displayTime,
-            isGameOver,
-            isNewGame,
-        })
         if (intervalRef.current) {
             clearInterval(intervalRef.current)
         }

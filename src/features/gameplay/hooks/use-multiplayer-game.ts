@@ -2,13 +2,13 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { supabase } from "@/utils/supabase/client"
 import { useEffect, useState } from "react"
 import { MoveType } from "../types"
-import { setup } from "@/redux/slices/multiplayer/multiplayer-slice"
+import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { move as localMove } from "@/redux/slices/game/game-slice"
-import {  SMove, StartedGame } from "@/db/types"
+import { SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../server-actions/moves-actions"
-import { getFullGame } from "../server-actions/games-actions"
+import { getFullGame, sendResign } from "../server-actions/games-actions"
 import usePlayer from "./use-player"
-import {  selectPlayerColor } from "@/redux/slices/game/game-selectors"
+import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 
 export const useMultiplayerGame = (gameId: string) => {
@@ -25,7 +25,7 @@ export const useMultiplayerGame = (gameId: string) => {
             console.log("[✔] Both game + move received.")
             // console.log("sync...")
             if (newMove.playerColor !== playerColor) {
-                console.log('run other player move :',newMove)
+                console.log("run other player move :", newMove)
                 dispatch(
                     localMove({
                         from: newMove.from,
@@ -34,7 +34,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     })
                 )
             }
-            // dispatch(sync(newGame))
+            dispatch(sync(newGame))
             setNewGame(null)
             setNewMove(null)
             // console.log("sync done")
@@ -66,7 +66,7 @@ export const useMultiplayerGame = (gameId: string) => {
             .on(
                 "postgres_changes",
                 {
-                    event: "*",
+                    event: "UPDATE",
                     schema: "public",
                     table: "games",
                     filter: `id=eq.${gameId}`,
@@ -96,8 +96,8 @@ export const useMultiplayerGame = (gameId: string) => {
                     setNewMove(newMove)
                 }
             )
-            .subscribe((status)=>{
-                console.log("SUBSCRIPTION STATUS : ",status)
+            .subscribe((status) => {
+                console.log("SUBSCRIPTION STATUS : ", status)
             })
 
         return () => {
@@ -108,18 +108,31 @@ export const useMultiplayerGame = (gameId: string) => {
     const move = async (mv: MoveType) => {
         try {
             // Insert to Supabase
-            console.log('sending move...')
+            console.log("sending move...")
             await makeMove({
                 move: mv,
                 gameId,
             })
-            console.log('move sent')
+            console.log("move sent")
         } catch (err) {
             console.error(err)
             // TODO!
             //   dispatch(rollbackMove())
         }
     }
+    async function resign() {
+        try {
+            console.log('sending resign...')
+            await sendResign(gameId,playerColor) 
+            console.log('resign sent')
 
-    return { multiplayerState, move, playerColor, isSetuping: isLoading }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+
+
+
+    return { multiplayerState, move, playerColor, isSetuping: isLoading ,resign}
 }

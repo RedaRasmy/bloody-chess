@@ -1,5 +1,5 @@
 "use client"
-import GameDetails from "@/features/gameplay/components/game-details"
+import BotController from "@/features/gameplay/components/bot-controller"
 import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 import PlayerSection from "@/features/gameplay/components/player-section"
@@ -14,10 +14,9 @@ import {
     selectIsGameOver,
     selectIsPlayerTurn,
     selectPlayerColor,
- 
 } from "@/redux/slices/game/game-selectors"
 import useBot from "@/features/gameplay/hooks/use-bot"
-import { move  } from "@/redux/slices/game/game-slice"
+import { move } from "@/redux/slices/game/game-slice"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -49,20 +48,12 @@ export default function Page() {
         <GameLayout
             chessBoard={
                 <ChessBoardLayout
-                    OpponentSection={
-                        <PlayerSection
-                            color={opponentColor}
-                        />
-                    }
+                    OpponentSection={<PlayerSection color={opponentColor} />}
                     ChessBoard={<ChessBoard />}
-                    PlayerSection={
-                        <PlayerSection
-                            color={playerColor}
-                        />
-                    }
+                    PlayerSection={<PlayerSection color={playerColor} />}
                 />
             }
-            gameDetails={<GameDetails />}
+            gameDetails={<BotController />}
             gameOverPopUp={<GameOverPopUp />}
         />
     )

@@ -8,6 +8,7 @@ import { useMultiplayerGame } from "@/features/gameplay/hooks/use-multiplayer-ga
 import { useParams } from "next/navigation"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import ChessBoard from "@/features/gameplay/components/chess-board"
+import MultiplayerController from "@/features/gameplay/components/multiplayer-controller"
 
 export default function Page() {
     const params = useParams()
@@ -15,7 +16,8 @@ export default function Page() {
     const {
         move,
         playerColor,
-        isSetuping
+        isSetuping,
+        resign
     } = useMultiplayerGame(gameId)
 
     const opponentColor = oppositeColor(playerColor)
@@ -33,7 +35,7 @@ export default function Page() {
                     PlayerSection={<PlayerSection color={playerColor} />}
                 />
             }
-            gameDetails={<GameDetails />}
+            gameDetails={<MultiplayerController onResign={resign}/>}
             gameOverPopUp={<GameOverPopUp />}
         />
     )

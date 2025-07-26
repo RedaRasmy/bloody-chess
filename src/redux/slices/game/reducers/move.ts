@@ -4,7 +4,7 @@ import { MoveType } from "@/features/gameplay/types"
 import { PayloadAction } from "@reduxjs/toolkit"
 import { Chess } from "chess.js"
 // import safeMove from "@/features/gameplay/utils/safe-move"
-import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
+// import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 import getDetailedMove from "@/features/gameplay/utils/get-detailed-move"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getExtraPoints from "@/features/gameplay/utils/get-extra-points"
@@ -12,7 +12,7 @@ import updateCapturedPieces from "@/features/gameplay/utils/update-captured-piec
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
-import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
+// import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 
 export function move(
     state: WritableDraft<GameState>,
@@ -41,27 +41,27 @@ export function move(
     // if (!validatedMove) {
     //     return
     // }
-    const playerColor = validatedMove.color
+    // const playerColor = validatedMove.color
 
-    const { plus } = state.timerOption
-        ? parseTimerOption(state.timerOption)
-        : { plus: 0 }
+    // const { plus } = state.timerOption
+    //     ? parseTimerOption(state.timerOption)
+    //     : { plus: 0 }
 
-    const wtl = state.players.white.timeLeft
-    const btl = state.players.black.timeLeft
-    const gameStartedAt = state.gameStartedAt
-    if (wtl !== null && btl !== null && gameStartedAt !== null) {
-        const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-            whiteTimeLeft: playerColor === "w" ? wtl + plus : wtl,
-            blackTimeLeft: playerColor === "b" ? btl + plus : btl,
-            currentTurn: state.currentTurn,
-            lastMoveAt: state.lastMoveAt
-                ? new Date(state.lastMoveAt)
-                : new Date(gameStartedAt),
-        })
-        state.players.white.timeLeft = whiteTimeLeft
-        state.players.black.timeLeft = blackTimeLeft
-    }
+    // const wtl = state.players.white.timeLeft
+    // const btl = state.players.black.timeLeft
+    // const gameStartedAt = state.gameStartedAt
+    // if (wtl !== null && btl !== null && gameStartedAt !== null) {
+    //     const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
+    //         whiteTimeLeft: playerColor === "w" ? wtl + plus : wtl,
+    //         blackTimeLeft: playerColor === "b" ? btl + plus : btl,
+    //         currentTurn: state.currentTurn,
+    //         lastMoveAt: state.lastMoveAt
+    //             ? new Date(state.lastMoveAt)
+    //             : new Date(gameStartedAt),
+    //     })
+    //     state.players.white.timeLeft = whiteTimeLeft
+    //     state.players.black.timeLeft = blackTimeLeft
+    // }
 
     const detailedMove = getDetailedMove(validatedMove, state.pieces)
     state.history.push({
@@ -111,5 +111,5 @@ export function move(
     state.currentMoveIndex = state.history.length - 1
 
     // update timing
-    state.lastMoveAt = Date.now()
+    // state.lastMoveAt = Date.now()
 }

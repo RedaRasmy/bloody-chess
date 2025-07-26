@@ -11,7 +11,7 @@ export default function PlayerSection({ color }: { color: Color }) {
     const { name, extraPoints, timeLeft, capturedPieces } = useAppSelector(
         color === 'w' ? selectWhitePlayer : selectBlackPlayer
     )
-    console.log("player : ",{ name, extraPoints, timeLeft, capturedPieces })
+    // console.log("player : ",{ name, extraPoints, timeLeft, capturedPieces })
 
 
     const image = undefined // for now

@@ -158,7 +158,12 @@ export default function useGameSearching({
                                                 retryAttempts + 1
                                             }/${MAX_RETRIES} in ${delay}ms`
                                         )
-                                        setRetryAttempts(retryAttempts + 1)
+                                        setRetryAttempts((prevAttempts) => {
+                                            if (prevAttempts < MAX_RETRIES) {
+                                                return prevAttempts + 1 // This will trigger useEffect to retry
+                                            }
+                                            return prevAttempts
+                                        })
                                     } else if (status === "TIMED_OUT") {
                                         console.error("Subscription timed out")
                                     } else if (status === "CLOSED") {
