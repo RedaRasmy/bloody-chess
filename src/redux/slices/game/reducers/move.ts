@@ -63,6 +63,7 @@ export function move(
     }
 
     const detailedMove = getDetailedMove(validatedMove, state.pieces)
+    console.log("detailed move : ",detailedMove)
     state.history.push({
         ...move,
         fenAfter: validatedMove.after,

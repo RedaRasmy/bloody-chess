@@ -2,11 +2,13 @@ import { Square } from "chess.js"
 import { DetailedMove, DetailedPiece } from "../types"
 import { rank } from "./rank-file"
 
-export default function updatePieces(piecesToUpdate: DetailedPiece[], move: DetailedMove,reversed = false): DetailedPiece[] {
-    const {from ,to ,promotion} = move
+export default function updatePieces(
+    piecesToUpdate: DetailedPiece[],
+    move: DetailedMove,
+    reversed = false
+): DetailedPiece[] {
+    const { from, to, promotion } = move
     const pieces = [...piecesToUpdate]
-
-
 
     if (reversed) {
         // Reverse the move
@@ -33,16 +35,22 @@ export default function updatePieces(piecesToUpdate: DetailedPiece[], move: Deta
         }
         return pieces
     } else {
-        const piece = pieces.find((p) => p.square === from)!
-        piece.square = to
-        // if capture clean
-        const output = pieces.filter((p) => p.square !== to || p === piece)
+        const movePiece = pieces.find((p) => p.square === from)!
+        const capturedPiece = move.captured
+        console.log('captured piece :',capturedPiece)
+        // change position
+        movePiece.square = to
+        // remove captured piece
+        const output = capturedPiece
+            ? pieces.filter((p) => p === movePiece || p.square !== capturedPiece.square)
+            : pieces
+        console.log("new pieces : ",output)
         // castling
         if (move.isKingsideCastle || move.isQueensideCastle) {
             // handle rook move in castling
             const rookFrom = move.isKingsideCastle ? "h" : "a"
             const rookTo = move.isKingsideCastle ? "f" : "d"
-            const rookRank = rank(piece.square)
+            const rookRank = rank(movePiece.square)
             const rookPiece = pieces.find(
                 (p) => p.square === `${rookFrom}${rookRank}`
             )!
@@ -50,11 +58,9 @@ export default function updatePieces(piecesToUpdate: DetailedPiece[], move: Deta
         }
         // promotion
         if (promotion) {
-            piece.type = promotion 
+            movePiece.type = promotion
         }
-    
+
         return output
     }
-    
-
 }

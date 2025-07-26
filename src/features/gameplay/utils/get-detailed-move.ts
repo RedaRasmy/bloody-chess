@@ -1,14 +1,26 @@
-import { Move } from "chess.js";
-import { DetailedMove, DetailedPiece } from "../types";
+import { Move } from "chess.js"
+import { DetailedMove, DetailedPiece } from "../types"
+import { file, rank } from "./rank-file"
 
-export default function getDetailedMove(move:Move,pieces:DetailedPiece[]):DetailedMove {
+export default function getDetailedMove(
+    move: Move,
+    pieces: DetailedPiece[]
+): DetailedMove {
+    const isEnPassant = move.isEnPassant()
+    console.log('is en passant :',isEnPassant)
+
+
     return {
         from: move.from,
         to: move.to,
         promotion: move.promotion,
-        isCapture: move.isCapture(),
+        isCapture: move.isCapture() || isEnPassant,
         isKingsideCastle: move.isKingsideCastle(),
         isQueensideCastle: move.isQueensideCastle(),
-        captured: pieces.find((p) => p.square === move.to),
+        captured: isEnPassant
+            ? pieces.find(
+                  (p) => p.square === `${file(move.to)}${rank(move.from)}`
+              )
+            : pieces.find((p) => p.square === move.to),
     }
 }

@@ -4,5 +4,5 @@ export function rank(square:Square) {
     return square.slice(1)
 }
 export function file(square:Square) {
-    return square.slice(0)
+    return square.slice(0,1)
 }
