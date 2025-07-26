@@ -9,7 +9,7 @@ import {
 } from "../server-actions/games-actions"
 import { ChessTimerOption } from "../types"
 import { supabase } from "@/utils/supabase/client"
-import {  Guest, Player, StartedGame } from "@/db/types"
+import { Guest, Player, StartedGame } from "@/db/types"
 import isError from "@/utils/is-error"
 import timerFormat from "@/utils/timer-format"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
@@ -22,10 +22,13 @@ export default function useGameSearching({
 }: {
     timerOption: ChessTimerOption
     maxDuration?: number
-    onGameFound?: (game: StartedGame,player:{
-        type : 'player' | "guest",
-        data : Player | Guest
-    }) => Promise<void>
+    onGameFound?: (
+        game: StartedGame,
+        player: {
+            type: "player" | "guest"
+            data: Player | Guest
+        }
+    ) => Promise<void>
     onGameCanceled?: (gameId: string) => Promise<void>
 }) {
     const [count, { startCountdown, resetCountdown }] = useCountdown({
@@ -41,6 +44,8 @@ export default function useGameSearching({
     const player = usePlayer()
     const channelRef = useRef<RealtimeChannel>(null)
     const hasSearched = useRef(false)
+    const [retryAttempts, setRetryAttempts] = useState(0)
+    const MAX_RETRIES = 5
 
     // Cleanup subscription on unmount
     useEffect(() => {
@@ -96,55 +101,79 @@ export default function useGameSearching({
                     }
 
                     // Create new subscription
-                    const channel = supabase
-                        .channel(channelName)
-                        .on(
-                            "postgres_changes",
-                            {
-                                event: "*",
-                                schema: "public",
-                                table: "games",
-                                filter: `id=eq.${createdGame.id}`,
-                            },
-                            (payload) => {
-                                console.log("=== RECEIVED UPDATE ===")
-                                console.log("Payload:", payload)
+                    const delay = Math.min(
+                        1000 * Math.pow(2, retryAttempts),
+                        30000
+                    ) // Cap at 30s
+                    setTimeout(
+                        () => {
+                            const channel = supabase
+                                .channel(channelName)
+                                .on(
+                                    "postgres_changes",
+                                    {
+                                        event: "*",
+                                        schema: "public",
+                                        table: "games",
+                                        filter: `id=eq.${createdGame.id}`,
+                                    },
+                                    (payload) => {
+                                        console.log("=== RECEIVED UPDATE ===")
+                                        console.log("Payload:", payload)
 
-                                
-                                const newGame = supabaseToTypescript<StartedGame>(payload.new)
+                                        const newGame =
+                                            supabaseToTypescript<StartedGame>(
+                                                payload.new
+                                            )
 
-                                console.log("New game data:", payload.new)
-                                
-                                // Clean up subscription before redirecting
-                                if (channelRef.current) {
-                                    channelRef.current.unsubscribe()
-                                    channelRef.current = null
-                                }
+                                        console.log(
+                                            "New game data:",
+                                            payload.new
+                                        )
 
-                                setIsSearching(false)
-                                onGameFound?.(newGame,{type,data})
-                            }
-                        )
-                        .subscribe((status,err) => {
-                            console.log("Subscription status:", status)
-                            if (status === "SUBSCRIBED") {
-                                console.log(
-                                    "Subscription is now active and ready!"
+                                        // Clean up subscription before redirecting
+                                        if (channelRef.current) {
+                                            channelRef.current.unsubscribe()
+                                            channelRef.current = null
+                                        }
+
+                                        setIsSearching(false)
+                                        onGameFound?.(newGame, { type, data })
+                                    }
                                 )
-                            } else if (status === "CHANNEL_ERROR") {
-                                console.error("Subscription error : ",err)
-                            } else if (status === "TIMED_OUT") {
-                                console.error("Subscription timed out")
-                            } else if (status === "CLOSED") {
-                                console.log("Subscription closed")
-                            }
-                        })
+                                .subscribe((status, err) => {
+                                    console.log("Subscription status:", status)
+                                    if (status === "SUBSCRIBED") {
+                                        console.log(
+                                            "Subscription is now active and ready!"
+                                        )
+                                        setRetryAttempts(0)
+                                    } else if (status === "CHANNEL_ERROR") {
+                                        console.error(
+                                            "Subscription error : ",
+                                            err
+                                        )
+                                        console.log(
+                                            `Retry ${
+                                                retryAttempts + 1
+                                            }/${MAX_RETRIES} in ${delay}ms`
+                                        )
+                                        setRetryAttempts(retryAttempts + 1)
+                                    } else if (status === "TIMED_OUT") {
+                                        console.error("Subscription timed out")
+                                    } else if (status === "CLOSED") {
+                                        console.log("Subscription closed")
+                                    }
+                                })
+                            channelRef.current = channel
+                        },
+                        retryAttempts === 0 ? 0 : delay
+                    )
 
                     // Store channel reference for cleanup
-                    channelRef.current = channel
                 } else {
                     setIsSearching(false)
-                    await onGameFound?.(startedGame,{type,data})
+                    await onGameFound?.(startedGame, { type, data })
                 }
             } catch (error) {
                 console.error("Search error:", error)
@@ -157,7 +186,7 @@ export default function useGameSearching({
         }
 
         handelSearch()
-    }, [isSearching, player.type, timerOption])
+    }, [isSearching, player.type, timerOption, retryAttempts])
 
     async function cancelSearch() {
         if (isSearching) {
