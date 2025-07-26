@@ -7,7 +7,6 @@ export default function getDetailedMove(
     pieces: DetailedPiece[]
 ): DetailedMove {
     const isEnPassant = move.isEnPassant()
-    console.log('is en passant :',isEnPassant)
 
 
     return {

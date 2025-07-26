@@ -37,7 +37,6 @@ export default function updatePieces(
     } else {
         const movePiece = pieces.find((p) => p.square === from)!
         const capturedPiece = move.captured
-        console.log('captured piece :',capturedPiece)
         // change position
         movePiece.square = to
         // remove captured piece

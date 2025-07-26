@@ -28,11 +28,13 @@ export function move(
     }
     const move = action.payload
     const chess = new Chess()
-    state.history.forEach((mv) => chess.move({
-        from : mv.from,
-        to : mv.to,
-        promotion : mv.promotion
-    }))
+    state.history.forEach((mv) =>
+        chess.move({
+            from: mv.from,
+            to: mv.to,
+            promotion: mv.promotion,
+        })
+    )
 
     const validatedMove = chess.move(move)
     // const validatedMove = safeMove(chess, move)
@@ -40,7 +42,6 @@ export function move(
     //     return
     // }
     const playerColor = validatedMove.color
-
 
     const { plus } = state.timerOption
         ? parseTimerOption(state.timerOption)
@@ -63,7 +64,6 @@ export function move(
     }
 
     const detailedMove = getDetailedMove(validatedMove, state.pieces)
-    console.log("detailed move : ",detailedMove)
     state.history.push({
         ...move,
         fenAfter: validatedMove.after,
@@ -97,6 +97,11 @@ export function move(
         state.legalMoves = getLegalMoves(chess)
     }
 
+    if (validatedMove.color === state.playerColor) {
+        // reset active piece only if Im the move player
+        // to allow preemptive moves : ( drag [in opp turn] and drop [in your turn ])
+        state.activePiece = null
+    }
     state.currentTurn = oppositeColor(state.currentTurn)
 
     state.isCheck = chess.isCheck()
@@ -104,8 +109,6 @@ export function move(
     state.gameOver = getGameOverState(chess)
 
     state.currentMoveIndex = state.history.length - 1
-
-    state.activePiece = null
 
     // update timing
     state.lastMoveAt = Date.now()
