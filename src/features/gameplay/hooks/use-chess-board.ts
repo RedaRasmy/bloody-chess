@@ -1,6 +1,6 @@
 import useChessBoardWidth from "@/features/gameplay/hooks/useChessBoardWidth"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { PieceSymbol, Square } from "chess.js"
+import { Chess, PieceSymbol, Square } from "chess.js"
 import { useState } from "react"
 import {
     selectActivePiece,
@@ -9,6 +9,7 @@ import {
     selectIsPlayerTurn,
     selectLastMove,
     selectPieces,
+    selectFEN,
 } from "@/redux/slices/game/game-selectors"
 import getSquares from "../utils/get-squares"
 import { BoardElement, MoveType } from "../types"
@@ -16,6 +17,8 @@ import { promotionRank } from "../utils/promotion-rank"
 import { rank } from "../utils/rank-file"
 import { move, select } from "@/redux/slices/game/game-slice"
 import { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
+import { playMoveSound } from "../utils/play-move-sound"
+import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
 
 export default function useChessBoard({
     onMoveEnd,
@@ -29,6 +32,8 @@ export default function useChessBoard({
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
     const lastMove = useAppSelector(selectLastMove)
     const pieces = useAppSelector(selectPieces)
+    const fen = useAppSelector(selectFEN)
+    const isMovesSoundEnabled = useAppSelector(selectIsMovesSoundsEnabled)
 
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)
@@ -51,6 +56,11 @@ export default function useChessBoard({
         dispatch(move(mv))
         setIsPromoting(false)
         setTargetSquare(null)
+        if (isMovesSoundEnabled) {
+            const chess = new Chess(fen)
+            const validatedMove = chess.move(mv)
+            playMoveSound(validatedMove, chess.isCheck())
+        }
         await onMoveEnd?.(mv)
     }
 
@@ -71,6 +81,11 @@ export default function useChessBoard({
                         to: square,
                     }
                     dispatch(move(mv))
+                    if (isMovesSoundEnabled) {
+                        const chess = new Chess(fen)
+                        const validatedMove = chess.move(mv)
+                        playMoveSound(validatedMove, chess.isCheck())
+                    }
                     await onMoveEnd?.(mv)
                 }
             } else {
@@ -114,6 +129,11 @@ export default function useChessBoard({
                         to: targetSquare,
                     }
                     dispatch(move(mv))
+                    if (isMovesSoundEnabled) {
+                        const chess = new Chess(fen)
+                        const validatedMove = chess.move(mv)
+                        playMoveSound(validatedMove, chess.isCheck())
+                    }
                     await onMoveEnd?.(mv)
                 }
             }
@@ -129,10 +149,12 @@ export default function useChessBoard({
                     from: activePiece.square,
                     to: targetSquare,
                 }
-                console.log('dispatching move : ',mv)
                 dispatch(move(mv))
-                console.log('dispatch move done')
-                console.log('sending move')
+                if (isMovesSoundEnabled) {
+                    const chess = new Chess(fen)
+                    const validatedMove = chess.move(mv)
+                    playMoveSound(validatedMove, chess.isCheck())
+                }
                 await onMoveEnd?.(mv)
             }
         }

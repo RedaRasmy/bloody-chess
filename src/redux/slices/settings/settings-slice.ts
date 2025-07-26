@@ -9,6 +9,12 @@ const initialState = {
             durationMs: 200,
         },
     },
+    sound : {
+        enabled : true as boolean,
+        moves : {
+            enabled : true as boolean
+        }
+    }
 } satisfies Settings
 
 const settings = createSlice({

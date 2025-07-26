@@ -20,3 +20,10 @@ export const selectShouldAnimate = (animationKey: SettingValue<"animation">) =>
 export const selectAnimationSetting =
     (animationKey: SettingValue<"animation">) => (state: RootState) =>
         state.settings.animation[animationKey]
+
+export const selectSoundSetting =
+    (animationKey: SettingValue<"sound">) => (state: RootState) =>
+        state.settings.animation[animationKey]
+
+export const selectIsMovesSoundsEnabled = (state: RootState) =>
+    state.settings.sound.enabled && state.settings.sound.moves.enabled
