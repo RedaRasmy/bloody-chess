@@ -1,10 +1,11 @@
 "use client"
 // import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { Button } from "./ui/button"
 // import { LocaleSelect } from "./locale-select"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
+import UserAvatar from "@/features/profile/components/user-avatar"
 
 export default function NavMenu() {
     const { data: session } = useSession()
@@ -26,13 +27,7 @@ export default function NavMenu() {
                 {/* <LocaleSelect /> */}
                 {session ? (
                     <>
-                        {/* {session.user?.name}  */}
-                        <Button
-                            className="cursor-pointer"
-                            onClick={() => signOut()}
-                        >
-                            Sign out
-                        </Button>
+                        <UserAvatar/>
                     </>
                 ) : (
                     <div className="flex gap-2">

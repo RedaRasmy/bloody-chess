@@ -38,6 +38,7 @@ export default function usePlayer(): Result {
                 if (status === "authenticated") {
                     const playerId = data.user.playerId // or playerId if you added it
 
+                    console.log("player id : ",playerId)
                     const playerData = await getPlayer(playerId)
                     if (!playerData)
                         throw new Error(

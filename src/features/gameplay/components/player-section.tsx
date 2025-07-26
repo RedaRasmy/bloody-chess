@@ -5,14 +5,16 @@ import CapturedPieces from "./captured-pieces"
 import Timer from "./timer"
 import { oppositeColor } from "../utils/opposite-color"
 import { useAppSelector } from "@/redux/hooks"
-import { selectWhitePlayer, selectBlackPlayer } from "@/redux/slices/game/game-selectors"
+import {
+    selectWhitePlayer,
+    selectBlackPlayer,
+} from "@/redux/slices/game/game-selectors"
 
 export default function PlayerSection({ color }: { color: Color }) {
     const { name, extraPoints, timeLeft, capturedPieces } = useAppSelector(
-        color === 'w' ? selectWhitePlayer : selectBlackPlayer
+        color === "w" ? selectWhitePlayer : selectBlackPlayer
     )
     // console.log("player : ",{ name, extraPoints, timeLeft, capturedPieces })
-
 
     const image = undefined // for now
 
@@ -31,7 +33,9 @@ export default function PlayerSection({ color }: { color: Color }) {
                 {extraPoints > 0 && <p>+{extraPoints}</p>}
             </div>
             <div>
-                {timeLeft !== null && <Timer timeLeft={timeLeft} playerColor={color} />}
+                {timeLeft !== null && (
+                    <Timer timeLeft={timeLeft} playerColor={color} />
+                )}
             </div>
         </div>
     )
