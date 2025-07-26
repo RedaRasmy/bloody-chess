@@ -6,8 +6,8 @@ import {
     createGame,
     deleteGameById,
     startGameIfExists,
-} from "../server-actions/games-actions"
-import { ChessTimerOption } from "../types"
+} from "../../gameplay/server-actions/games-actions"
+import { ChessTimerOption } from "../../gameplay/types"
 import { supabase } from "@/utils/supabase/client"
 import { Guest, Player, StartedGame } from "@/db/types"
 import isError from "@/utils/is-error"

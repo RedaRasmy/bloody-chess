@@ -11,21 +11,14 @@ import {
 import { Slider } from "@/components/ui/slider"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import {
-    changeColor,
-    changeLevel,
-    changeBotTimer,
-    selectBotOptions,
-} from "@/redux/slices/game-options"
 import { Link } from "@/i18n/navigation"
-import SelectTimer from "./select-timer"
-import { play } from "@/redux/slices/game/game-slice"
-import {ColorOption} from '../types'
+import SelectTimer from "../../gameplay/components/select-timer"
+import { ColorOption } from "../../gameplay/types"
+import useBotController from "../hooks/use-bot-controller"
 
 export default function BotOptionsDialog() {
-    const dispatch = useAppDispatch()
-    const { level, timer, color } = useAppSelector(selectBotOptions)
+
+    const {options:{level,timer,color},start,setOptions} = useBotController()
 
     return (
         <Dialog>
@@ -44,7 +37,7 @@ export default function BotOptionsDialog() {
                         <Slider
                             max={20}
                             step={1}
-                            onValueChange={(e) => dispatch(changeLevel(e[0]))}
+                            onValueChange={(e) => setOptions({level:e[0]})}
                             value={[level]}
                         />
                     </div>
@@ -52,7 +45,9 @@ export default function BotOptionsDialog() {
                         <p className="text-nowrap">Color : </p>
                         <RadioGroup
                             defaultValue={color}
-                            onValueChange={e=>dispatch(changeColor(e as ColorOption))}
+                            onValueChange={(e) =>
+                                setOptions({playerColor: e as ColorOption})
+                            }
                             className="flex flex-row"
                         >
                             <div className="flex items-center gap-3">
@@ -71,14 +66,14 @@ export default function BotOptionsDialog() {
                     </div>
                     <SelectTimer
                         value={timer}
-                        onChange={(op) => dispatch(changeBotTimer(op))}
+                        onChange={(op) => setOptions({timer:op})}
                     />
                 </div>
                 <DialogFooter>
                     <Button asChild className="">
                         <Link
                             href={"/play/bot"}
-                            onClick={() => dispatch(play())}
+                            onClick={start}
                         >
                             Start
                         </Link>

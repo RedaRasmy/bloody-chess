@@ -1,5 +1,5 @@
 "use client"
-import BotController from "@/features/gameplay/components/bot-controller"
+import BotController from "@/features/bot/components/bot-controller"
 import GameLayout from "@/features/gameplay/components/game-layout"
 import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 import PlayerSection from "@/features/gameplay/components/player-section"
@@ -15,7 +15,7 @@ import {
     selectIsPlayerTurn,
     selectPlayerColor,
 } from "@/redux/slices/game/game-selectors"
-import useBot from "@/features/gameplay/hooks/use-bot"
+import useBot from "@/features/bot/hooks/use-bot"
 import { move } from "@/redux/slices/game/game-slice"
 
 export default function Page() {

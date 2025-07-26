@@ -1,21 +1,21 @@
 import { useEffect } from "react"
-import sleep from '@/utils/delay'
-import { getEngineResponse } from "../server-actions/chess-engine"
+import sleep from "@/utils/delay"
+import { getEngineResponse } from "../chess-engine"
 import { getBestMove } from "../utils/get-bestmove"
-import { Chess , Move } from "chess.js"
+import { Chess, Move } from "chess.js"
 
 export default function useBot({
     onMove,
     isBotTurn,
     fen,
     level,
-    delay = 0
+    delay = 0,
 }: {
     isBotTurn: boolean
-    onMove: (move:Move,isCheck:boolean) => void,
-    fen : string,
-    level : number,
-    delay? : number
+    onMove: (move: Move, isCheck: boolean) => void
+    fen: string
+    level: number
+    delay?: number
 }) {
     useEffect(() => {
         if (isBotTurn) {
@@ -31,10 +31,10 @@ export default function useBot({
                     const move = chess.move(bestMove)
                     // dispatch(move(bestMove))
                     // playMoveSound(theMove, chess.inCheck())
-                    onMove(move,chess.isCheck())
+                    onMove(move, chess.isCheck())
                 }
             }
             fetchBestMove()
         }
-    }, [isBotTurn, fen , level])
+    }, [isBotTurn, fen, level])
 }

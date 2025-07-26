@@ -1,4 +1,4 @@
-import useChessBoardWidth from "@/hooks/useChessBoardWidth"
+import useChessBoardWidth from "@/features/gameplay/hooks/useChessBoardWidth"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { PieceSymbol, Square } from "chess.js"
 import { useState } from "react"

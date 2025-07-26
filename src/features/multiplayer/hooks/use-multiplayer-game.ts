@@ -1,12 +1,15 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { supabase } from "@/utils/supabase/client"
 import { useEffect, useState } from "react"
-import { MoveType } from "../types"
+import { MoveType } from "../../gameplay/types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { move as localMove } from "@/redux/slices/game/game-slice"
 import { SMove, StartedGame } from "@/db/types"
-import { makeMove } from "../server-actions/moves-actions"
-import { getFullGame, sendResign } from "../server-actions/games-actions"
+import { makeMove } from "../../gameplay/server-actions/moves-actions"
+import {
+    getFullGame,
+    sendResign,
+} from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
 import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
@@ -122,17 +125,19 @@ export const useMultiplayerGame = (gameId: string) => {
     }
     async function resign() {
         try {
-            console.log('sending resign...')
-            await sendResign(gameId,playerColor) 
-            console.log('resign sent')
-
+            console.log("sending resign...")
+            await sendResign(gameId, playerColor)
+            console.log("resign sent")
         } catch (error) {
             console.error(error)
         }
     }
 
-
-
-
-    return { multiplayerState, move, playerColor, isSetuping: isLoading ,resign}
+    return {
+        multiplayerState,
+        move,
+        playerColor,
+        isSetuping: isLoading,
+        resign,
+    }
 }

@@ -13,7 +13,7 @@ import {
     changeMultiplayerTimer,
     selectMultiplayerOptions,
 } from "@/redux/slices/game-options"
-import SelectTimer from "./select-timer"
+import SelectTimer from "../../gameplay/components/select-timer"
 import { useRouter } from "next/navigation"
 import useGameSearching from "../hooks/use-game-searching"
 
@@ -23,7 +23,7 @@ export default function MultiplayerOptionsDialog() {
     const { timer } = useAppSelector(selectMultiplayerOptions)
     const dispatch = useAppDispatch()
 
-    const { searchTimer , isSearching, startSearch, cancelSearch } =
+    const { searchTimer, isSearching, startSearch, cancelSearch } =
         useGameSearching({
             timerOption: timer,
             onGameFound: async (game, {}) => {

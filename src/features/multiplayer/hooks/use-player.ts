@@ -1,7 +1,10 @@
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
-import { getPlayer } from "../server-actions/player-actions"
-import { getGuest, createGuest } from "../server-actions/guest-actions"
+import { getPlayer } from "../../gameplay/server-actions/player-actions"
+import {
+    getGuest,
+    createGuest,
+} from "../../gameplay/server-actions/guest-actions"
 import { Player, Guest } from "@/db/types"
 import { useLocalStorage } from "usehooks-ts"
 import tryCatch from "@/utils/try-catch"
