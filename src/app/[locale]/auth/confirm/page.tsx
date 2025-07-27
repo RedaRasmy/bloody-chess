@@ -31,10 +31,10 @@ export default function ConfirmPage() {
                 setStatus("success")
 
                 // Auto-signin with NextAuth using the confirmed email
-                const result = await signIn("credentials", {
+                const result = await signIn("email-confirmation", {
+                    userId : data.user.id,
                     email: data.user.email,
-                    // You might need to handle this differently based on your auth setup
-                    // redirect: false,
+                    redirect: false, // to get result object
                 })
 
                 if (result?.ok) {

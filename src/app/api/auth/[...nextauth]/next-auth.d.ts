@@ -11,3 +11,13 @@ declare module "next-auth" {
     };
   }
 }
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    userId: string
+    email: string
+    username: string
+    playerId: string
+    lastUpdated: string
+  }
+}

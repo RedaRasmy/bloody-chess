@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Link } from "@/i18n/navigation"
 
 const formSchema = z.object({
@@ -24,6 +24,8 @@ const formSchema = z.object({
 
 export default function SignInForm() {
     const router = useRouter()
+    const params = useSearchParams()
+    const message = params.get("message")
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -55,9 +57,7 @@ export default function SignInForm() {
     }
 
     const errors = form.formState.errors
-    const message =
-        errors.root?.message ??
-        null
+    const error = errors.root?.message ?? null
 
     return (
         <Form {...form}>
@@ -66,8 +66,11 @@ export default function SignInForm() {
                 className="space-y-5 my-auto place-self-center w-[min(90%,400px)]"
             >
                 <div>
-                    <h1 className="text-2xl md:text-3xl mb-5 md:mb-10">Login to your account</h1>
-                    <p className="text-red-500 my-2">{message}</p>
+                    <h1 className="text-2xl md:text-3xl mb-5 md:mb-10">
+                        Login to your account
+                    </h1>
+                    <p className="text-green-500 my-2">{message}</p>
+                    <p className="text-red-500 my-2">{error}</p>
                 </div>
                 <FormField
                     control={form.control}
