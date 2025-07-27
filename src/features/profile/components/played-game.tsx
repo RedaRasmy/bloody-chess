@@ -6,7 +6,7 @@ export default function PlayedGame({
     color 
 }:PlayedGame) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between bg-accent rounded-md">
         <p>{color}</p>
         <p>{timerOption}</p>
         <p>{result}</p>
