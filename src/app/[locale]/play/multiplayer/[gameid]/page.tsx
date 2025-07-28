@@ -8,6 +8,7 @@ import { useParams } from "next/navigation"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import ChessBoard from "@/features/gameplay/components/chess-board"
 import MultiplayerController from "@/features/multiplayer/components/multiplayer-controller"
+import SetupLoading from "@/features/multiplayer/components/setup-loading"
 
 export default function Page() {
     const params = useParams()
@@ -16,7 +17,7 @@ export default function Page() {
 
     const opponentColor = oppositeColor(playerColor)
 
-    if (isSetuping) return <div>loading...</div>
+    if (isSetuping) return <SetupLoading/>
 
     return (
         <GameLayout
