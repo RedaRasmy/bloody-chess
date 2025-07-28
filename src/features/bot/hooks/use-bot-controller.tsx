@@ -35,7 +35,7 @@ export default function useBotController() {
         if (level) {
             dispatch(changeLevel(level))
         }
-        if (timer) {
+        if (timer !== undefined) {
             dispatch(changeBotTimer(timer))
         }
     }

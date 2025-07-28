@@ -17,8 +17,11 @@ import { ColorOption } from "../../gameplay/types"
 import useBotController from "../hooks/use-bot-controller"
 
 export default function BotOptionsDialog() {
-
-    const {options:{level,timer,color},start,setOptions} = useBotController()
+    const {
+        options: { level, timer, color },
+        start,
+        setOptions,
+    } = useBotController()
 
     return (
         <Dialog>
@@ -37,7 +40,7 @@ export default function BotOptionsDialog() {
                         <Slider
                             max={20}
                             step={1}
-                            onValueChange={(e) => setOptions({level:e[0]})}
+                            onValueChange={(e) => setOptions({ level: e[0] })}
                             value={[level]}
                         />
                     </div>
@@ -46,7 +49,7 @@ export default function BotOptionsDialog() {
                         <RadioGroup
                             defaultValue={color}
                             onValueChange={(e) =>
-                                setOptions({playerColor: e as ColorOption})
+                                setOptions({ playerColor: e as ColorOption })
                             }
                             className="flex flex-row"
                         >
@@ -66,15 +69,14 @@ export default function BotOptionsDialog() {
                     </div>
                     <SelectTimer
                         value={timer}
-                        onChange={(op) => setOptions({timer:op})}
+                        onChange={(op) => {
+                            setOptions({ timer: op })
+                        }}
                     />
                 </div>
                 <DialogFooter>
                     <Button asChild className="">
-                        <Link
-                            href={"/play/bot"}
-                            onClick={start}
-                        >
+                        <Link href={"/play/bot"} onClick={start}>
                             Start
                         </Link>
                     </Button>

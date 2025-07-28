@@ -37,7 +37,6 @@ export function getGameoverCause({
     }
 }
 
-// Todo : remove the func above and rename file
 
 export function getGameOverState(chess: Chess): GameOverState {
     const isGameOver = chess.isGameOver()

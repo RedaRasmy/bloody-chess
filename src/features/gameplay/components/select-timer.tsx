@@ -20,15 +20,14 @@ export default function SelectTimer({
     required = false,
 }: Props) {
     const options = [...TIMER_OPTIONS]
+
     const handleNoneClick = () => {
-        if (!required) {
-            (onChange as (option: ChessTimerOption | null) => void)(null)
-        }
+        (onChange as (option: ChessTimerOption | null) => void)(null)
     }
     return (
         <div className="flex gap-3 flex-wrap">
             <h1 className="">Timer : </h1>
-            {!required && (
+            {required === false && (
                 <div
                     onClick={handleNoneClick}
                     className={cn(
