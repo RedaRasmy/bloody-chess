@@ -5,22 +5,13 @@ import { games } from "@/db/schema"
 import { ChessTimerOption } from "@/features/gameplay/types"
 import { eq } from "drizzle-orm"
 import parseTimerOption from "../utils/parse-timer-option"
-import { FullGame, StartedGame } from "@/db/types"
+import { FullGame, GameStatus, NewGame, StartedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
 import { getPlayer } from "./player-actions"
 import { Color, Square } from "chess.js"
 
-// export async function getNewGame() {
-//     const newGame = await db.query.games.findFirst({
-//         where : (games,{eq}) => eq(games.status,'not-started'),
-//         orderBy : (games,{asc}) => [asc(games.createdAt)]
-//     })
-
-//     return newGame
-// }
-
 /// check if there is a player waiting -> start if yes
-export async function startGameIfExists({
+export async function matchGameIfExist({
     playerId,
     isForGuests,
     timerOption,
@@ -32,7 +23,7 @@ export async function startGameIfExists({
     const newGame = await db.query.games.findFirst({
         where: (games, { eq, and, ne }) =>
             and(
-                eq(games.status, "not-started"),
+                eq(games.status, "matching"),
                 eq(games.isForGuests, isForGuests),
                 ne(games.whiteId, playerId),
                 eq(games.timer, timerOption)
@@ -45,8 +36,7 @@ export async function startGameIfExists({
             .update(games)
             .set({
                 blackId: playerId,
-                status: "playing",
-                gameStartedAt: Date.now(),
+                status: "preparing",
             })
             .where(eq(games.id, newGame.id))
             .returning()
@@ -60,7 +50,7 @@ export async function startGameIfExists({
     }
 }
 
-/// if there is no one waiting for u create one instead :
+/// if there is no one waiting for u create new one instead :
 export async function createGame({
     isForGuests,
     timerOption,
@@ -69,10 +59,10 @@ export async function createGame({
     isForGuests: boolean
     timerOption: ChessTimerOption
     playerId: string
-}) {
+}): Promise<NewGame> {
     const timer = parseTimerOption(timerOption)
 
-    const newGame = await db
+    const result = await db
         .insert(games)
         .values({
             isForGuests,
@@ -80,11 +70,15 @@ export async function createGame({
             whiteId: playerId,
             blackTimeLeft: timer.base * 1000,
             whiteTimeLeft: timer.base * 1000,
-            currentTurn: "w",
         })
         .returning()
 
-    return newGame[0]
+    const newGame = result[0]
+    return {
+        ...newGame,
+        createdAt: newGame.createdAt.getTime(),
+        updatedAt: newGame.updatedAt.getTime(),
+    } as NewGame
 }
 
 export async function deleteGameById(id: string) {
@@ -101,73 +95,98 @@ export async function getFullGame(id: string): Promise<FullGame> {
         },
     })
 
-    if (!game) throw new Error("No game found")
+    if (!game) throw new Error("Game not found")
 
-    const { whiteId, blackId, gameStartedAt } = game
-    if (!whiteId || !blackId || !gameStartedAt)
-        throw new Error("Game not started yet!")
+    const { whiteId, blackId } = game
+    if (!blackId) throw new Error("Game not matched yet!")
 
-    if (game.isForGuests) {
-        const white = await getGuest(whiteId)
-        const black = await getGuest(blackId)
-        return {
-            ...game,
-            whiteId,
-            blackId,
-            gameStartedAt,
-            isForGuests: true,
-            whiteName: white.displayName,
-            blackName: black.displayName,
-            moves: game.moves.map((mv) => ({
-                from: mv.from as Square,
-                to: mv.to as Square,
-                promotion: mv.promotion || undefined,
-                fenAfter: mv.fenAfter,
-            })),
-            createdAt: game.createdAt.getTime(),
-            updatedAt: game.updatedAt.getTime(),
-        }
-    } else {
-        const white = await getPlayer(whiteId)
-        const black = await getPlayer(blackId)
-        return {
-            ...game,
-            whiteId,
-            blackId,
-            gameStartedAt,
-            isForGuests: false,
-            whiteName: white.username,
-            blackName: black.username,
-            moves: game.moves.map((mv) => ({
-                from: mv.from as Square,
-                to: mv.to as Square,
-                promotion: mv.promotion || undefined,
-                fenAfter: mv.fenAfter,
-            })),
-            createdAt: game.createdAt.getTime(),
-            updatedAt: game.updatedAt.getTime(),
-        }
-    }
+    const whiteName = game.isForGuests
+        ? (await getGuest(whiteId)).displayName
+        : (await getPlayer(whiteId)).username
+    const blackName = game.isForGuests
+        ? (await getGuest(blackId)).displayName
+        : (await getPlayer(blackId)).username
+
+   
+    return {
+        ...game,
+        whiteName,
+        blackName,
+        moves: game.moves.map((mv) => ({
+            from: mv.from as Square,
+            to: mv.to as Square,
+            promotion: mv.promotion || undefined,
+            fenAfter: mv.fenAfter,
+        })),
+        createdAt: game.createdAt.getTime(),
+        updatedAt: game.updatedAt.getTime(),
+    } as FullGame
 }
 
 export async function sendTimeOut(gameId: string, playerColor: Color) {
-    /// i should protect this 
+    /// i should protect this
     const updateData =
         playerColor === "w" ? { whiteTimeLeft: 0 } : { blackTimeLeft: 0 }
-    await db.update(games).set({
-        ...updateData,
-        status : 'finished',
-        gameOverReason: "Timeout",
-        result: playerColor === "w" ? "black_won" : "white_won",
-    }).where(eq(games.id,gameId))
+    await db
+        .update(games)
+        .set({
+            ...updateData,
+            status: "finished",
+            gameOverReason: "Timeout",
+            result: playerColor === "w" ? "black_won" : "white_won",
+        })
+        .where(eq(games.id, gameId))
 }
+
 export async function sendResign(gameId: string, playerColor: Color) {
-    /// i should protect this 
+    /// i should protect this
 
-    await db.update(games).set({
-        status : "finished",
-        gameOverReason : "Resignation",
-        result : playerColor === 'w' ? 'black_won' : 'white_won'
-    })
+    await db
+        .update(games)
+        .set({
+            status: "finished",
+            gameOverReason: "Resignation",
+            result: playerColor === "w" ? "black_won" : "white_won",
+        })
+        .where(eq(games.id, gameId))
 }
 
+export async function startGame(gameId: string, playerColor: Color) {
+    const matchedGame = await db.query.games.findFirst({
+        where: (games, { eq }) => eq(games.id, gameId),
+    })
+    if (!matchedGame) {
+        throw new Error("startGame : Game not found with id=" + gameId)
+    }
+    if (matchedGame.status !== "preparing") {
+        throw new Error(
+            "startGame : Game is not matched yet or already prepared"
+        )
+    }
+
+    const isOtherPlayerReady =
+        playerColor === "w" ? matchedGame.blackReady : matchedGame.whiteReady
+
+    const playerReady =
+        playerColor === "w"
+            ? {
+                  whiteReady: true,
+              }
+            : { blackReady: true }
+    const startGame: { status: GameStatus } = isOtherPlayerReady
+        ? {
+              status: "playing",
+          }
+        : {
+              status: "preparing",
+          }
+
+    const startedGame = await db
+        .update(games)
+        .set({
+            ...playerReady,
+            ...startGame,
+            gameStartedAt: Date.now(),
+        })
+        .where(eq(games.id, gameId))
+}

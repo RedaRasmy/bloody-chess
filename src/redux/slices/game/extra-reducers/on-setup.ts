@@ -8,7 +8,7 @@ import getExtraPoints from "@/features/gameplay/utils/get-extra-points"
 import { Chess, Square } from "chess.js"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { DrawReason, WinReason } from "@/features/gameplay/types"
-import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
+// import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 
 export function onSetup(
     state: WritableDraft<GameState>,
@@ -37,14 +37,14 @@ export function onSetup(
     }))
 
     // Only update timers if game is active
-    const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-        whiteTimeLeft: game.whiteTimeLeft,
-        blackTimeLeft: game.blackTimeLeft,
-        currentTurn: game.currentTurn,
-        lastMoveAt: game.lastMoveAt
-            ? new Date(game.lastMoveAt)
-            : new Date(game.gameStartedAt),
-    })
+    // const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
+    //     whiteTimeLeft: game.whiteTimeLeft,
+    //     blackTimeLeft: game.blackTimeLeft,
+    //     currentTurn: game.currentTurn,
+    //     lastMoveAt: game.lastMoveAt
+    //         ? new Date(game.lastMoveAt)
+    //         : new Date(game.gameStartedAt),
+    // })
 
     state.gameStartedAt = game.gameStartedAt
     state.lastMoveAt = game.lastMoveAt
@@ -60,13 +60,13 @@ export function onSetup(
     state.players = {
         white: {
             name: game.whiteName,
-            timeLeft: whiteTimeLeft,
+            timeLeft: game.whiteTimeLeft,
             capturedPieces: capturedPieces.b,
             extraPoints: whiteExtraPoints,
         },
         black: {
             name: game.blackName,
-            timeLeft: blackTimeLeft,
+            timeLeft: game.blackTimeLeft,
             capturedPieces: capturedPieces.w,
             extraPoints: blackExtraPoints,
         },

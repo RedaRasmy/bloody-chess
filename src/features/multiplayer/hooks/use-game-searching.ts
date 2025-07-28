@@ -5,7 +5,7 @@ import { RealtimeChannel } from "@supabase/supabase-js"
 import {
     createGame,
     deleteGameById,
-    startGameIfExists,
+    matchGameIfExist,
 } from "../../gameplay/server-actions/games-actions"
 import { ChessTimerOption } from "../../gameplay/types"
 import { supabase } from "@/utils/supabase/client"
@@ -74,7 +74,7 @@ export default function useGameSearching({
             try {
                 console.log("Starting search...")
 
-                const startedGame = await startGameIfExists({
+                const startedGame = await matchGameIfExist({
                     playerId: data.id,
                     isForGuests: type === "guest",
                     timerOption,
