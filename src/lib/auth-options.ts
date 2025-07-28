@@ -124,7 +124,7 @@ export const authOptions: NextAuthOptions = {
                     throw error
                 }
             },
-        }), /// for auto sign in 
+        }), /// for auto sign in
         CredentialsProvider({
             id: "email-confirmation",
             name: "Email Confirmation",
@@ -222,6 +222,17 @@ export const authOptions: NextAuthOptions = {
                     token.playerId = player.id
                     token.username = player.username
                 } else {
+                    token.playerId = existingPlayer.id
+                    token.username = existingPlayer.username
+                }
+            } else if (token.userId && !token.playerId) {
+
+                const existingPlayer = await db.query.players.findFirst({
+                    where: (players, { eq }) =>
+                        eq(players.userId, token.userId),
+                })
+
+                if (existingPlayer) {
                     token.playerId = existingPlayer.id
                     token.username = existingPlayer.username
                 }
