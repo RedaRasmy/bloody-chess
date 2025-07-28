@@ -43,7 +43,6 @@ export default function updatePieces(
         const output = capturedPiece
             ? pieces.filter((p) => p === movePiece || p.square !== capturedPiece.square)
             : pieces
-        console.log("new pieces : ",output)
         // castling
         if (move.isKingsideCastle || move.isQueensideCastle) {
             // handle rook move in castling

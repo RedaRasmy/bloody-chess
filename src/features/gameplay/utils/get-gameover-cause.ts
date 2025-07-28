@@ -1,6 +1,7 @@
 import { GameOverState } from "@/redux/slices/game/game-types"
 import { Chess } from "chess.js"
 import { DrawReason } from "../types"
+import { oppositeColor } from "./opposite-color"
 
 export function getGameoverCause({
     isCheckmate,
@@ -40,6 +41,7 @@ export function getGameoverCause({
 
 export function getGameOverState(chess: Chess): GameOverState {
     const isGameOver = chess.isGameOver()
+    const player = oppositeColor(chess.turn())
 
     if (isGameOver) {
         const isDraw = chess.isDraw()
@@ -61,7 +63,7 @@ export function getGameOverState(chess: Chess): GameOverState {
             return {
                 isGameOver : true,
                 isDraw : false,
-                winner : 'w',
+                winner : player,
                 reason : 'Checkmate'
             }
         }
