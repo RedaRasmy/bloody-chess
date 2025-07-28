@@ -36,7 +36,8 @@ export default function usePlayer(): Result {
         async function getPlayerOrGuest() {
             try {
                 if (status === "authenticated") {
-                    const playerId = data.user.playerId // or playerId if you added it
+                    const playerId = data.user.playerId 
+                    console.log('playerId from session :',playerId)
 
                     if (playerId) {
                         console.log("player id : ", playerId)
@@ -47,6 +48,8 @@ export default function usePlayer(): Result {
                             )
                         setPlayer(serializeTimestamps(playerData))
                         console.log("player : ", playerData)
+                    } else {
+                        console.log('there is no playerId in session ')
                     }
                 } else {
                     if (guestId !== "") {

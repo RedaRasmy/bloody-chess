@@ -151,6 +151,8 @@ export async function sendResign(gameId: string, playerColor: Color) {
         .where(eq(games.id, gameId))
 }
 
+
+
 export async function startGame(gameId: string, playerColor: Color) {
     const matchedGame = await db.query.games.findFirst({
         where: (games, { eq }) => eq(games.id, gameId),
@@ -181,7 +183,7 @@ export async function startGame(gameId: string, playerColor: Color) {
               status: "preparing",
           }
 
-    const startedGame = await db
+    await db
         .update(games)
         .set({
             ...playerReady,
@@ -189,4 +191,7 @@ export async function startGame(gameId: string, playerColor: Color) {
             gameStartedAt: Date.now(),
         })
         .where(eq(games.id, gameId))
+
+
+
 }

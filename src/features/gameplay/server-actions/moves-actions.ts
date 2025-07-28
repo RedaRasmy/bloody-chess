@@ -41,8 +41,8 @@ export async function makeMove({
         )
 
     const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-        blackTimeLeft: game.whiteTimeLeft,
-        whiteTimeLeft: game.blackTimeLeft,
+        blackTimeLeft: game.blackTimeLeft,
+        whiteTimeLeft: game.whiteTimeLeft,
         lastMoveAt : new Date(lastMoveAt),
         currentTurn: game.currentTurn,
     })
@@ -68,8 +68,8 @@ export async function makeMove({
         .set({
             currentFen: chess.fen(),
             currentTurn: chess.turn(),
-            whiteTimeLeft : playerColor === 'w' ? whiteTimeLeft + plus : whiteTimeLeft,
-            blackTimeLeft : playerColor === 'b' ? blackTimeLeft + plus : whiteTimeLeft,
+            whiteTimeLeft : playerColor === 'w' ? whiteTimeLeft + plus*1000 : whiteTimeLeft,
+            blackTimeLeft : playerColor === 'b' ? blackTimeLeft + plus*1000 : blackTimeLeft,
             lastMoveAt: Date.now(),
             gameOverReason: gameOverCause,
             status: isGameOver ? "finished" : "playing",

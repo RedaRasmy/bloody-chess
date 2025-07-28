@@ -195,6 +195,12 @@ export const authOptions: NextAuthOptions = {
         //     return true
         // },
         async jwt({ token, user }) {
+            console.log("JWT CALLBACK DEBUG:", {
+                hasUser: !!user,
+                tokenUserId: token.userId,
+                tokenPlayerIdBefore: token.playerId,
+                timestamp: new Date().toISOString(),
+            })
             if (user && user.id && user.email) {
                 token.userId = user.id
                 token.email = user.email
@@ -226,17 +232,37 @@ export const authOptions: NextAuthOptions = {
                     token.username = existingPlayer.username
                 }
             } else if (token.userId && !token.playerId) {
+                console.log(
+                    "FETCHING MISSING PLAYER ID for userId:",
+                    token.userId
+                )
 
-                const existingPlayer = await db.query.players.findFirst({
-                    where: (players, { eq }) =>
-                        eq(players.userId, token.userId),
-                })
+                try {
+                    const existingPlayer = await db.query.players.findFirst({
+                        where: (players, { eq }) =>
+                            eq(players.userId, token.userId),
+                    })
 
-                if (existingPlayer) {
-                    token.playerId = existingPlayer.id
-                    token.username = existingPlayer.username
+                    console.log("PLAYER QUERY RESULT:", existingPlayer)
+
+                    if (existingPlayer) {
+                        token.playerId = existingPlayer.id
+                        token.username = existingPlayer.username
+                        console.log("PLAYER ID SET:", token.playerId)
+                    } else {
+                        console.log(
+                            "NO PLAYER FOUND FOR USER ID:",
+                            token.userId
+                        )
+                    }
+                } catch (error) {
+                    console.error("DATABASE QUERY ERROR:", error)
                 }
             }
+            console.log("JWT CALLBACK END:", {
+                tokenUserId: token.userId,
+                tokenPlayerIdAfter: token.playerId,
+            })
             return token
         },
         async session({ session, token }) {

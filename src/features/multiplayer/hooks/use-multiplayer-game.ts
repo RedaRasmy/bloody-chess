@@ -4,24 +4,50 @@ import { useEffect, useState } from "react"
 import { MoveType } from "../../gameplay/types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import { move as localMove } from "@/redux/slices/game/game-slice"
-import { SMove, StartedGame } from "@/db/types"
+import { FinishedGame, Game, SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../../gameplay/server-actions/moves-actions"
 import {
     getFullGame,
     sendResign,
+    startGame,
 } from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
-import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
+import {
+    // selectGameStartedAt,
+    selectPlayerColor,
+} from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
     const multiplayerState = useAppSelector((state) => state.multiplayer)
     const playerColor = useAppSelector(selectPlayerColor)
+    // const gameStartedAt = useAppSelector(selectGameStartedAt)
     const player = usePlayer()
     const [isLoading, setIsLoading] = useState(true)
-    const [newGame, setNewGame] = useState<StartedGame | null>(null)
+    const [newGame, setNewGame] = useState<Game | null>(null)
     const [newMove, setNewMove] = useState<SMove | null>(null)
+
+
+
+    useEffect(() => {
+        if (newGame && !isLoading) {
+            const { status } = newGame
+            // if (
+            //     status === "playing" &&
+            //     gameStartedAt === null
+            // ) {
+            //     console.log("first sync done, game started :", newGame)
+            //     dispatch(sync(newGame as StartedGame))
+            // }
+            // if (status === "finished") {
+            //     dispatch(sync(newGame as FinishedGame))
+            // }
+            if (status === 'playing' || status === 'finished') {
+                dispatch(sync(newGame as FinishedGame | StartedGame))
+            }
+        }
+    }, [newGame,isLoading])
 
     useEffect(() => {
         if (newGame && newMove) {
@@ -37,7 +63,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     })
                 )
             }
-            dispatch(sync(newGame))
+            // dispatch(sync(newGame as StartedGame))
             setNewGame(null)
             setNewMove(null)
             // console.log("sync done")
@@ -45,6 +71,7 @@ export const useMultiplayerGame = (gameId: string) => {
     }, [newGame, newMove])
 
     useEffect(() => {
+        console.log('player.type =',player.type)
         if (player.type !== "loading") {
             const { data } = player
             async function setState() {
@@ -57,6 +84,10 @@ export const useMultiplayerGame = (gameId: string) => {
                     })
                 )
                 setIsLoading(false)
+                if (game.status === "preparing") {
+                    const playerColor = game.whiteId === data.id ? "w" : "b"
+                    await startGame(gameId, playerColor)
+                }
             }
             setState()
         }
@@ -76,9 +107,7 @@ export const useMultiplayerGame = (gameId: string) => {
                 },
                 (payload) => {
                     console.log("NEW UPDATE IN [[ GAMES ]] TABEL RECEIVED")
-                    const newGame = supabaseToTypescript<StartedGame>(
-                        payload.new
-                    )
+                    const newGame = supabaseToTypescript<Game>(payload.new)
                     console.log("new Game : ", newGame)
                     setNewGame(newGame)
                 }

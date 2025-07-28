@@ -35,8 +35,8 @@ export type MatchedGame = Prettify<
         status: "preparing"
         result: null
         gameOverReason: null
-        whiteReady: false
-        blackReady: false
+        whiteReady: boolean
+        blackReady: boolean
     }
 >
 export type StartedGame = Prettify<

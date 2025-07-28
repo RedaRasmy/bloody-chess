@@ -11,6 +11,7 @@ import { setup, sync } from "../multiplayer/multiplayer-slice"
 import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 import * as reducers from "./reducers"
 import { onSync, onSetup } from "./extra-reducers"
+import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 
 const initialState: GameState = {
     fen: DEFAULT_POSITION,
@@ -72,10 +73,11 @@ const gameSlice = createSlice({
         //         state.history[state.currentMoveIndex]
         //     )
         // }
-        resign: (state) => {
+        resign: (state,action:PayloadAction<Color | undefined>) => {
+            const color = action.payload // resigner
             state.gameOver.reason = "Resignation"
             state.gameOver.isGameOver = true
-            state.gameOver.winner = state.playerColor === "w" ? "b" : "w"
+            state.gameOver.winner = color ? oppositeColor(color) : state.playerColor === "w" ? "b" : "w"
         },
         play: (state,action:PayloadAction<{
             playerName:string,

@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import {
     selectCurrentPlayer,
+    selectGameStartedAt,
     selectIsGameOver,
     selectIsNewGame,
 } from "@/redux/slices/game/game-selectors"
@@ -22,13 +23,14 @@ export default function Timer({
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
+    const gameStartedAt = useAppSelector(selectGameStartedAt)
+
     const [displayTime, setDisplayTime] = useState(timeLeft)
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
     // const startTimeRef = useRef<number | null>(null)
     const lastUpdateRef = useRef<number>(Date.now())
 
     const isMyTurn = currentPlayer === playerColor && !isGameOver
-
 
     // Sync display time with Redux store
     useEffect(() => {
@@ -40,7 +42,7 @@ export default function Timer({
         if (intervalRef.current) {
             clearInterval(intervalRef.current)
         }
-        if (isMyTurn && timeLeft > 0) {
+        if (isMyTurn && timeLeft > 0 && gameStartedAt) {
             lastUpdateRef.current = Date.now()
             // startTimeRef.current = Date.now()
             intervalRef.current = setInterval(() => {
@@ -69,7 +71,7 @@ export default function Timer({
             if (intervalRef.current) clearInterval(intervalRef.current)
             intervalRef.current = null
         }
-    }, [isMyTurn, playerColor])
+    }, [isMyTurn, playerColor,gameStartedAt])
 
     // Clean up on game over
     useEffect(() => {
