@@ -1,7 +1,6 @@
 "use client"
 import BotController from "@/features/bot/components/bot-controller"
 import GameLayout from "@/features/gameplay/components/game-layout"
-import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 import PlayerSection from "@/features/gameplay/components/player-section"
 import ChessBoard from "@/features/gameplay/components/chess-board"
 import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
@@ -17,6 +16,7 @@ import {
 } from "@/redux/slices/game/game-selectors"
 import useBot from "@/features/bot/hooks/use-bot"
 import { move } from "@/redux/slices/game/game-slice"
+import BotGameOverDialog from "@/features/bot/components/bot-gameover-dialog"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -54,7 +54,7 @@ export default function Page() {
                 />
             }
             gameDetails={<BotController />}
-            gameOverPopUp={<GameOverPopUp />}
+            gameOverPopUp={<BotGameOverDialog />}
         />
     )
 }

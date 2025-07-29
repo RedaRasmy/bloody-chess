@@ -1,7 +1,6 @@
 "use client"
-import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+import {  useAppSelector } from "@/redux/hooks"
 import { selectGameOverData } from "@/redux/slices/game/game-selectors"
-import { play } from "@/redux/slices/game/game-slice"
 import {
     Dialog,
     DialogContent,
@@ -12,22 +11,11 @@ import {
 } from "@/components/ui/dialog"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
-import { selectBotOptions } from "@/redux/slices/game-options"
 
-export default function GameOverPopUp() {
+export default function MultiplayerGameOverDialog() {
     const { isWin, isDraw, reason, isGameOver } =
         useAppSelector(selectGameOverData)
-    const { level } = useAppSelector(selectBotOptions)
-    const dispatch = useAppDispatch()
 
-    function handleReplay() {
-        dispatch(
-            play({
-                playerName: "player",
-                opponentName: `bot - lvl ${level}`,
-            })
-        )
-    }
 
     if (isGameOver)
         return (
@@ -46,12 +34,6 @@ export default function GameOverPopUp() {
                     <DialogFooter>
                         <Button asChild variant="outline">
                             <Link href={"/"}>Home</Link>
-                        </Button>
-                        <Button
-                            className="cursor-pointer"
-                            onClick={handleReplay}
-                        >
-                            Replay
                         </Button>
                     </DialogFooter>
                 </DialogContent>

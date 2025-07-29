@@ -1,7 +1,6 @@
 "use client"
 import ChessBoardLayout from "@/features/gameplay/components/chess-board-layout"
 import GameLayout from "@/features/gameplay/components/game-layout"
-import GameOverPopUp from "@/features/gameplay/components/game-over-pop-up"
 import PlayerSection from "@/features/gameplay/components/player-section"
 import { useMultiplayerGame } from "@/features/multiplayer/hooks/use-multiplayer-game"
 import { useParams } from "next/navigation"
@@ -9,6 +8,7 @@ import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import ChessBoard from "@/features/gameplay/components/chess-board"
 import MultiplayerController from "@/features/multiplayer/components/multiplayer-controller"
 import SetupLoading from "@/features/multiplayer/components/setup-loading"
+import MultiplayerGameOverDialog from "@/features/multiplayer/components/multiplayer-gameover-dialog"
 
 export default function Page() {
     const params = useParams()
@@ -35,7 +35,7 @@ export default function Page() {
                 />
             }
             gameDetails={<MultiplayerController onResign={resign} />}
-            gameOverPopUp={<GameOverPopUp />}
+            gameOverPopUp={<MultiplayerGameOverDialog />}
         />
     )
 }
