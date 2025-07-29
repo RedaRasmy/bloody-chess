@@ -24,9 +24,9 @@ type GuestResult = {
 type Result = Loading | PlayerResult | GuestResult
 
 export default function usePlayer(): Result {
-    const { status, data  } = useSession()
+    const { status, data, update } = useSession()
 
-    console.log('usePlayer -- session : ',{status,data})
+    console.log("usePlayer -- session : ", { status, data })
 
     const [player, setPlayer] = useState<Player | null>(null)
     const [guest, setGuest] = useState<Guest | null>(null)
@@ -39,21 +39,25 @@ export default function usePlayer(): Result {
         async function getPlayerOrGuest() {
             try {
                 if (status === "authenticated") {
-                    const playerId = data.user.playerId 
-                    console.log('playerId from session :',playerId)
+                    const playerId = data.user.playerId
+                    console.log("playerId from session :", playerId)
 
-                    if (playerId) {
-                        console.log("player id : ", playerId)
-                        const playerData = await getPlayer(playerId)
-                        if (!playerData)
-                            throw new Error(
-                                "Player not exists in DB! id=" + playerId
-                            )
-                        setPlayer(serializeTimestamps(playerData))
-                        console.log("player : ", playerData)
-                    } else {
-                        console.log('there is no playerId in session ')
+                    if (!playerId) {
+                        console.log(
+                            "No playerId in session, forcing refetch..."
+                        )
+                        // Force session update
+                        await update()
+                        return
                     }
+                    console.log("player id : ", playerId)
+                    const playerData = await getPlayer(playerId)
+                    if (!playerData)
+                        throw new Error(
+                            "Player not exists in DB! id=" + playerId
+                        )
+                    setPlayer(serializeTimestamps(playerData))
+                    console.log("player : ", playerData)
                 } else {
                     if (guestId !== "") {
                         // guest_id exists
@@ -83,7 +87,7 @@ export default function usePlayer(): Result {
         }
 
         getPlayerOrGuest()
-    }, [status,data?.user.playerId])
+    }, [status, data?.user.playerId,update])
 
     if (player) {
         return {
