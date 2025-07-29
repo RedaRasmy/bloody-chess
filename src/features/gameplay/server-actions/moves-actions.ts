@@ -11,8 +11,8 @@ import parseTimerOption from "../utils/parse-timer-option"
 
 export async function getMoves(gameId: string) {
     const gameMoves = await db.query.moves.findMany({
-        where : (moves,{eq}) => eq(moves.gameId,gameId),
-        orderBy: (moves, { asc }) => [asc(moves.createdAt)]
+        where: (moves, { eq }) => eq(moves.gameId, gameId),
+        orderBy: (moves, { asc }) => [asc(moves.createdAt)],
     })
     return gameMoves
 }
@@ -24,26 +24,37 @@ export async function makeMove({
     gameId: string
     move: MoveType
 }) {
+    /// Get The Game Before The Move
     const game = await db.query.games.findFirst({
         where: (games, { eq }) => eq(games.id, gameId),
     })
-    if (!game) throw new Error("No game found with id: " + gameId)
-    const chess = new Chess(game.currentFen)
-    const validatedMove = chess.move(move)
-    const playerColor = validatedMove.color
 
-    const {plus} = parseTimerOption(game.timer) 
-
+    /// Some Checks
+    if (!game) {
+        throw new Error("No game found with id: " + gameId)
+    } else if (game.status === "matching" || game.status === "preparing") {
+        throw new Error("Unallowed Move : The game not started yet ")
+    } else if (game.status === "finished") {
+        throw new Error("Unallowed Move : The game already finsihed")
+    }
     const lastMoveAt = game.lastMoveAt || game.gameStartedAt
     if (!lastMoveAt)
         throw new Error(
             "You cant make a move while game is not started yet : lastMoveAt and gameCreatedAt are null"
         )
 
+    /// Move Logic
+    const chess = new Chess(game.currentFen)
+    const validatedMove = chess.move(move)
+    const playerColor = validatedMove.color
+
+    const { plus } = parseTimerOption(game.timer)
+
+
     const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
         blackTimeLeft: game.blackTimeLeft,
         whiteTimeLeft: game.whiteTimeLeft,
-        lastMoveAt : new Date(lastMoveAt),
+        lastMoveAt: new Date(lastMoveAt),
         currentTurn: game.currentTurn,
     })
 
@@ -68,8 +79,14 @@ export async function makeMove({
         .set({
             currentFen: chess.fen(),
             currentTurn: chess.turn(),
-            whiteTimeLeft : playerColor === 'w' ? whiteTimeLeft + plus*1000 : whiteTimeLeft,
-            blackTimeLeft : playerColor === 'b' ? blackTimeLeft + plus*1000 : blackTimeLeft,
+            whiteTimeLeft:
+                playerColor === "w"
+                    ? whiteTimeLeft + plus * 1000
+                    : whiteTimeLeft,
+            blackTimeLeft:
+                playerColor === "b"
+                    ? blackTimeLeft + plus * 1000
+                    : blackTimeLeft,
             lastMoveAt: Date.now(),
             gameOverReason: gameOverCause,
             status: isGameOver ? "finished" : "playing",
@@ -83,7 +100,7 @@ export async function makeMove({
         })
         .where(eq(games.id, gameId))
 
-    // insert move
+    /// Insert Move
     const newMoves = await db
         .insert(moves)
         .values({

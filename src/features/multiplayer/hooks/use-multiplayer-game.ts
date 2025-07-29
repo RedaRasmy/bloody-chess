@@ -33,16 +33,6 @@ export const useMultiplayerGame = (gameId: string) => {
     useEffect(() => {
         if (newGame && !isLoading) {
             const { status } = newGame
-            // if (
-            //     status === "playing" &&
-            //     gameStartedAt === null
-            // ) {
-            //     console.log("first sync done, game started :", newGame)
-            //     dispatch(sync(newGame as StartedGame))
-            // }
-            // if (status === "finished") {
-            //     dispatch(sync(newGame as FinishedGame))
-            // }
             if (status === 'playing' || status === 'finished') {
                 dispatch(sync(newGame as FinishedGame | StartedGame))
             }

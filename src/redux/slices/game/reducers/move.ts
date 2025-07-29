@@ -19,12 +19,15 @@ export function move(
     action: PayloadAction<MoveType>
 ) {
     if (state.gameOver.isGameOver) {
-        console.log("cant move , game is over!")
+        console.log("Move Reducer : cant move , game is over!")
         return
     }
     if (state.currentMoveIndex < state.history.length - 1) {
-        console.log("cant move while undo !")
+        console.log("Move Reducer : cant move while undo !")
         return
+    } 
+    if (!state.gameStartedAt) {
+        console.log('Move Reducer : cant move , game is not started yet')
     }
     const move = action.payload
     const chess = new Chess()
