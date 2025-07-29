@@ -5,6 +5,7 @@ import { supabase } from "@/utils/supabase/client"
 // import tryCatch from "@/utils/try-catch"
 import { db } from "@/db/drizzle"
 import { players } from "@/db/schema"
+import { Provider } from "@supabase/supabase-js"
 
 const authHandlers = {
     async handleSignup(email: string, password: string) {
@@ -46,6 +47,17 @@ const authHandlers = {
         }
 
         return data.user
+    },
+    async handleOAuth(provider: Provider) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider,
+        })
+        if (error) {
+            console.error("[AUTH] Signin error:", error)
+            throw new Error(error.message)
+        }
+
+        return data
     },
 
     // async handleResetPassword(email: string) {
@@ -124,7 +136,7 @@ export const authOptions: NextAuthOptions = {
                     throw error
                 }
             },
-        }), /// for auto sign in
+        }), /// for auto sign in // not working XD
         CredentialsProvider({
             id: "email-confirmation",
             name: "Email Confirmation",
@@ -169,49 +181,14 @@ export const authOptions: NextAuthOptions = {
         error: "/auth/error",
     },
     callbacks: {
-        // async signIn({ user }) {
-        //     // Only create player on first signup, not every signin
-        //     if (user.email) {
-        //         // Check if player already exists
-        //         const existingPlayer = await db.query.players.findFirst({
-        //             where: (players, { eq }) => eq(players.userId, user.id),
-        //         })
-
-        //         if (!existingPlayer) {
-        //             // Create player profile
-        //             await db.insert(players).values({
-        //                 userId: user.id,
-        //                 username:
-        //                     user.name || user.email.split("@")[0] + Math.random()*10000,
-        //                 elo: 500,
-        //                 gamesPlayed: 0,
-        //                 wins: 0,
-        //                 losses: 0,
-        //                 draws: 0,
-        //             })
-        //         } else {
-        //         }
-        //     }
-        //     return true
-        // },
-        async jwt({ token, user }) {
-            console.log("JWT CALLBACK DEBUG:", {
-                hasUser: !!user,
-                tokenUserId: token.userId,
-                tokenPlayerIdBefore: token.playerId,
-                timestamp: new Date().toISOString(),
-            })
-            if (user && user.id && user.email) {
-                token.userId = user.id
-                token.email = user.email
-                token.lastUpdated = new Date().toISOString()
-
+        async signIn({ user }) {
+            if (user?.id && user?.email) {
+                // Fetch player data here
                 const existingPlayer = await db.query.players.findFirst({
                     where: (players, { eq }) => eq(players.userId, user.id),
                 })
 
                 if (!existingPlayer) {
-                    // Create player profile
                     const result = await db
                         .insert(players)
                         .values({
@@ -224,45 +201,28 @@ export const authOptions: NextAuthOptions = {
                             draws: 0,
                         })
                         .returning()
-                    const player = result[0]
-                    token.playerId = player.id
-                    token.username = player.username
+
+                    // Attach player data to user object to pass to JWT
+                    user.playerId = result[0].id
+                    user.username = result[0].username
                 } else {
-                    token.playerId = existingPlayer.id
-                    token.username = existingPlayer.username
-                }
-            } else if (token.userId && !token.playerId) {
-                console.log(
-                    "FETCHING MISSING PLAYER ID for userId:",
-                    token.userId
-                )
-
-                try {
-                    const existingPlayer = await db.query.players.findFirst({
-                        where: (players, { eq }) =>
-                            eq(players.userId, token.userId),
-                    })
-
-                    console.log("PLAYER QUERY RESULT:", existingPlayer)
-
-                    if (existingPlayer) {
-                        token.playerId = existingPlayer.id
-                        token.username = existingPlayer.username
-                        console.log("PLAYER ID SET:", token.playerId)
-                    } else {
-                        console.log(
-                            "NO PLAYER FOUND FOR USER ID:",
-                            token.userId
-                        )
-                    }
-                } catch (error) {
-                    console.error("DATABASE QUERY ERROR:", error)
+                    user.playerId = existingPlayer.id
+                    user.username = existingPlayer.username
                 }
             }
-            console.log("JWT CALLBACK END:", {
-                tokenUserId: token.userId,
-                tokenPlayerIdAfter: token.playerId,
-            })
+            return true
+        },
+        async jwt({ token, user }) {
+            // remember : the user object exist only in the initial sign in
+            // On initial signin, user exists with player data
+            if (user && user.playerId && user.username) {
+                token.userId = user.id
+                token.email = user.email
+                token.playerId = user.playerId // From signIn callback
+                token.username = user.username // From signIn callback
+            }
+
+            // On subsequent requests, token already has all data
             return token
         },
         async session({ session, token }) {
@@ -271,7 +231,8 @@ export const authOptions: NextAuthOptions = {
             session.user.email = token.email
             session.user.playerId = token.playerId
             session.user.username = token.username
-
+            
+            console.log('session callback/ session to return : ',session)
             return session
         },
     },
