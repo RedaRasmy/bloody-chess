@@ -26,7 +26,7 @@ const games = pgTable("games", {
     isForGuests: boolean("is_for_guests").notNull(),
     currentFen: text("current_fen").default(DEFAULT_POSITION).notNull(),
     result: resultEnum(),
-    gameOverReason: gameOverReasonsEnum("gameover_reason"),
+    gameOverReason: gameOverReasonsEnum("game_over_reason"),
     status: statusEnum().default("matching").notNull(),
     timer: timerOptionsEnum().notNull(),
     currentTurn: colorsEnum("current_turn").default('w').notNull(),

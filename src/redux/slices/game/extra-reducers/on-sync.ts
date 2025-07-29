@@ -11,6 +11,8 @@ export const onSync = (
 ) => {
     const game = action.payload
 
+    console.log('sync -- the new game data to sync with : ',game)
+
     // Only update timers if game is active
     if (game.gameStartedAt && !state.gameOver.isGameOver) {
         const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
@@ -40,11 +42,13 @@ export const onSync = (
     state.lastMoveAt = game.lastMoveAt
 
     // handle special gameOver reasons (no by-move ones)
+    console.log('on-sync -- received gameover reason :',game.gameOverReason)
     if (game.gameOverReason === "Resignation") {
         const winner = game.result === "white_won" ? "w" : "b"
         state.gameOver.isGameOver = true
         state.gameOver.reason = "Resignation"
         state.gameOver.winner = winner
+        console.log('gameover state changde : resignation')
     }
     if (game.gameOverReason === "Timeout") {
         state.gameOver.isGameOver = true

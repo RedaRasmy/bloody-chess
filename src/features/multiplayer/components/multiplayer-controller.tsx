@@ -21,6 +21,7 @@ export default function MultiplayerController({
         dispatch(resign())
         await onResign?.()
     }
+    
     // async function handleRepaly() {
     //     dispatch(resign())
     //     await onResign?.()

@@ -1,0 +1,1 @@
+ALTER TABLE "games" RENAME COLUMN "gameover_reason" TO "game_over_reason";

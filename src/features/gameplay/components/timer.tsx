@@ -14,17 +14,21 @@ import { timeOut } from "@/redux/slices/game/game-slice"
 export default function Timer({
     timeLeft,
     playerColor,
+    onTimeOut,
 }: {
     timeLeft: number
     playerColor: Color
+    onTimeOut?: () => Promise<void>
 }) {
     const dispatch = useAppDispatch()
-
     const isGameOver = useAppSelector(selectIsGameOver)
     const isNewGame = useAppSelector(selectIsNewGame)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
     const gameStartedAt = useAppSelector(selectGameStartedAt)
 
+    const [isTimeOut, setIsTimeOut] = useState(
+        timeLeft === 0 && gameStartedAt !== null
+    )
     const [displayTime, setDisplayTime] = useState(timeLeft)
     const intervalRef = useRef<NodeJS.Timeout | null>(null)
     // const startTimeRef = useRef<number | null>(null)
@@ -38,23 +42,35 @@ export default function Timer({
         lastUpdateRef.current = Date.now()
     }, [timeLeft, isNewGame])
 
+    // trigger timeout for multiplayer
+    useEffect(() => {
+        if (isTimeOut) {
+            onTimeOut?.()
+        }
+    }, [isTimeOut])
+
     useEffect(() => {
         if (intervalRef.current) {
             clearInterval(intervalRef.current)
         }
         if (isMyTurn && timeLeft > 0 && gameStartedAt) {
             lastUpdateRef.current = Date.now()
-            // startTimeRef.current = Date.now()
             intervalRef.current = setInterval(() => {
                 const now = Date.now()
                 const elapsed = now - lastUpdateRef.current
+
                 setDisplayTime((prev) => {
                     const newTime = Math.max(prev - elapsed, 0)
 
                     // Dispatch timeout if time runs out
                     if (newTime <= 0 && prev > 0) {
                         console.log(`Timeout for ${playerColor}:`, newTime)
-                        dispatch(timeOut())
+
+                        setIsTimeOut(true)
+                        if (onTimeOut === undefined) {
+                            // if its not multiplayer just change local state directly
+                            dispatch(timeOut())
+                        }
                     }
 
                     return newTime
@@ -62,16 +78,12 @@ export default function Timer({
                 lastUpdateRef.current = now
             }, 100)
         }
-        // else if (!isMyTurn && (lastUpdateRef.current > Date.now())) {
-        //     setTime((prev) => prev + plus * 1000)
-        //     // update timings
-        // }
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current)
             intervalRef.current = null
         }
-    }, [isMyTurn, playerColor,gameStartedAt])
+    }, [isMyTurn, playerColor, gameStartedAt])
 
     // Clean up on game over
     useEffect(() => {

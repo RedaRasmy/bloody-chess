@@ -13,17 +13,23 @@ import SetupLoading from "@/features/multiplayer/components/setup-loading"
 export default function Page() {
     const params = useParams()
     const gameId = params.gameid as string
-    const { move, playerColor, isSetuping, resign } = useMultiplayerGame(gameId)
+    const { move, playerColor, isSetuping, resign, timeOut } =
+        useMultiplayerGame(gameId)
 
     const opponentColor = oppositeColor(playerColor)
 
-    if (isSetuping) return <SetupLoading/>
+    if (isSetuping) return <SetupLoading />
 
     return (
         <GameLayout
             chessBoard={
                 <ChessBoardLayout
-                    OpponentSection={<PlayerSection color={opponentColor} />}
+                    OpponentSection={
+                        <PlayerSection
+                            color={opponentColor}
+                            onTimeOut={timeOut}
+                        />
+                    }
                     ChessBoard={<ChessBoard onMoveEnd={move} />}
                     PlayerSection={<PlayerSection color={playerColor} />}
                 />

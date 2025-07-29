@@ -9,6 +9,7 @@ import { makeMove } from "../../gameplay/server-actions/moves-actions"
 import {
     getFullGame,
     sendResign,
+    sendTimeOut,
     startGame,
 } from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
@@ -17,6 +18,7 @@ import {
     selectPlayerColor,
 } from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
+import { Color } from "chess.js"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
@@ -28,16 +30,14 @@ export const useMultiplayerGame = (gameId: string) => {
     const [newGame, setNewGame] = useState<Game | null>(null)
     const [newMove, setNewMove] = useState<SMove | null>(null)
 
-
-
     useEffect(() => {
         if (newGame && !isLoading) {
             const { status } = newGame
-            if (status === 'playing' || status === 'finished') {
+            if (status === "playing" || status === "finished") {
                 dispatch(sync(newGame as FinishedGame | StartedGame))
             }
         }
-    }, [newGame,isLoading])
+    }, [newGame, isLoading])
 
     useEffect(() => {
         if (newGame && newMove) {
@@ -61,7 +61,7 @@ export const useMultiplayerGame = (gameId: string) => {
     }, [newGame, newMove])
 
     useEffect(() => {
-        console.log('player.type =',player.type)
+        console.log("player.type =", player.type)
         if (player.type !== "loading") {
             const { data } = player
             async function setState() {
@@ -151,6 +151,19 @@ export const useMultiplayerGame = (gameId: string) => {
             console.error(error)
         }
     }
+    async function timeOut(opponentColor:Color) {
+        try {
+            // each client check only their opponent timer
+            // to prevent race conditions
+            console.log("sending timeout...")
+
+            await sendTimeOut(gameId, opponentColor)
+
+            console.log("timout sent")
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     return {
         multiplayerState,
@@ -158,5 +171,6 @@ export const useMultiplayerGame = (gameId: string) => {
         playerColor,
         isSetuping: isLoading,
         resign,
+        timeOut,
     }
 }

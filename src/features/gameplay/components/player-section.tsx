@@ -10,7 +10,13 @@ import {
     selectBlackPlayer,
 } from "@/redux/slices/game/game-selectors"
 
-export default function PlayerSection({ color }: { color: Color }) {
+export default function PlayerSection({
+    color,
+    onTimeOut,
+}: {
+    color: Color
+    onTimeOut?: (color: Color) => Promise<void>
+}) {
     const { name, extraPoints, timeLeft, capturedPieces } = useAppSelector(
         color === "w" ? selectWhitePlayer : selectBlackPlayer
     )
@@ -34,7 +40,13 @@ export default function PlayerSection({ color }: { color: Color }) {
             </div>
             <div>
                 {timeLeft !== null && (
-                    <Timer timeLeft={timeLeft} playerColor={color} />
+                    <Timer
+                        timeLeft={timeLeft}
+                        playerColor={color}
+                        onTimeOut={
+                            onTimeOut ? () => onTimeOut(color) : undefined
+                        }
+                    />
                 )}
             </div>
         </div>
