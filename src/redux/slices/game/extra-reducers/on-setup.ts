@@ -8,18 +8,13 @@ import getExtraPoints from "@/features/gameplay/utils/get-extra-points"
 import { Chess, Square } from "chess.js"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { DrawReason, WinReason } from "@/features/gameplay/types"
-// import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
+import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 
 export function onSetup(
     state: WritableDraft<GameState>,
     action: PayloadAction<{ game: FullGame; playerId: string }>
 ) {
     const { game, playerId } = action.payload
-    console.log("Setup - White time left:", game.whiteTimeLeft)
-    console.log("Setup - Black time left:", game.blackTimeLeft)
-    console.log("Setup - Current turn:", game.currentTurn)
-    console.log("Setup - Player ID:", playerId)
-    console.log("Setup - White ID:", game.whiteId)
     const playerColor = game.whiteId === playerId ? "w" : "b"
 
     const capturedPieces = getCapturedPieces(game.moves)
@@ -36,37 +31,35 @@ export function onSetup(
         fenAfter: mv.fenAfter, // TODO
     }))
 
+    
     // Only update timers if game is active
-    // const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-    //     whiteTimeLeft: game.whiteTimeLeft,
-    //     blackTimeLeft: game.blackTimeLeft,
-    //     currentTurn: game.currentTurn,
-    //     lastMoveAt: game.lastMoveAt
-    //         ? new Date(game.lastMoveAt)
-    //         : new Date(game.gameStartedAt),
-    // })
+    const lastMoveAt = game.lastMoveAt || game.gameStartedAt
+
+    const { whiteTimeLeft , blackTimeLeft } = lastMoveAt
+        ? calculateTimeLeft({
+              whiteTimeLeft: game.whiteTimeLeft,
+              blackTimeLeft: game.blackTimeLeft,
+              currentTurn: game.currentTurn,
+              lastMoveAt: new Date(lastMoveAt),
+          })
+        : {
+              whiteTimeLeft: game.whiteTimeLeft,
+              blackTimeLeft: game.blackTimeLeft,
+          }
 
     state.gameStartedAt = game.gameStartedAt
     state.lastMoveAt = game.lastMoveAt
-    // if (game.gameStartedAt && !state.gameOver.isGameOver) {
-
-    //     // Only update if times are positive and game is not over
-    //     if (whiteTimeLeft >= 0 && blackTimeLeft >= 0) {
-    //         state.players.white.timeLeft = whiteTimeLeft
-    //         state.players.black.timeLeft = blackTimeLeft
-    //     }
-    // }
 
     state.players = {
         white: {
             name: game.whiteName,
-            timeLeft: game.whiteTimeLeft,
+            timeLeft: whiteTimeLeft,
             capturedPieces: capturedPieces.b,
             extraPoints: whiteExtraPoints,
         },
         black: {
             name: game.blackName,
-            timeLeft: game.blackTimeLeft,
+            timeLeft: blackTimeLeft,
             capturedPieces: capturedPieces.w,
             extraPoints: blackExtraPoints,
         },
