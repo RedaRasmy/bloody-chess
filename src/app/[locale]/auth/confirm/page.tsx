@@ -38,7 +38,7 @@ export default function ConfirmPage() {
                 })
 
                 if (result?.ok) {
-                    router.push("/") // or wherever you want to redirect
+                    router.push("/") 
                 } else {
                     // Fallback: redirect to signin with success message
                     router.push(

@@ -24,8 +24,8 @@ type GuestResult = {
 type Result = Loading | PlayerResult | GuestResult
 
 export default function usePlayer(): Result {
-    const { status, data } = useSession()
-    
+    const { status, data  } = useSession()
+
     console.log('usePlayer -- session : ',{status,data})
 
     const [player, setPlayer] = useState<Player | null>(null)

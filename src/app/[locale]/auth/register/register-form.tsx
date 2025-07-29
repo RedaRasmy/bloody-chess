@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -22,8 +22,8 @@ const formSchema = z.object({
 })
 
 export default function RegisterForm() {
-    const router = useRouter()
 
+    const [success,setSuccess] = useState('')
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -42,11 +42,14 @@ export default function RegisterForm() {
                 redirect: false,
             })
 
+            console.log('signUp result : ',result)
             if (result?.error) {
-                form.setError("root", { message: result.error })
-            } else {
-                router.push("/")
-            }
+                // form.setError("root", { message: result.error })
+                console.error(result.error)
+            } 
+            const message = 'A confirmation email has been sent to ' + email
+            setSuccess(message)
+            
         } catch (err) {
             console.error(err)
             form.setError("root", { message: "Unexpected error occurred 🤕" })
@@ -66,6 +69,7 @@ export default function RegisterForm() {
             >
                 <div>
                     <h1 className="text-2xl md:text-3xl mb-5 md:mb-10">Create new account</h1>
+                    <p className="text-green-500 font-semibold my-2">{success}</p>
                     <p className="text-red-500 my-2">{message}</p>
                 </div>
                 <FormField
