@@ -6,7 +6,7 @@ export function playMoveSound(move:Move,isCheck:boolean) {
     if (isCheck) {
         playSound('check')
         return;
-    } else if (move.isCapture()) {
+    } else if (move.isCapture() || move.isEnPassant()) {
         playSound("capture")
         return;
     } else if (move.isKingsideCastle() || move.isQueensideCastle()) {
