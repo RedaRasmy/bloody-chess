@@ -3,8 +3,6 @@ import { GameState } from "../game-types"
 import { MoveType } from "@/features/gameplay/types"
 import { PayloadAction } from "@reduxjs/toolkit"
 import { Chess } from "chess.js"
-// import safeMove from "@/features/gameplay/utils/safe-move"
-// import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 import getDetailedMove from "@/features/gameplay/utils/get-detailed-move"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getExtraPoints from "@/features/gameplay/utils/get-extra-points"
@@ -12,7 +10,7 @@ import updateCapturedPieces from "@/features/gameplay/utils/update-captured-piec
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
-// import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
+import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 
 export function move(
     state: WritableDraft<GameState>,
@@ -25,9 +23,9 @@ export function move(
     if (state.currentMoveIndex < state.history.length - 1) {
         console.log("Move Reducer : cant move while undo !")
         return
-    } 
+    }
     if (!state.gameStartedAt || state.gameStartedAt > Date.now()) {
-        console.log('Move Reducer : cant move , game is not started yet')
+        console.log("Move Reducer : cant move , game is not started yet")
     }
     const move = action.payload
     const chess = new Chess()
@@ -40,31 +38,23 @@ export function move(
     )
 
     const validatedMove = chess.move(move)
-    // const validatedMove = safeMove(chess, move)
-    // if (!validatedMove) {
-    //     return
-    // }
-    // const playerColor = validatedMove.color
 
-    // const { plus } = state.timerOption
-    //     ? parseTimerOption(state.timerOption)
-    //     : { plus: 0 }
-
-    // const wtl = state.players.white.timeLeft
-    // const btl = state.players.black.timeLeft
-    // const gameStartedAt = state.gameStartedAt
-    // if (wtl !== null && btl !== null && gameStartedAt !== null) {
-    //     const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-    //         whiteTimeLeft: playerColor === "w" ? wtl + plus : wtl,
-    //         blackTimeLeft: playerColor === "b" ? btl + plus : btl,
-    //         currentTurn: state.currentTurn,
-    //         lastMoveAt: state.lastMoveAt
-    //             ? new Date(state.lastMoveAt)
-    //             : new Date(gameStartedAt),
-    //     })
-    //     state.players.white.timeLeft = whiteTimeLeft
-    //     state.players.black.timeLeft = blackTimeLeft
-    // }
+    if (
+        state.players.white.timeLeft &&
+        state.players.black.timeLeft &&
+        state.gameStartedAt
+    ) {
+        const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
+            whiteTimeLeft: state.players.white.timeLeft,
+            blackTimeLeft: state.players.black.timeLeft,
+            currentTurn: state.currentTurn,
+            lastMoveAt: state.lastMoveAt
+                ? new Date(state.lastMoveAt)
+                : new Date(state.gameStartedAt),
+        })
+        state.players.white.timeLeft = whiteTimeLeft
+        state.players.black.timeLeft = blackTimeLeft
+    }
 
     const detailedMove = getDetailedMove(validatedMove, state.pieces)
     state.history.push({
@@ -114,5 +104,5 @@ export function move(
     state.currentMoveIndex = state.history.length - 1
 
     // update timing
-    // state.lastMoveAt = Date.now()
+    state.lastMoveAt = Date.now()
 }

@@ -12,6 +12,7 @@ import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 import * as reducers from "./reducers"
 import { onSync, onSetup } from "./extra-reducers"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
+import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 
 const initialState: GameState = {
     fen: DEFAULT_POSITION,
@@ -73,26 +74,51 @@ const gameSlice = createSlice({
         //         state.history[state.currentMoveIndex]
         //     )
         // }
-        resign: (state,action:PayloadAction<Color | undefined>) => {
+        resign: (state, action: PayloadAction<Color | undefined>) => {
             const color = action.payload // resigner
             state.gameOver.reason = "Resignation"
             state.gameOver.isGameOver = true
-            state.gameOver.winner = color ? oppositeColor(color) : state.playerColor === "w" ? "b" : "w"
+            state.gameOver.winner = color
+                ? oppositeColor(color)
+                : state.playerColor === "w"
+                ? "b"
+                : "w"
         },
-        play: (state,action:PayloadAction<{
-            playerName:string,
-            opponentName: string
-        }>) => {
-            const {playerName,opponentName} = action.payload 
+        correctTimers: (state) => {
+            if (
+                state.players.white.timeLeft &&
+                state.players.black.timeLeft &&
+                state.gameStartedAt
+            ) {
+                const {whiteTimeLeft,blackTimeLeft} = calculateTimeLeft({
+                    whiteTimeLeft: state.players.white.timeLeft,
+                    blackTimeLeft: state.players.black.timeLeft,
+                    currentTurn: state.currentTurn,
+                    lastMoveAt: state.lastMoveAt
+                        ? new Date(state.lastMoveAt)
+                        : new Date(state.gameStartedAt),
+                })
+                state.players.white.timeLeft = whiteTimeLeft
+                state.players.black.timeLeft = blackTimeLeft
+            }
+        },
+        play: (
+            state,
+            action: PayloadAction<{
+                playerName: string
+                opponentName: string
+            }>
+        ) => {
+            const { playerName, opponentName } = action.payload
             const timerOption = state.timerOption
             const timer = timerOption
                 ? parseTimerOption(timerOption)
                 : { base: null }
 
-            const base = timer.base ? timer.base * 1000 : timer.base
+            const base = timer.base ? timer.base * 1000 : null
             const playerColor = state.playerColor
-            const whiteName = playerColor === 'w' ? playerName : opponentName
-            const blackName = playerColor === 'w' ? opponentName : playerName
+            const whiteName = playerColor === "w" ? playerName : opponentName
+            const blackName = playerColor === "w" ? opponentName : playerName
             return {
                 ...initialState,
                 playerColor: state.playerColor,
@@ -135,20 +161,19 @@ const gameSlice = createSlice({
                     state.playerColor = "w"
                 }
             })
-            .addCase(changeLevel,(state,action)=>{
+            .addCase(changeLevel, (state, action) => {
                 const level = action.payload
                 const playerColor = state.playerColor
-                const botName = 'bot-'+level
-                const playerName = 'player'
-                if (playerColor === 'w') {
+                const botName = "bot-" + level
+                const playerName = "player"
+                if (playerColor === "w") {
                     state.players.black.name = botName
                     state.players.white.name = playerName
-
                 } else {
                     state.players.white.name = botName
                     state.players.black.name = playerName
                 }
-            }) 
+            })
             .addCase(changeBotTimer, (state, action) => {
                 const timerOption = action.payload
 
@@ -159,7 +184,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, play, resign, select, updateTimings , rollback } =
+export const { timeOut, move, play, resign, select, updateTimings, rollback , correctTimers} =
     gameSlice.actions
 
 export default gameSlice.reducer
