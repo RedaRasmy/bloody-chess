@@ -31,6 +31,7 @@ export type Sound =
     | "capture"
     | "game-start"
     | "game-end"
+    | "timeout-alert"
 
 export type CapturedPieces = {
     w: [number, number, number, number, number]
