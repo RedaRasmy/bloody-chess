@@ -26,7 +26,7 @@ export function move(
         console.log("Move Reducer : cant move while undo !")
         return
     } 
-    if (!state.gameStartedAt) {
+    if (!state.gameStartedAt || state.gameStartedAt > Date.now()) {
         console.log('Move Reducer : cant move , game is not started yet')
     }
     const move = action.payload

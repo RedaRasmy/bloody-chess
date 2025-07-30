@@ -107,7 +107,6 @@ export async function getFullGame(id: string): Promise<FullGame> {
         ? (await getGuest(blackId)).displayName
         : (await getPlayer(blackId)).username
 
-   
     return {
         ...game,
         whiteName,
@@ -151,8 +150,6 @@ export async function sendResign(gameId: string, playerColor: Color) {
         .where(eq(games.id, gameId))
 }
 
-
-
 export async function startGame(gameId: string, playerColor: Color) {
     const matchedGame = await db.query.games.findFirst({
         where: (games, { eq }) => eq(games.id, gameId),
@@ -183,15 +180,17 @@ export async function startGame(gameId: string, playerColor: Color) {
               status: "preparing",
           }
 
-    await db
-        .update(games)
-        .set({
-            ...playerReady,
-            ...startGame,
-            gameStartedAt: Date.now(),
-        })
-        .where(eq(games.id, gameId))
-
-
-
+    setTimeout(
+        async () => {
+            await db
+                .update(games)
+                .set({
+                    ...playerReady,
+                    ...startGame,
+                    gameStartedAt: Date.now(),
+                })
+                .where(eq(games.id, gameId))
+        },
+        isOtherPlayerReady ? 3000 : 0 // game start after 3 seconds 
+    )
 }

@@ -159,7 +159,7 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, play, resign, select, updateTimings } =
+export const { timeOut, move, play, resign, select, updateTimings , rollback } =
     gameSlice.actions
 
 export default gameSlice.reducer

@@ -26,11 +26,9 @@ type Result = Loading | PlayerResult | GuestResult
 export default function usePlayer(): Result {
     const { status, data, update } = useSession()
 
-    console.log("usePlayer -- session : ", { status, data })
 
     const [player, setPlayer] = useState<Player | null>(null)
     const [guest, setGuest] = useState<Guest | null>(null)
-    // const [isLoading, setIsLoading] = useState(true)
     const [guestId, setGuestId] = useLocalStorage("guest_id", "")
 
     useEffect(() => {
@@ -40,24 +38,18 @@ export default function usePlayer(): Result {
             try {
                 if (status === "authenticated") {
                     const playerId = data.user.playerId
-                    console.log("playerId from session :", playerId)
 
                     if (!playerId) {
-                        console.log(
-                            "No playerId in session, forcing refetch..."
-                        )
                         // Force session update
                         await update()
                         return
                     }
-                    console.log("player id : ", playerId)
                     const playerData = await getPlayer(playerId)
                     if (!playerData)
                         throw new Error(
                             "Player not exists in DB! id=" + playerId
                         )
                     setPlayer(serializeTimestamps(playerData))
-                    console.log("player : ", playerData)
                 } else {
                     if (guestId !== "") {
                         // guest_id exists
@@ -70,7 +62,6 @@ export default function usePlayer(): Result {
                             setGuest(serializeTimestamps(newGuest))
                         } else {
                             setGuest(serializeTimestamps(guest))
-                            console.log("guest : ", guest)
                         }
                     } else {
                         // create new one
@@ -107,5 +98,4 @@ export default function usePlayer(): Result {
         type: "loading",
     }
 
-    // throw new Error("usePlayer: no player or guest found!")
 }

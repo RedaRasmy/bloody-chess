@@ -3,7 +3,11 @@ import { supabase } from "@/utils/supabase/client"
 import { useEffect, useState } from "react"
 import { MoveType } from "../../gameplay/types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
-import { move as localMove } from "@/redux/slices/game/game-slice"
+import {
+    move as localMove,
+    rollback,
+    updateTimings,
+} from "@/redux/slices/game/game-slice"
 import { FinishedGame, Game, SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../../gameplay/server-actions/moves-actions"
 import {
@@ -14,21 +18,22 @@ import {
 } from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
 import {
-    // selectGameStartedAt,
     selectPlayerColor,
+    selectTimerOption,
 } from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 import { Color } from "chess.js"
+import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
     const multiplayerState = useAppSelector((state) => state.multiplayer)
     const playerColor = useAppSelector(selectPlayerColor)
-    // const gameStartedAt = useAppSelector(selectGameStartedAt)
     const player = usePlayer()
     const [isLoading, setIsLoading] = useState(true)
     const [newGame, setNewGame] = useState<Game | null>(null)
     const [newMove, setNewMove] = useState<SMove | null>(null)
+    const timerOption = useAppSelector(selectTimerOption)
 
     useEffect(() => {
         if (newGame && !isLoading) {
@@ -42,7 +47,6 @@ export const useMultiplayerGame = (gameId: string) => {
     useEffect(() => {
         if (newGame && newMove) {
             console.log("[✔] Both game + move received.")
-            // console.log("sync...")
             if (newMove.playerColor !== playerColor) {
                 console.log("run other player move :", newMove)
                 dispatch(
@@ -53,10 +57,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     })
                 )
             }
-            // dispatch(sync(newGame as StartedGame))
-            setNewGame(null)
             setNewMove(null)
-            // console.log("sync done")
         }
     }, [newGame, newMove])
 
@@ -96,9 +97,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     filter: `id=eq.${gameId}`,
                 },
                 (payload) => {
-                    console.log("NEW UPDATE IN [[ GAMES ]] TABEL RECEIVED")
                     const newGame = supabaseToTypescript<Game>(payload.new)
-                    console.log("new Game : ", newGame)
                     setNewGame(newGame)
                 }
             )
@@ -111,10 +110,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     filter: `game_id=eq.${gameId}`,
                 },
                 (payload) => {
-                    console.log("NEW UPDATE IN [[ MOVES ]] TABEL RECEIVED")
                     const newMove = supabaseToTypescript<SMove>(payload.new)
-
-                    console.log("new move : ", newMove)
                     setNewMove(newMove)
                 }
             )
@@ -130,36 +126,46 @@ export const useMultiplayerGame = (gameId: string) => {
     const move = async (mv: MoveType) => {
         try {
             // Insert to Supabase
-            console.log("sending move...")
             await makeMove({
                 move: mv,
                 gameId,
             })
-            console.log("move sent")
         } catch (err) {
             console.error(err)
-            // TODO!
-            //   dispatch(rollbackMove())
+            dispatch(rollback())
+            if (newGame) {
+                const { status } = newGame
+                if (status === "playing" || status === "finished") {
+                    dispatch(sync(newGame as FinishedGame | StartedGame))
+                }
+            } else if (timerOption) {
+                // if there is no newGame so we are still in setup
+                // reset all timings to setup values
+                const { base } = parseTimerOption(timerOption)
+                dispatch(
+                    updateTimings({
+                        blackTimeLeft: base * 1000,
+                        whiteTimeLeft: base * 1000,
+                        gameStartedAt: null,
+                        lastMoveAt: null,
+                    })
+                )
+            }
         }
     }
     async function resign() {
         try {
-            console.log("sending resign...")
             await sendResign(gameId, playerColor)
-            console.log("resign sent")
         } catch (error) {
             console.error(error)
         }
     }
-    async function timeOut(opponentColor:Color) {
+    async function timeOut(opponentColor: Color) {
         try {
             // each client check only their opponent timer
             // to prevent race conditions
-            console.log("sending timeout...")
 
             await sendTimeOut(gameId, opponentColor)
-
-            console.log("timout sent")
         } catch (error) {
             console.error(error)
         }
