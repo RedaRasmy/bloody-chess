@@ -1,5 +1,6 @@
 import { Color } from "chess.js"
 import { useChessTimer } from "../hooks/use-chess-timer" // Adjust import path as needed
+import parseTimerOption from "../utils/parse-timer-option"
 
 interface TimerProps {
     playerColor: Color
@@ -7,33 +8,44 @@ interface TimerProps {
 }
 
 export default function Timer({ playerColor, onTimeOut }: TimerProps) {
-    const { timeLeft, isTimeOut, formatTime } = useChessTimer({
+    const { timeLeft, isTimeOut, formatTime, timerOption } = useChessTimer({
         playerColor,
         onTimeOut,
     })
-    
-    
+
+    const { base } = parseTimerOption(timerOption)
     const { formatted } = formatTime(timeLeft)
-    
+
+    // TODO: change urgency to be controlled in settings
+
+    function getUrgentThreshold() {
+        if (base <= 60) return 10 
+        if (base <= 300) return 30 
+        if (base <= 600) return 45
+        return 60 
+    }
+
+    function isUrgent() {
+        return timeLeft / 1000 <= getUrgentThreshold()
+    }
+
     // Style based on time remaining and timeout state
     const getTimerStyle = () => {
         if (isTimeOut) {
             return "bg-red-500 text-white" // Timeout state
         }
-        
-        if (timeLeft <= 30000) { // Less than 30 seconds
+
+        if (isUrgent()) {
             return "bg-red-100 text-red-800 animate-pulse"
         }
-        
-        // if (timeLeft <= 60000) { // Less than 1 minute
-        //     return "bg-yellow-100 text-yellow-800"
-        // }
-        
+
         return "bg-gray-300 text-gray-800" // Normal state
     }
-    
+
     return (
-        <div className={`py-0.5 px-3 rounded-md font-bold transition-colors duration-200 ${getTimerStyle()}`}>
+        <div
+            className={`py-0.5 px-3 rounded-md font-bold transition-colors duration-200 ${getTimerStyle()}`}
+        >
             <div className="flex items-center gap-1">
                 <span>{formatted}</span>
             </div>

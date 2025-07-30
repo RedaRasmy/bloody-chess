@@ -91,5 +91,6 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
         timeLeft: count,
         isTimeOut: count === 0,
         formatTime,
+        timerOption
     }
 }
