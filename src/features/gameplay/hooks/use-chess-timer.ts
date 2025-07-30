@@ -11,7 +11,6 @@ import {
 import { timeOut } from "@/redux/slices/game/game-slice"
 import { Color } from "chess.js"
 import { useCallback, useEffect, } from "react"
-import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 import useChessCountdown from "./use-chess-countdown"
 
 interface UseTimerProps {
@@ -43,13 +42,10 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
             "player.timeLeft should be defined while using useChessTimer"
         )
     //
-    // Computed values
     const isMyTurn = currentPlayer === playerColor && !isGameOver
     const canRun = gameStartedAt !== null && !isGameOver
 
-    const { plus } = parseTimerOption(timerOption)
-
-    const timeElapsed = gameStartedAt
+    const timeElapsed = (gameStartedAt && gameStartedAt <= Date.now())
         ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
         : 0
 
@@ -58,7 +54,6 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
 
     const { count, pause, resume } = useChessCountdown({
         timeLeft,
-        plusMs: plus * 1000,
         onTimeOut: async () => {
             console.log(`⏰ Timeout for ${playerColor}`)
             if (onTimeOut) {

@@ -15,6 +15,7 @@ import {
     sendResign,
     sendTimeOut,
     startGame,
+    updateGameStatus,
 } from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
 import {
@@ -37,9 +38,14 @@ export const useMultiplayerGame = (gameId: string) => {
 
     useEffect(() => {
         if (newGame && !isLoading) {
-            const { status } = newGame
+            const { status ,whiteReady,blackReady } = newGame
             if (status === "playing" || status === "finished") {
                 dispatch(sync(newGame as FinishedGame | StartedGame))
+            } else if (whiteReady && blackReady) {
+                newGame.status = 'playing'
+                dispatch(sync(newGame as FinishedGame | StartedGame))
+                console.log('both players are ready , change game status to playing ...')
+                updateGameStatus(newGame.id,'playing')
             }
         }
     }, [newGame, isLoading])
@@ -75,9 +81,12 @@ export const useMultiplayerGame = (gameId: string) => {
                     })
                 )
                 setIsLoading(false)
+                console.log('setup done')
                 if (game.status === "preparing") {
+                    console.log('send ready...')
                     const playerColor = game.whiteId === data.id ? "w" : "b"
                     await startGame(gameId, playerColor)
+                    console.log('ready sent')
                 }
             }
             setState()
@@ -98,6 +107,7 @@ export const useMultiplayerGame = (gameId: string) => {
                 },
                 (payload) => {
                     const newGame = supabaseToTypescript<Game>(payload.new)
+                    console.log('new game update received : ',newGame)
                     setNewGame(newGame)
                 }
             )
@@ -110,6 +120,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     filter: `game_id=eq.${gameId}`,
                 },
                 (payload) => {
+                    console.log('new move received')
                     const newMove = supabaseToTypescript<SMove>(payload.new)
                     setNewMove(newMove)
                 }

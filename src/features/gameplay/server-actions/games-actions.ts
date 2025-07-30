@@ -166,13 +166,19 @@ export async function startGame(gameId: string, playerColor: Color) {
     const isOtherPlayerReady =
         playerColor === "w" ? matchedGame.blackReady : matchedGame.whiteReady
 
+    console.log(
+        playerColor + " -- is other player ready : ",
+        isOtherPlayerReady
+    )
+
     const playerReady =
         playerColor === "w"
             ? {
                   whiteReady: true,
               }
             : { blackReady: true }
-    const startGame: { status: GameStatus } = isOtherPlayerReady
+
+    const status: { status: GameStatus } = isOtherPlayerReady
         ? {
               status: "playing",
           }
@@ -180,17 +186,26 @@ export async function startGame(gameId: string, playerColor: Color) {
               status: "preparing",
           }
 
-    setTimeout(
-        async () => {
-            await db
-                .update(games)
-                .set({
-                    ...playerReady,
-                    ...startGame,
-                    gameStartedAt: Date.now(),
-                })
-                .where(eq(games.id, gameId))
-        },
-        isOtherPlayerReady ? 3000 : 0 // game start after 3 seconds 
-    )
+    await db
+        .update(games)
+        .set({
+            ...playerReady,
+            ...status,
+            gameStartedAt: Date.now() + 3000,
+        })
+        .where(eq(games.id, gameId))
+    // setTimeout(
+    //     async () => {
+    //     },
+    //     isOtherPlayerReady ? 3000 : 0 // game start after 3 seconds
+    // )
+}
+
+export async function updateGameStatus(gameId: string, status: GameStatus) {
+    await db
+        .update(games)
+        .set({
+            status,
+        })
+        .where(eq(games.id, gameId))
 }

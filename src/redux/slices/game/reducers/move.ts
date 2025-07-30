@@ -58,34 +58,13 @@ export function move(
                 : new Date(state.gameStartedAt),
         })
         // Apply calculated times
-        state.players.white.timeLeft = whiteTimeLeft
-        state.players.black.timeLeft = blackTimeLeft
-        if (state.timerOption) {
-            const timer = parseTimerOption(state.timerOption)
-            if (timer.plus) {
-                const incrementMs = timer.plus * 1000
-
-                if (validatedMove.color === "w") {
-                    // White just moved, add increment to white's time
-                    state.players.white.timeLeft = Math.max(
-                        0,
-                        whiteTimeLeft + incrementMs
-                    )
-                } else {
-                    // Black just moved, add increment to black's time
-                    state.players.black.timeLeft = Math.max(
-                        0,
-                        blackTimeLeft + incrementMs
-                    )
-                }
-
-                console.log(
-                    `Applied +${timer.plus}s increment to ${
-                        validatedMove.color === "w" ? "white" : "black"
-                    }`
-                )
-            }
-        }
+        const { plus } = state.timerOption
+            ? parseTimerOption(state.timerOption)
+            : { plus: 0 }
+        state.players.white.timeLeft =
+            whiteTimeLeft + (validatedMove.color === "w" ? plus * 1000 : 0)
+        state.players.black.timeLeft =
+            blackTimeLeft + (validatedMove.color === "b" ? plus * 1000 : 0)
     }
 
     const detailedMove = getDetailedMove(validatedMove, state.pieces)
@@ -102,14 +81,15 @@ export function move(
     state.players.black.extraPoints = blackExtraPoints
 
     ////
-    const { w : whiteCapturedPieces, b : blackCapturedPieces } = updateCapturedPieces({
-        captured: validatedMove.captured,
-        capturedPieces: {
-            w: state.players.black.capturedPieces, // white captures black pieces
-            b: state.players.white.capturedPieces, // the opposite
-        },
-        movePlayer: validatedMove.color,
-    })
+    const { w: whiteCapturedPieces, b: blackCapturedPieces } =
+        updateCapturedPieces({
+            captured: validatedMove.captured,
+            capturedPieces: {
+                w: state.players.black.capturedPieces, // white captures black pieces
+                b: state.players.white.capturedPieces, // the opposite
+            },
+            movePlayer: validatedMove.color,
+        })
     state.players.white.capturedPieces = blackCapturedPieces // white captures black pieces
     state.players.black.capturedPieces = whiteCapturedPieces // black captures white pieces
     ////
