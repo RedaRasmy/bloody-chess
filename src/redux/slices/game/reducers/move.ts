@@ -11,6 +11,7 @@ import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
+import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 
 export function move(
     state: WritableDraft<GameState>,
@@ -26,9 +27,13 @@ export function move(
     }
     if (!state.gameStartedAt || state.gameStartedAt > Date.now()) {
         console.log("Move Reducer : cant move , game is not started yet")
+        return
     }
+
     const move = action.payload
     const chess = new Chess()
+
+    // Replay all moves to get current position
     state.history.forEach((mv) =>
         chess.move({
             from: mv.from,
@@ -40,8 +45,8 @@ export function move(
     const validatedMove = chess.move(move)
 
     if (
-        state.players.white.timeLeft &&
-        state.players.black.timeLeft &&
+        state.players.white.timeLeft !== null &&
+        state.players.black.timeLeft !== null &&
         state.gameStartedAt
     ) {
         const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
@@ -52,8 +57,35 @@ export function move(
                 ? new Date(state.lastMoveAt)
                 : new Date(state.gameStartedAt),
         })
+        // Apply calculated times
         state.players.white.timeLeft = whiteTimeLeft
         state.players.black.timeLeft = blackTimeLeft
+        if (state.timerOption) {
+            const timer = parseTimerOption(state.timerOption)
+            if (timer.plus) {
+                const incrementMs = timer.plus * 1000
+
+                if (validatedMove.color === "w") {
+                    // White just moved, add increment to white's time
+                    state.players.white.timeLeft = Math.max(
+                        0,
+                        whiteTimeLeft + incrementMs
+                    )
+                } else {
+                    // Black just moved, add increment to black's time
+                    state.players.black.timeLeft = Math.max(
+                        0,
+                        blackTimeLeft + incrementMs
+                    )
+                }
+
+                console.log(
+                    `Applied +${timer.plus}s increment to ${
+                        validatedMove.color === "w" ? "white" : "black"
+                    }`
+                )
+            }
+        }
     }
 
     const detailedMove = getDetailedMove(validatedMove, state.pieces)
@@ -70,16 +102,16 @@ export function move(
     state.players.black.extraPoints = blackExtraPoints
 
     ////
-    const { w, b } = updateCapturedPieces({
+    const { w : whiteCapturedPieces, b : blackCapturedPieces } = updateCapturedPieces({
         captured: validatedMove.captured,
         capturedPieces: {
-            w: state.players.black.capturedPieces, // white capture black pieces
+            w: state.players.black.capturedPieces, // white captures black pieces
             b: state.players.white.capturedPieces, // the opposite
         },
         movePlayer: validatedMove.color,
     })
-    state.players.white.capturedPieces = b // white capture black pieces
-    state.players.black.capturedPieces = w // the opposite
+    state.players.white.capturedPieces = blackCapturedPieces // white captures black pieces
+    state.players.black.capturedPieces = whiteCapturedPieces // black captures white pieces
     ////
 
     // udpate fen
@@ -92,7 +124,7 @@ export function move(
 
     if (validatedMove.color === state.playerColor) {
         // reset active piece only if Im the move player
-        // to allow preemptive moves : ( drag [in opp turn] and drop [in your turn ])
+        // to allow preemptive moves : ( drag [in opp turn] and drop [in your turn])
         state.activePiece = null
     }
     state.currentTurn = oppositeColor(state.currentTurn)

@@ -15,9 +15,8 @@ import {
     selectPlayerColor,
 } from "@/redux/slices/game/game-selectors"
 import useBot from "@/features/bot/hooks/use-bot"
-import { move, correctTimers } from "@/redux/slices/game/game-slice"
+import { move,  } from "@/redux/slices/game/game-slice"
 import BotGameOverDialog from "@/features/bot/components/bot-gameover-dialog"
-import { useEffect } from "react"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -46,10 +45,6 @@ export default function Page() {
         },
     })
 
-    // set the right timings
-    useEffect(() => {
-        dispatch(correctTimers())
-     },[])
 
     return (
         <GameLayout

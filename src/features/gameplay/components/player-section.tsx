@@ -20,7 +20,6 @@ export default function PlayerSection({
     const { name, extraPoints, timeLeft, capturedPieces } = useAppSelector(
         color === "w" ? selectWhitePlayer : selectBlackPlayer
     )
-    // console.log("player : ",{ name, extraPoints, timeLeft, capturedPieces })
 
     const image = undefined // for now
 
@@ -41,11 +40,8 @@ export default function PlayerSection({
             <div>
                 {timeLeft !== null && (
                     <Timer
-                        timeLeft={timeLeft}
                         playerColor={color}
-                        onTimeOut={
-                            onTimeOut ? () => onTimeOut(color) : undefined
-                        }
+                        onTimeOut={onTimeOut}
                     />
                 )}
             </div>

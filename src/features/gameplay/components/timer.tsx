@@ -1,107 +1,42 @@
-import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import {
-    selectCurrentPlayer,
-    selectGameStartedAt,
-    selectIsGameOver,
-    selectIsNewGame,
-} from "@/redux/slices/game/game-selectors"
-// import { selectTimerOption } from "@/redux/slices/game/game-selectors"
 import { Color } from "chess.js"
-import { useEffect, useRef, useState } from "react"
-// import parseTimerOption from "../utils/parse-timer-option"
-import { timeOut } from "@/redux/slices/game/game-slice"
+import { useChessTimer } from "../hooks/use-chess-timer" // Adjust import path as needed
 
-export default function Timer({
-    timeLeft,
-    playerColor,
-    onTimeOut,
-}: {
-    timeLeft: number
+interface TimerProps {
     playerColor: Color
-    onTimeOut?: () => Promise<void>
-}) {
-    const dispatch = useAppDispatch()
-    const isGameOver = useAppSelector(selectIsGameOver)
-    const isNewGame = useAppSelector(selectIsNewGame)
-    const currentPlayer = useAppSelector(selectCurrentPlayer)
-    const gameStartedAt = useAppSelector(selectGameStartedAt)
+    onTimeOut?: (color: Color) => Promise<void>
+}
 
-    const [isTimeOut, setIsTimeOut] = useState(
-        timeLeft === 0 && gameStartedAt !== null
-    )
-    const [displayTime, setDisplayTime] = useState(timeLeft)
-    const intervalRef = useRef<NodeJS.Timeout | null>(null)
-    // const startTimeRef = useRef<number | null>(null)
-    const lastUpdateRef = useRef<number>(Date.now())
-
-    const isMyTurn = currentPlayer === playerColor && !isGameOver
-
-    // Sync display time with Redux store
-    useEffect(() => {
-        setDisplayTime(timeLeft)
-        lastUpdateRef.current = Date.now()
-    }, [timeLeft, isNewGame])
-
-    // trigger timeout for multiplayer
-    useEffect(() => {
+export default function Timer({ playerColor, onTimeOut }: TimerProps) {
+    const { timeLeft, isTimeOut, formatTime } = useChessTimer({
+        playerColor,
+        onTimeOut,
+    })
+    
+    
+    const { formatted } = formatTime(timeLeft)
+    
+    // Style based on time remaining and timeout state
+    const getTimerStyle = () => {
         if (isTimeOut) {
-            onTimeOut?.()
+            return "bg-red-500 text-white" // Timeout state
         }
-    }, [isTimeOut])
-
-    useEffect(() => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current)
+        
+        if (timeLeft <= 30000) { // Less than 30 seconds
+            return "bg-red-100 text-red-800 animate-pulse"
         }
-        if (isMyTurn && timeLeft > 0 && gameStartedAt) {
-            lastUpdateRef.current = Date.now()
-            intervalRef.current = setInterval(() => {
-                const now = Date.now()
-                const elapsed = now - lastUpdateRef.current
-
-                setDisplayTime((prev) => {
-                    const newTime = Math.max(prev - elapsed, 0)
-
-                    // Dispatch timeout if time runs out
-                    if (newTime <= 0 && prev > 0) {
-                        console.log(`Timeout for ${playerColor}:`, newTime)
-
-                        setIsTimeOut(true)
-                        if (onTimeOut === undefined) {
-                            // if its not multiplayer just change local state directly
-                            dispatch(timeOut())
-                        }
-                    }
-
-                    return newTime
-                })
-                lastUpdateRef.current = now
-            }, 100)
-        }
-
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current)
-            intervalRef.current = null
-        }
-    }, [isMyTurn, playerColor, gameStartedAt])
-
-    // Clean up on game over
-    useEffect(() => {
-        if (isGameOver && intervalRef.current) {
-            clearInterval(intervalRef.current)
-        }
-    }, [isGameOver])
-
-    const totalSeconds = Math.floor(displayTime / 1000)
-
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = totalSeconds % 60
-    // const hundredMs = Math.floor((time % 1000) / 100)
-
+        
+        // if (timeLeft <= 60000) { // Less than 1 minute
+        //     return "bg-yellow-100 text-yellow-800"
+        // }
+        
+        return "bg-gray-300 text-gray-800" // Normal state
+    }
+    
     return (
-        <div className="bg-gray-300 py-0.5 px-3 rounded-md font-bold">
-            {minutes}:{seconds.toString().padStart(2, "0")}
-            {/* {time <= timeLeft * 100 && <>:{hundredMs}</>} */}
+        <div className={`py-0.5 px-3 rounded-md font-bold transition-colors duration-200 ${getTimerStyle()}`}>
+            <div className="flex items-center gap-1">
+                <span>{formatted}</span>
+            </div>
         </div>
     )
 }

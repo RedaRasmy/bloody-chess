@@ -86,11 +86,12 @@ const gameSlice = createSlice({
         },
         correctTimers: (state) => {
             if (
-                state.players.white.timeLeft &&
-                state.players.black.timeLeft &&
+                state.players.white.timeLeft !== null &&
+                state.players.black.timeLeft !== null &&
                 state.gameStartedAt
             ) {
-                const {whiteTimeLeft,blackTimeLeft} = calculateTimeLeft({
+                console.log('correctTimers reducer runs...')
+                const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
                     whiteTimeLeft: state.players.white.timeLeft,
                     blackTimeLeft: state.players.black.timeLeft,
                     currentTurn: state.currentTurn,
@@ -98,6 +99,20 @@ const gameSlice = createSlice({
                         ? new Date(state.lastMoveAt)
                         : new Date(state.gameStartedAt),
                 })
+                console.log(
+                    "correctTimers -- last date reference : ",
+                    state.lastMoveAt
+                        ? new Date(state.lastMoveAt)
+                        : new Date(state.gameStartedAt)
+                )
+                console.log(
+                    "correctTimers -- white diff : ",
+                    state.players.white.timeLeft - whiteTimeLeft
+                )
+                console.log(
+                    "correctTimers -- black diff : ",
+                    state.players.black.timeLeft - blackTimeLeft
+                )
                 state.players.white.timeLeft = whiteTimeLeft
                 state.players.black.timeLeft = blackTimeLeft
             }
@@ -184,7 +199,15 @@ const gameSlice = createSlice({
     },
 })
 
-export const { timeOut, move, play, resign, select, updateTimings, rollback , correctTimers} =
-    gameSlice.actions
+export const {
+    timeOut,
+    move,
+    play,
+    resign,
+    select,
+    updateTimings,
+    rollback,
+    correctTimers,
+} = gameSlice.actions
 
 export default gameSlice.reducer
