@@ -12,6 +12,7 @@ import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
+import {redoToEnd} from './'
 
 export function move(
     state: WritableDraft<GameState>,
@@ -21,13 +22,12 @@ export function move(
         console.log("Move Reducer : cant move , game is over!")
         return
     }
-    if (state.currentMoveIndex < state.history.length - 1) {
-        console.log("Move Reducer : cant move while undo !")
-        return
-    }
     if (!state.gameStartedAt || state.gameStartedAt > Date.now()) {
         console.log("Move Reducer : cant move , game is not started yet")
         return
+    }
+    if (state.currentMoveIndex < state.history.length - 1) {
+        redoToEnd(state)
     }
 
     const move = action.payload
