@@ -109,8 +109,6 @@ export function move(
     }
     state.currentTurn = oppositeColor(state.currentTurn)
 
-    state.isCheck = chess.isCheck()
-
     state.gameOver = getGameOverState(chess)
 
     state.currentMoveIndex = state.history.length - 1

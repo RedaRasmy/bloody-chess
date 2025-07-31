@@ -4,7 +4,6 @@ import { Chess, Color, DEFAULT_POSITION } from "chess.js"
 import { changeBotTimer, changeColor, changeLevel } from "../game-options"
 import { BoardElement } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
-import getInitialPieces from "@/features/gameplay/utils/get-pieces"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { GameState, Timings } from "./game-types"
 import { setup, sync } from "../multiplayer/multiplayer-slice"
@@ -15,16 +14,16 @@ import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getDetailedMove from "@/features/gameplay/utils/get-detailed-move"
+import getPieces from "@/features/gameplay/utils/get-pieces"
 
 const initialState: GameState = {
     fen: DEFAULT_POSITION,
     history: [],
-    isCheck: false,
     currentTurn: "w",
     playerColor: "w",
     currentMoveIndex: -1,
     legalMoves: getLegalMoves(new Chess()),
-    pieces: getInitialPieces(),
+    pieces: getPieces(),
     activePiece: null,
     timerOption: null,
     players: {
@@ -61,33 +60,70 @@ const gameSlice = createSlice({
             ...state,
             ...action.payload,
         }),
+        undoToStart: (state) => {
+            state.pieces = getPieces()
+            state.currentMoveIndex = -1
+        },
         undo: (state) => {
-            if (state.currentMoveIndex <= -1) return;
-            const previousMove = state.history[state.currentMoveIndex -1]
-            const move = state.history[state.currentMoveIndex]
-            const fen = state.currentMoveIndex === 0 ? DEFAULT_POSITION : previousMove.fenAfter
-
-            const chess = new Chess(fen)
-            const validatedMove = chess.move({
-                from : move.from,
-                to: move.to,
-                promotion: move.promotion
+            if (state.currentMoveIndex <= -1) return
+            if (state.currentMoveIndex === 0) {
+                state.pieces = getPieces()
+                state.currentMoveIndex = -1
+                return
+            }
+            let pieces = getPieces()
+            const chess = new Chess()
+            state.history.slice(0, state.currentMoveIndex).forEach((mv) => {
+                const validatedMove = chess.move({
+                    from: mv.from,
+                    to: mv.to,
+                    promotion: mv.promotion,
+                })
+                const detailedMove = getDetailedMove(
+                    validatedMove,
+                    state.pieces
+                )
+                pieces = updatePieces(pieces, detailedMove)
             })
-            const detailedMove = getDetailedMove(validatedMove,state.pieces)
-            state.pieces = updatePieces(
-                state.pieces,
-                detailedMove,
-                true
-            )
+            state.pieces = pieces
             state.currentMoveIndex--
-
         },
         redo: (state) => {
-            // state.currentMoveIndex++
-            // state.pieces = updatePieces(
-            //     state.pieces,
-            //     state.history[state.currentMoveIndex]
-            // )
+            if (state.currentMoveIndex === state.history.length - 1) return
+            console.log('run redo')
+            const fen = state.currentMoveIndex <= 0 ? DEFAULT_POSITION : state.history[state.currentMoveIndex - 1].fenAfter
+            const chess = new Chess(fen)
+            const mv = state.history[state.currentMoveIndex]
+            const validatedMove = chess.move({
+                from: mv.from,
+                to: mv.to,
+                promotion: mv.promotion,
+            })
+            const detailedMove = getDetailedMove(validatedMove, state.pieces)
+            state.pieces = updatePieces(state.pieces, detailedMove)
+            state.currentMoveIndex++
+        },
+        redoToEnd: (state) => {
+            if (state.currentMoveIndex === state.history.length - 1) return
+
+            const chess = new Chess(
+                state.history[state.currentMoveIndex - 1].fenAfter
+            )
+            let pieces = [...state.pieces]
+            state.history.slice(state.currentMoveIndex).forEach(mv=>{
+                const validatedMove = chess.move({
+                    from: mv.from,
+                    to: mv.to,
+                    promotion: mv.promotion,
+                })
+                const detailedMove = getDetailedMove(
+                    validatedMove,
+                    state.pieces
+                )
+                pieces = updatePieces(pieces, detailedMove)
+            })
+            state.pieces = pieces
+            state.currentMoveIndex = state.history.length -1
         },
         resign: (state, action: PayloadAction<Color | undefined>) => {
             const color = action.payload // resigner
@@ -105,7 +141,7 @@ const gameSlice = createSlice({
                 state.players.black.timeLeft !== null &&
                 state.gameStartedAt
             ) {
-                console.log('correctTimers reducer runs...')
+                console.log("correctTimers reducer runs...")
                 const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
                     whiteTimeLeft: state.players.white.timeLeft,
                     blackTimeLeft: state.players.black.timeLeft,
@@ -223,7 +259,10 @@ export const {
     updateTimings,
     rollback,
     correctTimers,
-    undo,redo
+    undo,
+    redo,
+    undoToStart,
+    redoToEnd,
 } = gameSlice.actions
 
 export default gameSlice.reducer

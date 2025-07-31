@@ -34,16 +34,18 @@ export default function BotController() {
                 </Button>
                 <Button
                     className="cursor-pointer w-full font-semibold"
-                    onClick={start}
+                    // onClick={start}
                     variant={"outline"}
+                    disabled
                 >
                     <ExternalLink />
                     Share
                 </Button>
                 <Button
                     className="cursor-pointer w-full font-semibold"
-                    onClick={start}
+                    // onClick={start}
                     variant={"outline"}
+                    disabled
                 >
                     <Plus />
                     New Game

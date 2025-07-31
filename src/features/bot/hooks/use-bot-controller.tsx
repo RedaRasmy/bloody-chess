@@ -1,12 +1,24 @@
 import { ChessTimerOption, ColorOption } from "@/features/gameplay/types"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { changeBotTimer, changeColor, changeLevel, selectBotOptions } from "@/redux/slices/game-options"
-import { play ,resign as resignReducer , undo as undoReducer} from "@/redux/slices/game/game-slice"
+import {
+    changeBotTimer,
+    changeColor,
+    changeLevel,
+    selectBotOptions,
+} from "@/redux/slices/game-options"
+import {
+    play,
+    resign as resignReducer,
+    undo as undoReducer,
+    redo as redoReducer,
+    undoToStart as undoToStartReducer,
+    redoToEnd as redoToEndReducer,
+} from "@/redux/slices/game/game-slice"
 
 export default function useBotController() {
     const dispatch = useAppDispatch()
-    const  options = useAppSelector(selectBotOptions)
-    const {level} = options
+    const options = useAppSelector(selectBotOptions)
+    const { level } = options
     function resign() {
         dispatch(resignReducer())
     }
@@ -21,17 +33,17 @@ export default function useBotController() {
     }
 
     function setOptions({
-        playerColor ,
+        playerColor,
         level,
-        timer
-    }:{
-        playerColor?: ColorOption,
-        level?: number,
+        timer,
+    }: {
+        playerColor?: ColorOption
+        level?: number
         timer?: ChessTimerOption | null
     }) {
         if (playerColor) {
             dispatch(changeColor(playerColor))
-        } 
+        }
         if (level) {
             dispatch(changeLevel(level))
         }
@@ -41,16 +53,16 @@ export default function useBotController() {
     }
 
     function undoToStart() {
-        
+        dispatch(undoToStartReducer())
     }
     function undo() {
         dispatch(undoReducer())
     }
     function redo() {
-
+        dispatch(redoReducer())
     }
     function redoToEnd() {
-
+        dispatch(redoToEndReducer())
     }
 
     return {
@@ -58,10 +70,10 @@ export default function useBotController() {
         resign,
         setOptions,
         options,
-        undoToStart,    
+        undoToStart,
         undo,
         redo,
 
-        redoToEnd
+        redoToEnd,
     }
 }

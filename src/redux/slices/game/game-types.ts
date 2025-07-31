@@ -35,7 +35,6 @@ export type History = Prettify<
 export type GameState = {
     fen: string;
     history: History;
-    isCheck: boolean;
     currentTurn: Color;
     playerColor: Color;
     currentMoveIndex: number;
