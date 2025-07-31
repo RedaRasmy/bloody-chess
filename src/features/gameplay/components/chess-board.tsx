@@ -10,11 +10,16 @@ import { selectAnimationSetting } from "@/redux/slices/settings/settings-selecto
 import useChessBoard from "../hooks/use-chess-board"
 import ChessSquare from "./chess-square"
 import { MoveType } from "../types"
+import getPieces from "../utils/get-pieces"
 
 export default function ChessBoard({
     onMoveEnd,
+    fen,
+    move,
 }: {
     onMoveEnd?: (move: MoveType) => Promise<void>
+    fen?: string
+    move?: MoveType
 }) {
     const { enabled: animatedMoves, durationMs } = useAppSelector(
         selectAnimationSetting("moves")
@@ -34,6 +39,11 @@ export default function ChessBoard({
         allowedSquares,
         pieces,
     } = useChessBoard({ onMoveEnd })
+
+    const piecesToShow = fen ? getPieces(fen) : pieces
+    const lastMoveToShow = move ?? lastMove
+
+    const isIdle = fen !== null || move !== null
 
     return (
         <DndContext
@@ -58,23 +68,25 @@ export default function ChessBoard({
                         <ChessSquare
                             squareName={sq}
                             isLastMove={
-                                !!lastMove &&
-                                (lastMove.from === sq || lastMove.to === sq)
+                                !!lastMoveToShow &&
+                                (lastMoveToShow.from === sq ||
+                                    lastMoveToShow.to === sq)
                             }
                             // isPreMove={
                             //     !!preMoves.find(
                             //         (mv) => mv.from === sq || mv.to === sq
                             //     )
                             // }
-                            isTarget={allowedSquares.includes(sq)}
-                            onClick={clickSquare}
+                            isTarget={isIdle ? false : allowedSquares.includes(sq)}
+                            onClick={isIdle ? () => {} : clickSquare}
                         />
                     </Droppable>
                 ))}
-                {pieces.map((piece) => {
-                    if (piece && boardWidth) {
+                {piecesToShow.map((piece) => {
+                    if (piecesToShow && boardWidth) {
                         return (
                             <ChessPiece
+                                idle={isIdle}
                                 animated={animatedMoves}
                                 durationMs={durationMs}
                                 reversed={playerColor === "b"}

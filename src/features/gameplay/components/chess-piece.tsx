@@ -14,6 +14,7 @@ export default function ChessPiece({
     reversed,
     animated,
     durationMs = 200,
+    idle = false,
 }: {
     data: Exclude<BoardElement, null>
     className?: string
@@ -21,13 +22,14 @@ export default function ChessPiece({
     reversed: boolean
     animated: boolean
     durationMs?: number
+    idle?: boolean
 }) {
     const { square, type, color } = data
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
             id: square,
             data,
-        })
+    })
     const style = {
         transform: CSS.Translate.toString(transform),
     }
@@ -62,7 +64,15 @@ export default function ChessPiece({
         },
     }
 
-    const draggableContent = (
+    const draggableContent = idle ? (
+        <ChessPieceImage
+            piece={{
+                type,
+                color,
+            }}
+            size={boardWidth / 8}
+        />
+    ) : (
         <div
             ref={setNodeRef}
             {...listeners}
