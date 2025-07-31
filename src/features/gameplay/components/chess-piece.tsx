@@ -24,6 +24,7 @@ export default function ChessPiece({
     durationMs?: number
     idle?: boolean
 }) {
+
     const { square, type, color } = data
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
