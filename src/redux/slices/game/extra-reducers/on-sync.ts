@@ -4,6 +4,7 @@ import { PayloadAction } from "@reduxjs/toolkit"
 import { GameState } from "../game-types"
 import { WritableDraft } from "immer"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
+// import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 
 export const onSync = (
     state: WritableDraft<GameState>,

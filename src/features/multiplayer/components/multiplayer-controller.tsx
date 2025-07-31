@@ -1,8 +1,11 @@
 'use client'
 import { Button } from "@/components/ui/button";
+import useBotController from "@/features/bot/hooks/use-bot-controller";
+import HistoryController from "@/features/gameplay/components/history-controller";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {  selectIsGameOver } from "@/redux/slices/game/game-selectors";
 import {  resign } from "@/redux/slices/game/game-slice";
+import { Flag, Handshake, Plus, RotateCcw } from "lucide-react";
 
 export default function MultiplayerController({
     onResign,
@@ -21,6 +24,8 @@ export default function MultiplayerController({
         dispatch(resign())
         await onResign?.()
     }
+
+    const {undo,redo,redoToEnd,undoToStart} = useBotController()
     
     // async function handleRepaly() {
     //     dispatch(resign())
@@ -33,11 +38,48 @@ export default function MultiplayerController({
 
 
     return (
-        <div className="bg-gray-300 flex gap-2 flex-wrap landscape:min-w-[20%] landscape:lg:w-[30%] landscape:xl:w-[30%]  portrait:h-full  border-l-1 border-black/30 py-4 px-3">
-            <Button disabled={isGameOver} className="cursor-pointer" onClick={handleResign}>Resign</Button>
-            {/* <Button className="cursor-pointer" onClick={()=>dispatch(play())}>Replay</Button> */}
-            {/* <Button disabled={!isUndoable} className="cursor-pointer" onClick={()=>dispatch(undo())}>Undo</Button>
-            <Button disabled={!isRedoable} className="cursor-pointer" onClick={()=>dispatch(redo())}>Redo</Button> */}
+        <div className="bg-gray-300 py-3 lg:py-5 flex flex-col gap-5 lg:gap-8 justify-center items-center landscape:min-w-[20%] landscape:lg:w-[30%] landscape:xl:w-[30%]  portrait:h-full  border-l-1 border-black/30 ">
+            <div className="grid grid-cols-2 px-2 lg:px-4 w-full gap-2 grid-rows-2 ">
+                <Button
+                    disabled={isGameOver}
+                    className="cursor-pointer w-full font-semibold"
+                    onClick={handleResign}
+                    variant={"outline"}
+                >
+                    <Flag />
+                    Resign
+                </Button>
+                <Button
+                    className="cursor-pointer w-full font-semibold"
+                    variant={"outline"}
+                    disabled
+                >
+                    <RotateCcw />
+                    Replay
+                </Button>
+                <Button
+                    className="cursor-pointer w-full font-semibold"
+                    variant={"outline"}
+                    disabled
+                >
+                    <Handshake />
+                    Draw
+                </Button>
+                <Button
+                    className="cursor-pointer w-full font-semibold"
+                    variant={"outline"}
+                    disabled
+                >
+                    <Plus />
+                    New Game
+                </Button>
+            </div>
+            <HistoryController
+                onUndo={undo}
+                onRedo={redo}
+                onStart={undoToStart}
+                onEnd={redoToEnd}
+            />
         </div>
     )
 }

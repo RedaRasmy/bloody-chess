@@ -51,7 +51,6 @@ export function rollback(state: WritableDraft<GameState>) {
     state.fen = chess.fen()
     state.pieces = getPieces(chess.fen())
     state.currentTurn = chess.turn()
-    state.isCheck = chess.isCheck()
     state.gameOver = getGameOverState(chess)
     state.legalMoves = getLegalMoves(chess)
     state.activePiece = null
