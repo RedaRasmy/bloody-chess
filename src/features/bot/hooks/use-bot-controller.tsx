@@ -1,7 +1,7 @@
 import { ChessTimerOption, ColorOption } from "@/features/gameplay/types"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { changeBotTimer, changeColor, changeLevel, selectBotOptions } from "@/redux/slices/game-options"
-import { play ,resign as resignReducer} from "@/redux/slices/game/game-slice"
+import { play ,resign as resignReducer , undo as undoReducer} from "@/redux/slices/game/game-slice"
 
 export default function useBotController() {
     const dispatch = useAppDispatch()
@@ -40,10 +40,28 @@ export default function useBotController() {
         }
     }
 
+    function undoToStart() {
+        
+    }
+    function undo() {
+        dispatch(undoReducer())
+    }
+    function redo() {
+
+    }
+    function redoToEnd() {
+
+    }
+
     return {
         start,
         resign,
         setOptions,
-        options
+        options,
+        undoToStart,    
+        undo,
+        redo,
+
+        redoToEnd
     }
 }

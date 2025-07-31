@@ -13,6 +13,8 @@ import * as reducers from "./reducers"
 import { onSync, onSetup } from "./extra-reducers"
 import { oppositeColor } from "@/features/gameplay/utils/opposite-color"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
+import updatePieces from "@/features/gameplay/utils/update-pieces"
+import getDetailedMove from "@/features/gameplay/utils/get-detailed-move"
 
 const initialState: GameState = {
     fen: DEFAULT_POSITION,
@@ -59,21 +61,34 @@ const gameSlice = createSlice({
             ...state,
             ...action.payload,
         }),
-        // undo: (state) => {
-        //     state.pieces = updatePieces(
-        //         state.pieces,
-        //         state.history[state.currentMoveIndex],
-        //         true
-        //     )
-        //     state.currentMoveIndex--
-        // },
-        // redo: (state) => {
-        //     state.currentMoveIndex++
-        //     state.pieces = updatePieces(
-        //         state.pieces,
-        //         state.history[state.currentMoveIndex]
-        //     )
-        // }
+        undo: (state) => {
+            if (state.currentMoveIndex <= -1) return;
+            const previousMove = state.history[state.currentMoveIndex -1]
+            const move = state.history[state.currentMoveIndex]
+            const fen = state.currentMoveIndex === 0 ? DEFAULT_POSITION : previousMove.fenAfter
+
+            const chess = new Chess(fen)
+            const validatedMove = chess.move({
+                from : move.from,
+                to: move.to,
+                promotion: move.promotion
+            })
+            const detailedMove = getDetailedMove(validatedMove,state.pieces)
+            state.pieces = updatePieces(
+                state.pieces,
+                detailedMove,
+                true
+            )
+            state.currentMoveIndex--
+
+        },
+        redo: (state) => {
+            // state.currentMoveIndex++
+            // state.pieces = updatePieces(
+            //     state.pieces,
+            //     state.history[state.currentMoveIndex]
+            // )
+        },
         resign: (state, action: PayloadAction<Color | undefined>) => {
             const color = action.payload // resigner
             state.gameOver.reason = "Resignation"
@@ -208,6 +223,7 @@ export const {
     updateTimings,
     rollback,
     correctTimers,
+    undo,redo
 } = gameSlice.actions
 
 export default gameSlice.reducer
