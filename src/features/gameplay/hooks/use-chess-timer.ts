@@ -10,7 +10,7 @@ import {
 } from "@/redux/slices/game/game-selectors"
 import { timeOut } from "@/redux/slices/game/game-slice"
 import { Color } from "chess.js"
-import { useCallback, useEffect,  } from "react"
+import { useCallback, useEffect , useMemo} from "react"
 import useChessCountdown from "./use-chess-countdown"
 
 interface UseTimerProps {
@@ -43,29 +43,29 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
     //
     const isMyTurn = currentPlayer === playerColor
 
-    const timeElapsed =
-        gameStartedAt && gameStartedAt <= Date.now()
-            ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
-            : 0
+    // const timeElapsed =
+    //     gameStartedAt && gameStartedAt <= Date.now()
+    //         ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
+    //         : 0
 
     /// correct only the current player timer
-    const timeLeft = player.timeLeft - (isMyTurn ? timeElapsed : 0)
+    // const timeLeft = Math.max(player.timeLeft - (isMyTurn ? timeElapsed : 0), 0)
     // Only recalculate when the relevant state changes, not on every render
-    // const initialTimeLeft = useMemo(() => {
-    //     if (!gameStartedAt || !isMyTurn) {
-    //         return player.timeLeft!
-    //     }
+    const timeLeft = useMemo(() => {
+        if (!gameStartedAt || !isMyTurn) {
+            return player.timeLeft!
+        }
 
-    //     const timeElapsed =
-    //         gameStartedAt <= Date.now()
-    //             ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
-    //             : 0
+        const timeElapsed =
+            gameStartedAt <= Date.now()
+                ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
+                : 0
 
-    //     return player.timeLeft! - timeElapsed
-    // }, [player.timeLeft, gameStartedAt, lastMoveAt, isMyTurn])
+        return Math.max(player.timeLeft! - timeElapsed, 0)
+    }, [player.timeLeft, gameStartedAt, lastMoveAt, isMyTurn])
 
     const { count, pause, resume, isRunning } = useChessCountdown({
-        timeLeft ,
+        timeLeft,
         onTimeOut: async () => {
             if (onTimeOut) {
                 // Multiplayer - let server handle it

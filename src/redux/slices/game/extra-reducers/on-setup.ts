@@ -8,7 +8,7 @@ import getExtraPoints from "@/features/gameplay/utils/get-extra-points"
 import { Chess, Square } from "chess.js"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { DrawReason, WinReason } from "@/features/gameplay/types"
-import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
+// import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 
 export function onSetup(
     state: WritableDraft<GameState>,
@@ -33,33 +33,33 @@ export function onSetup(
 
     
     // Only update timers if game is active
-    const lastMoveAt = game.lastMoveAt || game.gameStartedAt
+    // const lastMoveAt = game.lastMoveAt || game.gameStartedAt
 
-    const { whiteTimeLeft , blackTimeLeft } = lastMoveAt
-        ? calculateTimeLeft({
-              whiteTimeLeft: game.whiteTimeLeft,
-              blackTimeLeft: game.blackTimeLeft,
-              currentTurn: game.currentTurn,
-              lastMoveAt: new Date(lastMoveAt),
-          })
-        : {
-              whiteTimeLeft: game.whiteTimeLeft,
-              blackTimeLeft: game.blackTimeLeft,
-          }
-
+    // const { whiteTimeLeft , blackTimeLeft } = lastMoveAt
+    //     ? calculateTimeLeft({
+    //           whiteTimeLeft: game.whiteTimeLeft,
+    //           blackTimeLeft: game.blackTimeLeft,
+    //           currentTurn: game.currentTurn,
+    //           lastMoveAt: new Date(lastMoveAt),
+    //       })
+    //     : {
+    //           whiteTimeLeft: game.whiteTimeLeft,
+    //           blackTimeLeft: game.blackTimeLeft,
+    //       }
+    
     state.gameStartedAt = game.gameStartedAt
     state.lastMoveAt = game.lastMoveAt
 
     state.players = {
         white: {
             name: game.whiteName,
-            timeLeft: whiteTimeLeft,
+            timeLeft: game.whiteTimeLeft,
             capturedPieces: capturedPieces.b,
             extraPoints: whiteExtraPoints,
         },
         black: {
             name: game.blackName,
-            timeLeft: blackTimeLeft,
+            timeLeft: game.blackTimeLeft,
             capturedPieces: capturedPieces.w,
             extraPoints: blackExtraPoints,
         },

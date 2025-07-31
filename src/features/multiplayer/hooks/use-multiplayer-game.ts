@@ -37,18 +37,16 @@ export const useMultiplayerGame = (gameId: string) => {
     const timerOption = useAppSelector(selectTimerOption)
 
     useEffect(() => {
+        // only for initial sync ( there is no lastMove ) or resignaton/timeout
         if (newGame && !isLoading) {
-            const { status } = newGame
-            if (status === "playing" || status === "finished") {
+            const { status, lastMoveAt, gameOverReason } = newGame
+            if (
+                (status === "playing" && lastMoveAt === null) ||
+                (gameOverReason &&
+                    ["Resignation", "Timeout"].includes(gameOverReason))
+            ) {
                 dispatch(sync(newGame as FinishedGame | StartedGame))
-            } 
-            // this shoudnt be necesasry now , delete after test
-            // else if (whiteReady && blackReady) {
-            //     newGame.status = 'playing'
-            //     dispatch(sync(newGame as FinishedGame | StartedGame))
-            //     console.log('both players are ready , change game status to playing ...')
-            //     updateGameStatus(newGame.id,'playing')
-            // }
+            }
         }
     }, [newGame, isLoading])
 
@@ -64,6 +62,7 @@ export const useMultiplayerGame = (gameId: string) => {
                         promotion: newMove.promotion || undefined,
                     })
                 )
+                dispatch(sync(newGame as FinishedGame | StartedGame))
             }
             setNewMove(null)
         }
@@ -83,12 +82,12 @@ export const useMultiplayerGame = (gameId: string) => {
                     })
                 )
                 setIsLoading(false)
-                console.log('setup done')
+                console.log("setup done")
                 if (game.status === "preparing") {
-                    console.log('send ready...')
+                    console.log("send ready...")
                     const playerColor = game.whiteId === data.id ? "w" : "b"
                     await startGame(gameId, playerColor)
-                    console.log('ready sent')
+                    console.log("ready sent")
                 }
             }
             setState()
@@ -109,7 +108,7 @@ export const useMultiplayerGame = (gameId: string) => {
                 },
                 (payload) => {
                     const newGame = supabaseToTypescript<Game>(payload.new)
-                    console.log('new game update received : ',newGame)
+                    console.log("new game update received : ", newGame)
                     setNewGame(newGame)
                 }
             )
@@ -122,7 +121,7 @@ export const useMultiplayerGame = (gameId: string) => {
                     filter: `game_id=eq.${gameId}`,
                 },
                 (payload) => {
-                    console.log('new move received')
+                    console.log("new move received")
                     const newMove = supabaseToTypescript<SMove>(payload.new)
                     setNewMove(newMove)
                 }
