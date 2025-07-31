@@ -15,7 +15,7 @@ import {
     sendResign,
     sendTimeOut,
     startGame,
-    updateGameStatus,
+    // updateGameStatus,
 } from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
 import {
@@ -38,15 +38,17 @@ export const useMultiplayerGame = (gameId: string) => {
 
     useEffect(() => {
         if (newGame && !isLoading) {
-            const { status ,whiteReady,blackReady } = newGame
+            const { status } = newGame
             if (status === "playing" || status === "finished") {
                 dispatch(sync(newGame as FinishedGame | StartedGame))
-            } else if (whiteReady && blackReady) {
-                newGame.status = 'playing'
-                dispatch(sync(newGame as FinishedGame | StartedGame))
-                console.log('both players are ready , change game status to playing ...')
-                updateGameStatus(newGame.id,'playing')
-            }
+            } 
+            // this shoudnt be necesasry now , delete after test
+            // else if (whiteReady && blackReady) {
+            //     newGame.status = 'playing'
+            //     dispatch(sync(newGame as FinishedGame | StartedGame))
+            //     console.log('both players are ready , change game status to playing ...')
+            //     updateGameStatus(newGame.id,'playing')
+            // }
         }
     }, [newGame, isLoading])
 

@@ -10,14 +10,13 @@ import {
 } from "@/redux/slices/game/game-selectors"
 import { timeOut } from "@/redux/slices/game/game-slice"
 import { Color } from "chess.js"
-import { useCallback, useEffect, } from "react"
+import { useCallback, useEffect } from "react"
 import useChessCountdown from "./use-chess-countdown"
 
 interface UseTimerProps {
     playerColor: Color
     onTimeOut?: (color: Color) => Promise<void>
 }
-
 
 export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
     const dispatch = useAppDispatch()
@@ -42,20 +41,21 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
             "player.timeLeft should be defined while using useChessTimer"
         )
     //
-    const isMyTurn = currentPlayer === playerColor && !isGameOver
-    const canRun = gameStartedAt !== null && !isGameOver
+    const isMyTurn = currentPlayer === playerColor
 
-    const timeElapsed = (gameStartedAt && gameStartedAt <= Date.now())
-        ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
-        : 0
+
+
+    const timeElapsed =
+        gameStartedAt && gameStartedAt <= Date.now()
+            ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
+            : 0
 
     /// correct only the current player timer
     const timeLeft = player.timeLeft - (isMyTurn ? timeElapsed : 0)
 
-    const { count, pause, resume } = useChessCountdown({
+    const { count, pause, resume, isRunning } = useChessCountdown({
         timeLeft,
         onTimeOut: async () => {
-            console.log(`⏰ Timeout for ${playerColor}`)
             if (onTimeOut) {
                 // Multiplayer - let server handle it
                 await onTimeOut(playerColor)
@@ -66,13 +66,34 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
         },
     })
 
+    /// handle the initial run
     useEffect(() => {
+        if (!gameStartedAt) return
+
+        const delay = gameStartedAt - Date.now()
+
+        if (delay <= 0) {
+            return
+        }
+
+        const timeout = setTimeout(() => {
+            resume() // start exactly at gameStartedAt
+        }, delay)
+
+        return () => clearTimeout(timeout) // clean up
+    }, [gameStartedAt])
+
+    useEffect(() => {
+        // can run only if game in playing status after 3s of delay
+        const canRun =
+            gameStartedAt !== null && !isGameOver && gameStartedAt <= Date.now()
+
         if (isMyTurn && canRun) {
             resume()
-        } else if (count!==timeLeft) { // to prevent add bonus on start
+        } else if (isRunning) {
             pause()
         }
-    }, [isMyTurn, canRun])
+    }, [isMyTurn, isGameOver, gameStartedAt, isRunning])
 
     // Format time for display
     const formatTime = useCallback((timeMs: number) => {
@@ -91,6 +112,6 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
         timeLeft: count,
         isTimeOut: count === 0,
         formatTime,
-        timerOption
+        timerOption,
     }
 }

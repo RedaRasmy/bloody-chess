@@ -151,54 +151,56 @@ export async function sendResign(gameId: string, playerColor: Color) {
 }
 
 export async function startGame(gameId: string, playerColor: Color) {
-    const matchedGame = await db.query.games.findFirst({
-        where: (games, { eq }) => eq(games.id, gameId),
-    })
-    if (!matchedGame) {
-        throw new Error("startGame : Game not found with id=" + gameId)
-    }
-    if (matchedGame.status !== "preparing") {
-        throw new Error(
-            "startGame : Game is not matched yet or already prepared"
+    await db.transaction(async (tx) => {
+        const [matchedGame] = await tx
+            .select()
+            .from(games)
+            .where(eq(games.id, gameId))
+            .for("update")
+
+        if (!matchedGame) {
+            throw new Error("startGame : Game not found with id=" + gameId)
+        }
+        if (matchedGame.status !== "preparing") {
+            throw new Error(
+                "startGame : Game is not matched yet or already prepared"
+            )
+        }
+
+        const updates =
+            playerColor === "w"
+                ? {
+                      whiteReady: true,
+                      status: "preparing" as GameStatus,
+                      gameStartedAt: null as null | number,
+                  }
+                : {
+                      blackReady: true,
+                      status: "preparing" as GameStatus,
+                      gameStartedAt: null as null | number,
+                  }
+
+        // Check if both will be ready after this update
+        const isOtherPlayerReady =
+            playerColor === "w"
+                ? matchedGame.blackReady === true
+                : matchedGame.whiteReady === true
+
+        if (isOtherPlayerReady) {
+            updates.status = "playing"
+            updates.gameStartedAt = Date.now() + 3000 // will start after 3s
+        }
+
+        console.log(
+            playerColor + " -- is other player ready : ",
+            isOtherPlayerReady
         )
-    }
 
-    const isOtherPlayerReady =
-        playerColor === "w" ? matchedGame.blackReady : matchedGame.whiteReady
+        await tx.update(games).set(updates).where(eq(games.id, gameId))
+    })
 
-    console.log(
-        playerColor + " -- is other player ready : ",
-        isOtherPlayerReady
-    )
 
-    const playerReady =
-        playerColor === "w"
-            ? {
-                  whiteReady: true,
-              }
-            : { blackReady: true }
 
-    const status: { status: GameStatus } = isOtherPlayerReady
-        ? {
-              status: "playing",
-          }
-        : {
-              status: "preparing",
-          }
-
-    await db
-        .update(games)
-        .set({
-            ...playerReady,
-            ...status,
-            gameStartedAt: Date.now() + 3000,
-        })
-        .where(eq(games.id, gameId))
-    // setTimeout(
-    //     async () => {
-    //     },
-    //     isOtherPlayerReady ? 3000 : 0 // game start after 3 seconds
-    // )
 }
 
 export async function updateGameStatus(gameId: string, status: GameStatus) {

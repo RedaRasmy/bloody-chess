@@ -4,7 +4,7 @@ import { MoveType } from "@/features/gameplay/types"
 import { DEFAULT_POSITION, PieceSymbol, Square } from "chess.js"
 import { useSearchParams } from "next/navigation"
 
-export default function page() {
+export default function Page() {
     const params = useSearchParams()
     const fen = params.get("fen") ?? DEFAULT_POSITION
     const lastMove = params.get("lastmove")

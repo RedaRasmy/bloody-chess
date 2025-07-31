@@ -44,6 +44,7 @@ export default function ChessBoard({
     const lastMoveToShow = move ?? lastMove
 
     const isIdle = fen !== null || move !== null
+    console.log('chessBoard -- is idle :',isIdle)
 
     return (
         <DndContext
