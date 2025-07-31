@@ -4,7 +4,7 @@ import { useAppSelector } from "@/redux/hooks"
 import { selectIsGameOver } from "@/redux/slices/game/game-selectors"
 import useBotController from "../hooks/use-bot-controller"
 import HistoryController from "@/features/gameplay/components/history-controller"
-import { ExternalLink, Flag, RotateCcw, Plus } from "lucide-react"
+import { Flag, RotateCcw, Plus, Undo } from "lucide-react"
 
 export default function BotController() {
     const isGameOver = useAppSelector(selectIsGameOver)
@@ -38,8 +38,8 @@ export default function BotController() {
                     variant={"outline"}
                     disabled
                 >
-                    <ExternalLink />
-                    Share
+                    <Undo />
+                    Undo
                 </Button>
                 <Button
                     className="cursor-pointer w-full font-semibold"
