@@ -77,7 +77,7 @@ const gameSlice = createSlice({
                 const validatedMove = chess.move({
                     from: mv.from,
                     to: mv.to,
-                    promotion: mv.promotion,
+                promotion: mv.promotion,
                 })
                 const detailedMove = getDetailedMove(validatedMove, pieces)
                 pieces = updatePieces(pieces, detailedMove)

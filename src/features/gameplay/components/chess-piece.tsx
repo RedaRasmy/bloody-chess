@@ -24,13 +24,12 @@ export default function ChessPiece({
     durationMs?: number
     idle?: boolean
 }) {
-
     const { square, type, color } = data
     const { setNodeRef, listeners, attributes, transform, isDragging } =
         useDraggable({
             id: square,
             data,
-    })
+        })
     const style = {
         transform: CSS.Translate.toString(transform),
     }
@@ -38,11 +37,21 @@ export default function ChessPiece({
     const [x, y] = squareToCoords(square, reversed)
 
     const [justDropped, setJustDropped] = useState(false)
+    const [isFirstRender, setIsFirstRender] = useState(true)
+
+    useEffect(() => {
+        // If this is first render or piece just appeared on a new square without moving
+        // (like a captured piece being reintroduced), skip animation
+        if (isFirstRender) {
+            const timer = setTimeout(() =>  setIsFirstRender(false),durationMs)
+            return () => clearTimeout(timer)
+        }
+    }, [])
 
     useEffect(() => {
         if (!isDragging && justDropped) {
             // Reset after a brief moment
-            const timer = setTimeout(() => setJustDropped(false), 50)
+            const timer = setTimeout(() => setJustDropped(false), durationMs/4)
             return () => clearTimeout(timer)
         }
         if (isDragging) {
@@ -99,7 +108,7 @@ export default function ChessPiece({
         <motion.div
             animate={targetPosition}
             transition={{
-                duration: justDropped ? 0 : durationMs / 1000, // Skip animation if just dropped
+                duration: (justDropped || isFirstRender) ? 0 : durationMs / 1000, // Skip animation if just dropped
             }}
             className={cn("absolute z-10", {
                 "z-30": isDragging,
