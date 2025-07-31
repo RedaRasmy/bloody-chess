@@ -10,7 +10,7 @@ import {
 } from "@/redux/slices/game/game-selectors"
 import { timeOut } from "@/redux/slices/game/game-slice"
 import { Color } from "chess.js"
-import { useCallback, useEffect , useMemo} from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import useChessCountdown from "./use-chess-countdown"
 
 interface UseTimerProps {
@@ -43,13 +43,21 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
     //
     const isMyTurn = currentPlayer === playerColor
 
-    // const timeElapsed =
-    //     gameStartedAt && gameStartedAt <= Date.now()
-    //         ? Date.now() - (lastMoveAt ? lastMoveAt : gameStartedAt)
-    //         : 0
+    const [isVisible,setIsVisible] = useState(true)
 
-    /// correct only the current player timer
-    // const timeLeft = Math.max(player.timeLeft - (isMyTurn ? timeElapsed : 0), 0)
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        setIsVisible(!document.hidden)
+
+        const handleVisibilityChange = () => {
+            setIsVisible(!document.hidden)
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }, [])
+
     // Only recalculate when the relevant state changes, not on every render
     const timeLeft = useMemo(() => {
         if (!gameStartedAt || !isMyTurn) {
@@ -62,7 +70,7 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
                 : 0
 
         return Math.max(player.timeLeft! - timeElapsed, 0)
-    }, [player.timeLeft, gameStartedAt, lastMoveAt, isMyTurn])
+    }, [player.timeLeft, gameStartedAt, lastMoveAt, isMyTurn,isVisible])
 
     const { count, pause, resume, isRunning } = useChessCountdown({
         timeLeft,
