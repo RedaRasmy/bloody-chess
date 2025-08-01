@@ -69,7 +69,7 @@ export default function MultiplayerController({
                     className="cursor-pointer w-full font-semibold"
                     variant={"outline"}
                     asChild
-                    disabled={isGameOver}
+                    disabled={!isGameOver}
                 >
                     <Link href="/?dialog=multiplayer">
                         <Plus />
