@@ -2,6 +2,9 @@ import { RootState } from "@/redux/store"
 import { createSelector } from "@reduxjs/toolkit"
 import { SettingValue } from "./settings-types"
 
+
+export const selectSettings = (state:RootState) => state.settings
+
 export const selectAnimationSettings = (state: RootState) =>
     state.settings.animation
 
@@ -27,3 +30,4 @@ export const selectSoundSetting =
 
 export const selectIsMovesSoundsEnabled = (state: RootState) =>
     state.settings.sound.enabled && state.settings.sound.moves.enabled
+

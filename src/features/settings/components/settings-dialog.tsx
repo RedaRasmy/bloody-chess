@@ -1,5 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
     Dialog,
     DialogContent,
@@ -8,9 +9,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
 export default function SettingsDialog() {
-
+    
 
     return (
         <Dialog>
@@ -24,7 +26,12 @@ export default function SettingsDialog() {
                     <DialogTitle>Settings</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
-                   
+                   <Label>Animations</Label>
+                    <div>
+                        <Checkbox id='moves-animation'/>
+                        <Label htmlFor="moves-animation" >Moves animation</Label>
+                    </div>
+                   <Label>Sounds</Label>
                 </div>
                 <DialogFooter>
                     {/* <Button asChild className="">
