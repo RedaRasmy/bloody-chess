@@ -57,7 +57,6 @@ export type GameState = {
         };
     };
     gameOver: GameOverState;
-    newGame: boolean;
     lastMoveAt: number | null;
     gameStartedAt: number | null;
 }

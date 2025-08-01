@@ -45,7 +45,6 @@ const initialState: GameState = {
         isDraw: false,
         reason: null,
     },
-    newGame: false, // should change on new game // remove this later ?
     lastMoveAt: null,
     gameStartedAt: null,
 }
@@ -168,7 +167,6 @@ const gameSlice = createSlice({
             return {
                 ...initialState,
                 isPlayerTurn: state.playerColor === "w",
-                newGame: !state.newGame,
                 timerOption,
                 playerColor ,
                 // TODO: always 3s delay after adding game-start animation
