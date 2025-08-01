@@ -20,12 +20,15 @@ import {
 } from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
 import {
+    selectFEN,
     selectPlayerColor,
     selectTimerOption,
 } from "@/redux/slices/game/game-selectors"
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
-import { Color } from "chess.js"
+import { Chess, Color } from "chess.js"
 import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
+import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
+import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
@@ -36,9 +39,9 @@ export const useMultiplayerGame = (gameId: string) => {
     const [newGame, setNewGame] = useState<Game | null>(null)
     const [newMove, setNewMove] = useState<SMove | null>(null)
     const timerOption = useAppSelector(selectTimerOption)
-
-
-
+    const isMovesSoundEnabled = useAppSelector(selectIsMovesSoundsEnabled)
+    const fen = useAppSelector(selectFEN)
+    
     useEffect(() => {
         // only for initial sync ( there is no lastMove ) or resignaton/timeout
         if (newGame && !isLoading) {
@@ -65,6 +68,16 @@ export const useMultiplayerGame = (gameId: string) => {
                         promotion: newMove.promotion || undefined,
                     })
                 )
+                // Move sound
+                if (isMovesSoundEnabled) {
+                    const chess = new Chess(fen)
+                    const validatedMove = chess.move({
+                        from : newMove.from,
+                        to : newMove.to,
+                        promotion : newMove.promotion ?? undefined
+                    })
+                    playMoveSound(validatedMove, chess.isCheck())
+                }
                 dispatch(sync(newGame as FinishedGame | StartedGame))
             }
             setNewMove(null)

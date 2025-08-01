@@ -15,8 +15,9 @@ import {
     selectPlayerColor,
 } from "@/redux/slices/game/game-selectors"
 import useBot from "@/features/bot/hooks/use-bot"
-import { move,  } from "@/redux/slices/game/game-slice"
+import { move } from "@/redux/slices/game/game-slice"
 import BotGameOverDialog from "@/features/bot/components/bot-gameover-dialog"
+import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -26,6 +27,7 @@ export default function Page() {
     const isGameOver = useAppSelector(selectIsGameOver)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
 
+    const movesSoundsEnabled = useAppSelector(selectIsMovesSoundsEnabled)
 
     const opponentColor = oppositeColor(playerColor)
 
@@ -41,10 +43,11 @@ export default function Page() {
                     promotion: botMove.promotion,
                 })
             )
-            playMoveSound(botMove, isCheck)
+            if (movesSoundsEnabled) {
+                playMoveSound(botMove, isCheck)
+            }
         },
     })
-
 
     return (
         <GameLayout

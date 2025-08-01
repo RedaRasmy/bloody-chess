@@ -137,7 +137,7 @@ export default function useChessBoard({
                     await onMoveEnd?.(mv)
                 }
             }
-        } else {
+        } else { // TODO: premoves
             const isPromotionMove =
                 promotionRank(playerColor) === rank(targetSquare) &&
                 activePiece.type === "p"
