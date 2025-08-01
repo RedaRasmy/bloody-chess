@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {  selectIsGameOver } from "@/redux/slices/game/game-selectors";
 import {  resign } from "@/redux/slices/game/game-slice";
 import { Flag, Handshake, Plus, RotateCcw } from "lucide-react";
+import Link from "next/link";
 
 export default function MultiplayerController({
     onResign,
@@ -27,7 +28,7 @@ export default function MultiplayerController({
 
     const {undo, redo, undoToStart, redoToEnd} = useHistoryController()
     
-    // async function handleRepaly() {
+    // async function handleReplay() {
     //     dispatch(resign())
     //     await onResign?.()
     // }
@@ -67,10 +68,13 @@ export default function MultiplayerController({
                 <Button
                     className="cursor-pointer w-full font-semibold"
                     variant={"outline"}
-                    disabled
+                    asChild
+                    disabled={isGameOver}
                 >
-                    <Plus />
-                    New Game
+                    <Link href="/?dialog=multiplayer">
+                        <Plus />
+                        New Game
+                    </Link>
                 </Button>
             </div>
             <HistoryController

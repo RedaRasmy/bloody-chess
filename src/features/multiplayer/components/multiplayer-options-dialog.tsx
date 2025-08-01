@@ -16,8 +16,13 @@ import {
 import SelectTimer from "../../gameplay/components/select-timer"
 import { useRouter } from "next/navigation"
 import useGameSearching from "../hooks/use-game-searching"
+import { useEffect } from "react"
 
-export default function MultiplayerOptionsDialog() {
+export default function MultiplayerOptionsDialog({
+    defaultOpen = false,
+}: {
+    defaultOpen?: boolean
+}) {
     const MULTIPLAYER_PATH = "play/multiplayer/"
     const router = useRouter()
     const { timer } = useAppSelector(selectMultiplayerOptions)
@@ -31,8 +36,14 @@ export default function MultiplayerOptionsDialog() {
             },
         })
 
+    useEffect(() => {
+        if (defaultOpen) {
+            startSearch()
+        }
+    }, [])
+
     return (
-        <Dialog onOpenChange={cancelSearch}>
+        <Dialog onOpenChange={cancelSearch} defaultOpen={defaultOpen}>
             <DialogTrigger asChild>
                 <Button className="py-6 cursor-pointer w-full">
                     Play Online
