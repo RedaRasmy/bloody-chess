@@ -26,7 +26,7 @@ export default function BotOptionsDialog() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button className="lg:w-sm w-50 py-6 cursor-pointer">
+                <Button className="py-6 cursor-pointer w-full">
                     Play Bot
                 </Button>
             </DialogTrigger>

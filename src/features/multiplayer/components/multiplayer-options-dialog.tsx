@@ -28,53 +28,13 @@ export default function MultiplayerOptionsDialog() {
             timerOption: timer,
             onGameFound: async (game, {}) => {
                 router.push(MULTIPLAYER_PATH + game.id)
-                // setup only in game page for simplicity
-
-                // setup the game
-                // console.log('setuping the full game...')
-                // console.log('the game getting from onGameFound : ',game)
-                // console.log("isForGuests = " +game.isForGuests)
-                // const playerId = data.id
-                // if ("displayName" in data) { // if guest
-                //     console.log("fetching guests ...")
-                //     const white = playerId === game.whiteId ? data : await getGuest(game.whiteId)
-                //     const black = playerId === game.blackId ? data : await getGuest(game.blackId)
-                //     dispatch(
-                //         setup({
-                //             game: {
-                //                 ...game,
-                //                 isForGuests: true,
-                //                 white,
-                //                 black,
-                //                 moves : [], // no moves yet
-                //             },
-                //             playerId: data.id,
-                //         })
-                //     )
-                // } else {
-                //     console.log("fetching players ...")
-                //     const white = playerId === game.whiteId ? data : await getPlayer(game.whiteId)
-                //     const black = playerId === game.whiteId ? data : await getPlayer(game.blackId)
-                //     dispatch(
-                //         setup({
-                //             game: {
-                //                 ...game,
-                //                 isForGuests: false,
-                //                 white,
-                //                 black,
-                //                 moves : [], // no moves yet
-                //             },
-                //             playerId: data.id,
-                //         })
-                //     )
-                // }
             },
         })
 
     return (
         <Dialog onOpenChange={cancelSearch}>
             <DialogTrigger asChild>
-                <Button className="lg:w-sm w-50 py-6 cursor-pointer">
+                <Button className="py-6 cursor-pointer w-full">
                     Play Online
                 </Button>
             </DialogTrigger>
