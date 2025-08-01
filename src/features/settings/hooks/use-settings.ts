@@ -3,6 +3,7 @@ import { selectSettings } from "@/redux/slices/settings/settings-selectors"
 import {
     updateMovesAnimation,
     updateMovesSound,
+    reset
 } from "@/redux/slices/settings/settings-slice"
 
 export default function useSettings() {
@@ -32,6 +33,9 @@ export default function useSettings() {
             })
         )
     }
+    function resetDefaults() {
+        dispatch(reset())
+    }
 
     return {
         movesAnimationEnabled: animation.moves.enabled,
@@ -40,5 +44,6 @@ export default function useSettings() {
         toggleMovesAnimation,
         toggleMovesSound,
         changeMovesDuration,
+        resetDefaults
     }
 }

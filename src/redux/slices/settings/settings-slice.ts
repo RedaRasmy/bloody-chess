@@ -46,9 +46,10 @@ const settings = createSlice({
                 state.sound.moves.enabled = enabled
             }
         },
+        reset : () => initialState
     },
 })
 
-export const {updateMovesAnimation,updateMovesSound} = settings.actions
+export const {updateMovesAnimation,updateMovesSound , reset}  = settings.actions
 
 export default settings.reducer

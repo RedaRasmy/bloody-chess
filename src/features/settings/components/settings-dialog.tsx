@@ -34,11 +34,11 @@ export default function SettingsDialog() {
                    <Label>Sounds</Label>
                 </div>
                 <DialogFooter>
-                    {/* <Button asChild className="">
-                        <Link href={"/play/bot"} onClick={start}>
-                            Start
-                        </Link>
-                    </Button> */}
+                    <Button asChild className="">
+                        {/* <Button onClick={reset}>
+                            Reset
+                        </Button> */}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
