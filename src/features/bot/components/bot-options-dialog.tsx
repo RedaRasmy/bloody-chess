@@ -16,7 +16,11 @@ import SelectTimer from "../../gameplay/components/select-timer"
 import { ColorOption } from "../../gameplay/types"
 import useBotController from "../hooks/use-bot-controller"
 
-export default function BotOptionsDialog() {
+export default function BotOptionsDialog({
+    defaultOpen = false
+}:{
+    defaultOpen?: boolean
+}) {
     const {
         options: { level, timer, color },
         start,
@@ -24,8 +28,8 @@ export default function BotOptionsDialog() {
     } = useBotController()
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>
+        <Dialog defaultOpen={defaultOpen}>
+            <DialogTrigger asChild >
                 <Button className="py-6 cursor-pointer w-full">
                     Play Bot
                 </Button>
