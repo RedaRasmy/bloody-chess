@@ -70,7 +70,7 @@ const gameSlice = createSlice({
                 return
             }
             let pieces = getPieces()
-            
+
             const chess = new Chess()
             state.history.slice(0, state.currentMoveIndex).forEach((mv) => {
                 const validatedMove = chess.move({
@@ -170,9 +170,7 @@ const gameSlice = createSlice({
                 isPlayerTurn: state.playerColor === "w",
                 timerOption,
                 playerColor ,
-                // TODO: always 3s delay after adding game-start animation
-                gameStartedAt: timerOption ? Date.now() + 3000 : Date.now() ,
-
+                gameStartedAt: Date.now() + 3000 ,
                 players: {
                     white: {
                         capturedPieces: initialCaputeredPieces.w,

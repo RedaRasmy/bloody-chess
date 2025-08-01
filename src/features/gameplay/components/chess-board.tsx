@@ -11,6 +11,8 @@ import useChessBoard from "../hooks/use-chess-board"
 import ChessSquare from "./chess-square"
 import { MoveType } from "../types"
 import getPieces from "../utils/get-pieces"
+import GameDelayOverlay from "./game-delay-overlay"
+import { selectGameStartedAt } from "@/redux/slices/game/game-selectors"
 
 export default function ChessBoard({
     onMoveEnd,
@@ -24,6 +26,7 @@ export default function ChessBoard({
     const { enabled: animatedMoves, durationMs } = useAppSelector(
         selectAnimationSetting("moves")
     )
+    const gameStartedAt = useAppSelector(selectGameStartedAt)
 
     const {
         boardWidth,
@@ -63,6 +66,7 @@ export default function ChessBoard({
                     open={isPromoting}
                     onClickOutside={cancelPromotion}
                 />
+                <GameDelayOverlay gameStartedAt={gameStartedAt} />
                 {squares.map((sq) => (
                     <Droppable key={sq} id={sq}>
                         <ChessSquare
@@ -77,7 +81,9 @@ export default function ChessBoard({
                             //         (mv) => mv.from === sq || mv.to === sq
                             //     )
                             // }
-                            isTarget={isIdle ? false : allowedSquares.includes(sq)}
+                            isTarget={
+                                isIdle ? false : allowedSquares.includes(sq)
+                            }
                             onClick={isIdle ? () => {} : clickSquare}
                         />
                     </Droppable>

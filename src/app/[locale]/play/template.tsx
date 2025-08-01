@@ -2,6 +2,7 @@
 import { ReactNode, useEffect } from "react"
 import { useAppSelector } from "@/redux/hooks"
 import {
+    selectGameStartedAt,
     selectIsGameOver,
     // selectWhitePlayer,
     // selectBlackPlayer,
@@ -22,34 +23,16 @@ export default function Template({ children }: { children: ReactNode }) {
     // const blackPlayer = useAppSelector(selectBlackPlayer)
     // const currentTurn = useAppSelector(selectCurrentPlayer)
     // const lastMoveAt = useAppSelector(selectLastMoveAt)
-    // const gameStartedAt = useAppSelector(selectGameStartedAt)
+    const gameStartedAt = useAppSelector(selectGameStartedAt)
 
     useEffect(() => {
-        if (!isGameOver) {
+        if (gameStartedAt && gameStartedAt <= Date.now() ) {
             playSound("game-start")
-        } else {
+        } else if (isGameOver) {
             playSound("game-end")
         }
-    }, [isGameOver])
+    }, [isGameOver,gameStartedAt])
 
-    // Timer Correction
-
-    // useEffect(() => {
-    //     const wtl = whitePlayer.timeLeft
-    //     const btl = blackPlayer.timeLeft
-    //     if (wtl !== null && btl !== null && gameStartedAt !== null) {
-    //         const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
-    //             whiteTimeLeft : wtl,
-    //             blackTimeLeft : btl,
-    //             currentTurn,
-    //             lastMoveAt: lastMoveAt ? new Date(lastMoveAt) : new Date(gameStartedAt),
-    //         })
-    //         dispatch(updateTimings({
-    //             whiteTimeLeft ,
-    //             blackTimeLeft
-    //         }))
-    //     }
-    // }, [])
 
     // Premoves Processor
     // useEffect(() => {

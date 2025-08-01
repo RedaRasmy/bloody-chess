@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { selectBotOptions } from "@/redux/slices/game-options"
 import {
     selectFEN,
+    // selectGameStartedAt,
     selectIsGameOver,
     selectIsPlayerTurn,
     selectPlayerColor,
@@ -18,6 +19,8 @@ import useBot from "@/features/bot/hooks/use-bot"
 import { move } from "@/redux/slices/game/game-slice"
 import BotGameOverDialog from "@/features/bot/components/bot-gameover-dialog"
 import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
+// import { useEffect } from "react"
+// import useBotController from "@/features/bot/hooks/use-bot-controller"
 
 export default function Page() {
     const dispatch = useAppDispatch()
@@ -25,6 +28,7 @@ export default function Page() {
     const fen = useAppSelector(selectFEN)
     const { level } = useAppSelector(selectBotOptions)
     const isGameOver = useAppSelector(selectIsGameOver)
+    // const gameStartedAt = useAppSelector(selectGameStartedAt)
     const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
 
     const movesSoundsEnabled = useAppSelector(selectIsMovesSoundsEnabled)
@@ -48,6 +52,13 @@ export default function Page() {
             }
         },
     })
+
+    // const { start } = useBotController()
+
+    // useEffect(() => { // initial start
+    //     if (!gameStartedAt || isGa)
+    //     start()
+    // }, [])
 
     return (
         <GameLayout
