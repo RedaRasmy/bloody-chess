@@ -2,6 +2,7 @@ import { Move } from "chess.js";
 import playSound from "./play-sound";
 
 export function playMoveSound(move:Move,isCheck:boolean) {
+    
 
     if (isCheck) {
         playSound('check')
