@@ -14,20 +14,30 @@ import {
     undoToStart as undoToStartReducer,
     redoToEnd as redoToEndReducer,
 } from "@/redux/slices/game/game-slice"
+import { Color } from "chess.js"
 
 export default function useBotController() {
     const dispatch = useAppDispatch()
     const options = useAppSelector(selectBotOptions)
-    const { level } = options
+    const { level, color, timer } = options
     function resign() {
         dispatch(resignReducer())
     }
 
     function start() {
+        let playerColor:Color = "w"
+        if (color == "black") {
+            playerColor = "b"
+        } else if (color == "random") {
+            const randomColor: Color = Math.random() < 0.5 ? "w" : "b"
+            playerColor = randomColor
+        }
         dispatch(
             play({
                 playerName: "player",
                 opponentName: `bot - lvl ${level}`,
+                playerColor ,
+                timerOption : timer
             })
         )
     }

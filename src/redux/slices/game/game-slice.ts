@@ -1,8 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
 import { Chess, Color, DEFAULT_POSITION } from "chess.js"
-import { changeBotTimer, changeColor, changeLevel } from "../game-options"
-import { BoardElement } from "@/features/gameplay/types"
+import { BoardElement, ChessTimerOption } from "@/features/gameplay/types"
 import { initialCaputeredPieces } from "@/features/gameplay/utils/constantes"
 import getLegalMoves from "@/features/gameplay/utils/get-legal-moves"
 import { GameState, Timings } from "./game-types"
@@ -151,25 +150,30 @@ const gameSlice = createSlice({
             action: PayloadAction<{
                 playerName: string
                 opponentName: string
+                playerColor : Color
+                timerOption : ChessTimerOption | null
             }>
         ) => {
-            const { playerName, opponentName } = action.payload
-            const timerOption = state.timerOption
+            const { playerName, opponentName , playerColor , timerOption } = action.payload
+            // const timerOption = state.timerOption
+
             const timer = timerOption
                 ? parseTimerOption(timerOption)
                 : { base: null }
 
             const base = timer.base ? timer.base * 1000 : null
-            const playerColor = state.playerColor
+            // const playerColor = state.playerColor
             const whiteName = playerColor === "w" ? playerName : opponentName
             const blackName = playerColor === "w" ? opponentName : playerName
             return {
                 ...initialState,
-                playerColor: state.playerColor,
                 isPlayerTurn: state.playerColor === "w",
                 newGame: !state.newGame,
-                timerOption: state.timerOption,
-                gameStartedAt: Date.now() + 3000 ,
+                timerOption,
+                playerColor ,
+                // TODO: always 3s delay after adding game-start animation
+                gameStartedAt: timerOption ? Date.now() + 3000 : Date.now() ,
+
                 players: {
                     white: {
                         capturedPieces: initialCaputeredPieces.w,
@@ -193,36 +197,6 @@ const gameSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(changeColor, (state, action) => {
-                const color = action.payload
-
-                if (color == "black") {
-                    state.playerColor = "b"
-                } else if (color == "random") {
-                    const randomColor: Color = Math.random() < 0.5 ? "w" : "b"
-                    state.playerColor = randomColor
-                } else {
-                    state.playerColor = "w"
-                }
-            })
-            .addCase(changeLevel, (state, action) => {
-                const level = action.payload
-                const playerColor = state.playerColor
-                const botName = "bot-" + level
-                const playerName = "player"
-                if (playerColor === "w") {
-                    state.players.black.name = botName
-                    state.players.white.name = playerName
-                } else {
-                    state.players.white.name = botName
-                    state.players.black.name = playerName
-                }
-            })
-            .addCase(changeBotTimer, (state, action) => {
-                const timerOption = action.payload
-
-                state.timerOption = timerOption
-            })
             .addCase(setup, onSetup)
             .addCase(sync, onSync)
     },
