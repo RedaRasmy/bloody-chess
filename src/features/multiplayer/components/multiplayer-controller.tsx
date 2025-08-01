@@ -1,7 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/button";
-import useBotController from "@/features/bot/hooks/use-bot-controller";
 import HistoryController from "@/features/gameplay/components/history-controller";
+import useHistoryController from "@/features/gameplay/hooks/use-history-controller";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {  selectIsGameOver } from "@/redux/slices/game/game-selectors";
 import {  resign } from "@/redux/slices/game/game-slice";
@@ -25,7 +25,7 @@ export default function MultiplayerController({
         await onResign?.()
     }
 
-    const {undo,redo,redoToEnd,undoToStart} = useBotController()
+    const {undo, redo, undoToStart, redoToEnd} = useHistoryController()
     
     // async function handleRepaly() {
     //     dispatch(resign())
@@ -35,7 +35,6 @@ export default function MultiplayerController({
     //     dispatch(resign())
     //     await onResign?.()
     // }
-
 
     return (
         <div className="bg-gray-300 py-3 lg:py-5 flex flex-col gap-5 lg:gap-8 justify-center items-center landscape:min-w-[20%] landscape:lg:w-[30%] landscape:xl:w-[30%]  portrait:h-full  border-l-1 border-black/30 ">
