@@ -7,21 +7,28 @@ import {
     selectBotOptions,
 } from "@/redux/slices/game-options"
 import {
+    selectCurrentPlayer,
+    selectPlayerColor,
+} from "@/redux/slices/game/game-selectors"
+import {
     play,
     resign as resignReducer,
+    rollback,
 } from "@/redux/slices/game/game-slice"
 import { Color } from "chess.js"
 
 export default function useBotController() {
     const dispatch = useAppDispatch()
     const options = useAppSelector(selectBotOptions)
+    const currentTurn = useAppSelector(selectCurrentPlayer)
+    const playerColor = useAppSelector(selectPlayerColor)
     const { level, color, timer } = options
     function resign() {
         dispatch(resignReducer())
     }
 
     function start() {
-        let playerColor:Color = "w"
+        let playerColor: Color = "w"
         if (color == "black") {
             playerColor = "b"
         } else if (color == "random") {
@@ -32,8 +39,8 @@ export default function useBotController() {
             play({
                 playerName: "player",
                 opponentName: `bot - lvl ${level}`,
-                playerColor ,
-                timerOption : timer
+                playerColor,
+                timerOption: timer,
             })
         )
     }
@@ -58,11 +65,18 @@ export default function useBotController() {
         }
     }
 
+    function realUndo() {
+        if (currentTurn === playerColor) {
+            dispatch(rollback()) // one more rollabck in player-turn case
+        }
+        dispatch(rollback())
+    }
 
     return {
         start,
         resign,
         setOptions,
         options,
+        realUndo,
     }
 }

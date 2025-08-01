@@ -8,52 +8,38 @@ import updatePieces from "@/features/gameplay/utils/update-pieces"
 import getDetailedMove from "@/features/gameplay/utils/get-detailed-move"
 
 export function rollback(state: WritableDraft<GameState>) {
-    // Remove the last move
-    const move = state.history.at(-1)
-    if (!move) return;
+    // TODO : think about store capturedPices in game slice to optimize 
+    // Why : we will not need to reconstruct pieces from scartch to just know the piece Id
+    // maybe store them in History
 
-    // Create chess instance with full history to get the detailed move
-    const chessWithMove = new Chess()
+    if (state.history.length <= 0) return
+
+    const chess = new Chess()
+
+    // // Get the validated move and detailed move for animation
+    let pieces = getPieces()
+    // Reconstruct game state from history
     state.history.slice(0,-1).forEach((mv) => {
-        chessWithMove.move({
+        const validatedMove = chess.move({
             from: mv.from,
             to: mv.to,
             promotion: mv.promotion,
         })
+        const detailedMove = getDetailedMove(validatedMove, pieces)
+        pieces = updatePieces(pieces, detailedMove)
     })
 
-    // Get the validated move and detailed move for animation
-
-    const validatedMove = chessWithMove.move(move)
-    const detailedMove = getDetailedMove(validatedMove, state.pieces)
-
-    // update pieces with updatePieces func to enable rollback animation
-    state.pieces = updatePieces(state.pieces, detailedMove, true)
 
     ////////////////////////////
 
     state.history.pop()
+    
 
-    const chess = new Chess()
-
-    state.currentMoveIndex = state.history.length - 1
-
-    // Reconstruct game state from history
-    state.history.forEach((mv) => {
-        chess.move({
-            from: mv.from,
-            to: mv.to,
-            promotion: mv.promotion,
-        })
-    })
-
-    // Reset state to before the failed move
+    state.pieces = pieces
     state.fen = chess.fen()
-    state.pieces = getPieces(chess.fen())
     state.currentTurn = chess.turn()
     state.gameOver = getGameOverState(chess)
     state.legalMoves = getLegalMoves(chess)
     state.activePiece = null
-
-
+    state.currentMoveIndex--
 }

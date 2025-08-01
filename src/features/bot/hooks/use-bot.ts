@@ -3,6 +3,7 @@ import sleep from "@/utils/delay"
 import { getEngineResponse } from "../chess-engine"
 import { getBestMove } from "../utils/get-bestmove"
 import { Chess, Move } from "chess.js"
+import safeMove from "@/features/gameplay/utils/safe-move"
 
 export default function useBot({
     onMove,
@@ -28,10 +29,10 @@ export default function useBot({
                 if (res.success) {
                     const bestMove = getBestMove(res, level, fen)
                     const chess = new Chess(fen)
-                    const move = chess.move(bestMove)
-                    // dispatch(move(bestMove))
-                    // playMoveSound(theMove, chess.inCheck())
-                    onMove(move, chess.isCheck())
+                    const move = safeMove(chess,bestMove)
+                    if (move) {
+                        onMove(move, chess.isCheck())
+                    }
                 }
             }
             fetchBestMove()

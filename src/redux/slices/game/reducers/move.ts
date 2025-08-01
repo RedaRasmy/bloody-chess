@@ -13,6 +13,7 @@ import { getGameOverState } from "@/features/gameplay/utils/get-gameover-cause"
 import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 import {redoToEnd} from './'
+import safeMove from "@/features/gameplay/utils/safe-move"
 
 export function move(
     state: WritableDraft<GameState>,
@@ -42,7 +43,9 @@ export function move(
         })
     )
 
-    const validatedMove = chess.move(move)
+    const validatedMove = safeMove(chess,move)
+
+    if (!validatedMove) return;
 
     if (
         state.players.white.timeLeft !== null &&

@@ -70,6 +70,7 @@ const gameSlice = createSlice({
                 return
             }
             let pieces = getPieces()
+            
             const chess = new Chess()
             state.history.slice(0, state.currentMoveIndex).forEach((mv) => {
                 const validatedMove = chess.move({
