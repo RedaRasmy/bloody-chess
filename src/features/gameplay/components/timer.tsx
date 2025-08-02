@@ -5,6 +5,7 @@ import playSound from "../utils/play-sound"
 import { useEffect, useState } from "react"
 import { selectIsSoundEnabled } from "@/redux/slices/settings/settings-selectors"
 import { useAppSelector } from "@/redux/hooks"
+import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
 
 interface TimerProps {
     playerColor: Color
@@ -16,7 +17,10 @@ export default function Timer({ playerColor, onTimeOut }: TimerProps) {
         playerColor,
         onTimeOut,
     })
+    const clientColor = useAppSelector(selectPlayerColor)
     const isAlertEnabled = useAppSelector(selectIsSoundEnabled("timeout"))
+
+    const isClient = clientColor === playerColor
 
     const { base } = parseTimerOption(timerOption)
     const { formatted } = formatTime(timeLeft)
@@ -38,7 +42,7 @@ export default function Timer({ playerColor, onTimeOut }: TimerProps) {
     useEffect(() => {
         if (soundRan) return
         if (isUrgent()) {
-            if (isAlertEnabled) playSound("timeout-alert")
+            if (isClient && isAlertEnabled) playSound("timeout-alert")
             setSoundRan(true)
         }
     }, [timeLeft, soundRan])
