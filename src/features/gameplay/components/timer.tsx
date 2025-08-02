@@ -3,6 +3,8 @@ import { useChessTimer } from "../hooks/use-chess-timer" // Adjust import path a
 import parseTimerOption from "../utils/parse-timer-option"
 import playSound from "../utils/play-sound"
 import { useEffect, useState } from "react"
+import { selectIsSoundEnabled } from "@/redux/slices/settings/settings-selectors"
+import { useAppSelector } from "@/redux/hooks"
 
 interface TimerProps {
     playerColor: Color
@@ -14,16 +16,17 @@ export default function Timer({ playerColor, onTimeOut }: TimerProps) {
         playerColor,
         onTimeOut,
     })
+    const isAlertEnabled = useAppSelector(selectIsSoundEnabled("timeout"))
 
     const { base } = parseTimerOption(timerOption)
     const { formatted } = formatTime(timeLeft)
-    const [soundRan,setSoundRan] = useState(false)
+    const [soundRan, setSoundRan] = useState(false)
 
     // TODO: change urgency to be controlled in settings
 
     function getUrgentThreshold() {
-        if (base <= 60) return 10 
-        if (base <= 300) return 30 
+        if (base <= 60) return 10
+        if (base <= 300) return 30
         if (base <= 600) return 45
         return 60
     }
@@ -32,13 +35,13 @@ export default function Timer({ playerColor, onTimeOut }: TimerProps) {
         return timeLeft / 1000 <= getUrgentThreshold()
     }
 
-    useEffect(() => { 
-        if (soundRan) return;
+    useEffect(() => {
+        if (soundRan) return
         if (isUrgent()) {
-            playSound('timeout-alert')
+            if (isAlertEnabled) playSound("timeout-alert")
             setSoundRan(true)
         }
-     },[timeLeft,soundRan])
+    }, [timeLeft, soundRan])
 
     // Style based on time remaining and timeout state
     const getTimerStyle = () => {

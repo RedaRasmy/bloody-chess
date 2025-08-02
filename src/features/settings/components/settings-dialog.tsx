@@ -16,10 +16,15 @@ import { Slider } from "@/components/ui/slider"
 export default function SettingsDialog() {
     const {
         resetDefaults,
+        sound : {
+            moves,
+            gameStart,
+            gameEnd,
+            timeout
+        },
         movesAnimationEnabled,
-        movesSoundsEnabled,
         movesAnimationDuration,
-        toggleMovesSound,
+        toggleSound,
         toggleMovesAnimation,
         changeMovesDuration,
     } = useSettings()
@@ -75,10 +80,34 @@ export default function SettingsDialog() {
                     <div className="flex gap-2 pl-2">
                         <Checkbox
                             id="moves-sound"
-                            checked={movesSoundsEnabled}
-                            onCheckedChange={toggleMovesSound}
+                            checked={moves}
+                            onCheckedChange={()=>toggleSound("moves")}
                         />
                         <Label htmlFor="moves-sound">Moves Sound</Label>
+                    </div>
+                    <div className="flex gap-2 pl-2">
+                        <Checkbox
+                            id="game-start"
+                            checked={gameStart}
+                            onCheckedChange={()=>toggleSound('gameStart')}
+                        />
+                        <Label htmlFor="game-start">Game start alert</Label>
+                    </div>
+                    <div className="flex gap-2 pl-2">
+                        <Checkbox
+                            id="game-end"
+                            checked={gameEnd}
+                            onCheckedChange={()=>toggleSound('gameEnd')}
+                        />
+                        <Label htmlFor="game-end">Game end alert</Label>
+                    </div>
+                    <div className="flex gap-2 pl-2">
+                        <Checkbox
+                            id="timer-alert"
+                            checked={timeout}
+                            onCheckedChange={()=>toggleSound('timeout')}
+                        />
+                        <Label htmlFor="timer-alert">Timer alert</Label>
                     </div>
                 </div>
                 <DialogFooter>

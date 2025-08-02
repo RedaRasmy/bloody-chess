@@ -18,3 +18,5 @@ export type SettingValue<S extends SettingKey> = Exclude<
     keyof SettingsState[S],
     "enabled"
 >
+
+export type SoundSetting = keyof SettingsState['sound']

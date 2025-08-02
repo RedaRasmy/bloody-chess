@@ -11,6 +11,7 @@ import {
     // selectGameStartedAt,
 } from "@/redux/slices/game/game-selectors"
 import playSound from "@/features/gameplay/utils/play-sound"
+import { selectIsSoundEnabled } from "@/redux/slices/settings/settings-selectors"
 // import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 // import { updateTimings } from "@/redux/slices/game/game-slice"
 
@@ -24,14 +25,16 @@ export default function Template({ children }: { children: ReactNode }) {
     // const currentTurn = useAppSelector(selectCurrentPlayer)
     // const lastMoveAt = useAppSelector(selectLastMoveAt)
     const gameStartedAt = useAppSelector(selectGameStartedAt)
+    const gameStart = useAppSelector(selectIsSoundEnabled('gameStart'))
+    const gameEnd = useAppSelector(selectIsSoundEnabled('gameEnd'))
 
     useEffect(() => {
-        if (gameStartedAt && gameStartedAt <= Date.now() ) {
+        if (gameStart && gameStartedAt && gameStartedAt <= Date.now() ) {
             playSound("game-start")
-        } else if (isGameOver) {
+        } else if (gameEnd && isGameOver) {
             playSound("game-end")
         }
-    }, [isGameOver,gameStartedAt])
+    }, [isGameOver,gameStartedAt,gameStart,gameEnd])
 
 
     // Premoves Processor
