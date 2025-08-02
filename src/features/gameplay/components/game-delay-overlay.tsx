@@ -8,19 +8,15 @@ export default function GameDelayOverlay({
     gameStartedAt: number | null
     onComplete?: () => void
 }) {
-    // const delayMs = useMemo(
-    //     () => (gameStartedAt ? Math.max(0, gameStartedAt - Date.now()) : 0),
-    //     [gameStartedAt]
-    // )
-
-    const [timeLeftMs, setTimeLeftMs] = useState(3000)
-    const [isVisible, setIsVisible] = useState(true)
+    function getDelay() {
+        return gameStartedAt ? Math.max(0, gameStartedAt - Date.now()) : 0
+    }
+    const [timeLeftMs, setTimeLeftMs] = useState(getDelay())
+    const [isVisible, setIsVisible] = useState(getDelay()>0)
 
     // Sync with prop changes
     useEffect(() => {
-        const delayMs = gameStartedAt
-            ? Math.max(0, gameStartedAt - Date.now())
-            : 0
+        const delayMs = getDelay()
         console.log("delay : ", delayMs)
 
         if (delayMs > 0) {
@@ -36,17 +32,17 @@ export default function GameDelayOverlay({
             setTimeLeftMs((prev) => {
                 if (prev <= 100) {
                     setIsVisible(false)
-                    setTimeout(onComplete, 500) // Small delay for exit animation
+                    setTimeout(onComplete, 200) // Small delay for exit animation
                     return 0
                 }
                 return prev - 100
             })
-        }, 100) // Update every 100ms for precision
+        }, 100) 
 
         return () => clearInterval(interval)
     }, [isVisible, onComplete])
 
-    // Display seconds (rounded up for better UX)
+    
     const displaySeconds = Math.ceil(timeLeftMs / 1000)
 
     return (

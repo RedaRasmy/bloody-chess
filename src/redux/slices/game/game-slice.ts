@@ -170,7 +170,7 @@ const gameSlice = createSlice({
                 isPlayerTurn: state.playerColor === "w",
                 timerOption,
                 playerColor ,
-                gameStartedAt: Date.now() + 3000 ,
+                gameStartedAt: Date.now() ,
                 players: {
                     white: {
                         capturedPieces: initialCaputeredPieces.w,
