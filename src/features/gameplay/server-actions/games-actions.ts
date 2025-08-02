@@ -5,10 +5,18 @@ import { games } from "@/db/schema"
 import { ChessTimerOption } from "@/features/gameplay/types"
 import { eq } from "drizzle-orm"
 import parseTimerOption from "../utils/parse-timer-option"
-import { FullGame, GameStatus, NewGame, StartedGame } from "@/db/types"
+import { FullGame, GameStatus, NewGame ,MatchedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
 import { getPlayer } from "./player-actions"
 import { Color, Square } from "chess.js"
+
+
+export async function getGameById(id:string) {
+    const game = await db.query.games.findFirst({
+        where : (games,{eq}) => eq(games.id,id)
+    })
+    return game
+}
 
 /// check if there is a player waiting -> start if yes
 export async function matchGameIfExist({
@@ -46,7 +54,7 @@ export async function matchGameIfExist({
             ...startedGame,
             createdAt: startedGame.createdAt.getTime(),
             updatedAt: startedGame.updatedAt.getTime(),
-        } as StartedGame
+        } as MatchedGame
     }
 }
 
