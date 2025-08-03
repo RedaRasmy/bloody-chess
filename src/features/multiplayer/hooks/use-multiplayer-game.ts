@@ -1,22 +1,19 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { supabase } from "@/utils/supabase/client"
 import { useEffect, useState } from "react"
 import { MoveType } from "../../gameplay/types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import {
-    // correctTimers,
     move as localMove,
     rollback,
     updateTimings,
 } from "@/redux/slices/game/game-slice"
-import { FinishedGame, Game, SMove, StartedGame } from "@/db/types"
+import { FinishedGame, Game, GameStatus, SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../../gameplay/server-actions/moves-actions"
 import {
     getFullGame,
     sendResign,
     sendTimeOut,
     startGame,
-    // updateGameStatus,
 } from "../../gameplay/server-actions/games-actions"
 import usePlayer from "./use-player"
 import {
@@ -29,6 +26,9 @@ import { Chess, Color } from "chess.js"
 import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
 import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
+import { useSupabaseChannel } from "./use-supabase-channel"
+
+// Flow : setup , subscribe to channel -> ready1 -> ready2 -> delay 3s -> play
 
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
@@ -38,12 +38,49 @@ export const useMultiplayerGame = (gameId: string) => {
     const [isLoading, setIsLoading] = useState(true)
     const [newGame, setNewGame] = useState<Game | null>(null)
     const [newMove, setNewMove] = useState<SMove | null>(null)
+    const [gameStatus, setGameStatus] = useState<GameStatus>("matching")
     const timerOption = useAppSelector(selectTimerOption)
     const isMovesSoundEnabled = useAppSelector(selectIsMovesSoundsEnabled)
     const fen = useAppSelector(selectFEN)
-    
+
+    // Setup channel subscription
+    const { isSubscribed, connectionStatus } = useSupabaseChannel({
+        channelName: `game:${gameId}`,
+        subscriptions: [
+            {
+                config: {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "games",
+                    filter: `id=eq.${gameId}`,
+                },
+                callback: (payload) => {
+                    const newGame = supabaseToTypescript<Game>(payload.new)
+                    console.log("new game update received:", newGame)
+                    setNewGame(newGame)
+                },
+            },
+            {
+                config: {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "moves",
+                    filter: `game_id=eq.${gameId}`,
+                },
+                callback: (payload) => {
+                    console.log("new move received")
+                    const newMove = supabaseToTypescript<SMove>(payload.new)
+                    setNewMove(newMove)
+                },
+            },
+        ],
+        onStatusChange: (status) => {
+            console.log("SUBSCRIPTION STATUS:", status)
+        },
+    })
+
     useEffect(() => {
-        // only for initial sync ( there is no lastMove ) or resignaton/timeout
+        // only for initial sync ( there is no lastMove ) or resignation/timeout
         if (newGame && !isLoading) {
             const { status, lastMoveAt, gameOverReason } = newGame
             if (
@@ -60,7 +97,7 @@ export const useMultiplayerGame = (gameId: string) => {
         if (newGame && newMove) {
             console.log("[✔] Both game + move received.")
             if (newMove.playerColor !== playerColor) {
-                console.log("run other player move :", newMove)
+                console.log("run other player move:", newMove)
                 dispatch(
                     localMove({
                         from: newMove.from,
@@ -72,9 +109,9 @@ export const useMultiplayerGame = (gameId: string) => {
                 if (isMovesSoundEnabled) {
                     const chess = new Chess(fen)
                     const validatedMove = chess.move({
-                        from : newMove.from,
-                        to : newMove.to,
-                        promotion : newMove.promotion ?? undefined
+                        from: newMove.from,
+                        to: newMove.to,
+                        promotion: newMove.promotion ?? undefined,
                     })
                     playMoveSound(validatedMove, chess.isCheck())
                 }
@@ -86,10 +123,10 @@ export const useMultiplayerGame = (gameId: string) => {
 
     useEffect(() => {
         console.log("player.type =", player.type)
-        if (player.type !== "loading") {
+        if (player.type !== "loading" && isSubscribed) {
             const { data } = player
             async function setState() {
-                console.log("setuping the game ...")
+                console.log("setting up the game...")
                 const game = await getFullGame(gameId)
                 dispatch(
                     setup({
@@ -99,57 +136,22 @@ export const useMultiplayerGame = (gameId: string) => {
                 )
                 setIsLoading(false)
                 console.log("setup done")
-                if (game.status === "preparing") {
-                    console.log("send ready...")
-                    const playerColor = game.whiteId === data.id ? "w" : "b"
-                    await startGame(gameId, playerColor)
-                    console.log("ready sent")
-                }
+                setGameStatus(game.status)
             }
             setState()
         }
-    }, [player.type])
+    }, [player.type, isSubscribed])
 
     useEffect(() => {
-        // Subscribe to game updates
-        const channel = supabase
-            .channel(`game:${gameId}`)
-            .on(
-                "postgres_changes",
-                {
-                    event: "UPDATE",
-                    schema: "public",
-                    table: "games",
-                    filter: `id=eq.${gameId}`,
-                },
-                (payload) => {
-                    const newGame = supabaseToTypescript<Game>(payload.new)
-                    console.log("new game update received : ", newGame)
-                    setNewGame(newGame)
-                }
-            )
-            .on(
-                "postgres_changes",
-                {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "moves",
-                    filter: `game_id=eq.${gameId}`,
-                },
-                (payload) => {
-                    console.log("new move received")
-                    const newMove = supabaseToTypescript<SMove>(payload.new)
-                    setNewMove(newMove)
-                }
-            )
-            .subscribe((status) => {
-                console.log("SUBSCRIPTION STATUS : ", status)
-            })
-
-        return () => {
-            supabase.removeChannel(channel)
+        if (!isLoading && gameStatus === "preparing" && isSubscribed) {
+            async function ready() {
+                console.log("send ready...")
+                await startGame(gameId, playerColor)
+                console.log("ready sent")
+            }
+            ready()
         }
-    }, [gameId])
+    }, [isLoading, isSubscribed,gameStatus])
 
     const move = async (mv: MoveType) => {
         try {
@@ -181,6 +183,7 @@ export const useMultiplayerGame = (gameId: string) => {
             }
         }
     }
+
     async function resign() {
         try {
             await sendResign(gameId, playerColor)
@@ -188,11 +191,11 @@ export const useMultiplayerGame = (gameId: string) => {
             console.error(error)
         }
     }
+
     async function timeOut(opponentColor: Color) {
         try {
             // each client check only their opponent timer
             // to prevent race conditions
-
             await sendTimeOut(gameId, opponentColor)
         } catch (error) {
             console.error(error)
@@ -206,5 +209,7 @@ export const useMultiplayerGame = (gameId: string) => {
         isSetuping: isLoading,
         resign,
         timeOut,
+        isSubscribed,
+        connectionStatus,
     }
 }
