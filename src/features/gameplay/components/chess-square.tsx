@@ -31,10 +31,17 @@ export default function ChessSquare({
                     "bg-red-500/50": isPreMove && color == "b",
                 }
             )}
-            onClick={() => onClick(squareName)}
+            onClick={() => {
+                if (!isTarget) onClick(squareName)
+            }}
         >
             {isTarget && (
-                <div className=" lg:size-6 size-5 bg-gray-500/60 rounded-full z-20 absolute " />
+                <div
+                    onClick={() => onClick(squareName)}
+                    className="z-20 absolute flex justify-center items-center w-full h-full"
+                >
+                    <div className=" lg:size-6 size-5 bg-gray-500/60 rounded-full " />
+                </div>
             )}
         </div>
     )
