@@ -105,10 +105,7 @@ export default function useChessBoard({
         /// prevent unnecesasry calculations :
         // if not a player's piece
         if (piece.color !== playerColor) return
-        // if it's the same piece
-        // if (piece.square === activePiece?.square) {
-        //     return
-        // }
+
         dispatch(select(piece))
     }
 

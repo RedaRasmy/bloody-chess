@@ -92,7 +92,7 @@ export default function ChessBoard({
                     if (piecesToShow && boardWidth) {
                         return (
                             <ChessPiece
-                                idle={isIdle}
+                                idle={isIdle || allowedSquares.includes(piece.square)}
                                 animated={animatedMoves}
                                 durationMs={durationMs}
                                 reversed={playerColor === "b"}
