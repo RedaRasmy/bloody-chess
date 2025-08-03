@@ -10,6 +10,7 @@ import {
     selectLastMove,
     selectPieces,
     selectFEN,
+    selectIsGameOver,
 } from "@/redux/slices/game/game-selectors"
 import getSquares from "../utils/get-squares"
 import { BoardElement, MoveType } from "../types"
@@ -19,6 +20,7 @@ import { move, select } from "@/redux/slices/game/game-slice"
 import { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { playMoveSound } from "../utils/play-move-sound"
 import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
+import safeMove from "../utils/safe-move"
 
 export default function useChessBoard({
     onMoveEnd,
@@ -33,6 +35,7 @@ export default function useChessBoard({
     const lastMove = useAppSelector(selectLastMove)
     const pieces = useAppSelector(selectPieces)
     const fen = useAppSelector(selectFEN)
+    const isGameOver = useAppSelector(selectIsGameOver)
     const isMovesSoundEnabled = useAppSelector(selectIsMovesSoundsEnabled)
 
     const [isPromoting, setIsPromoting] = useState(false)
@@ -45,7 +48,7 @@ export default function useChessBoard({
     const squares = getSquares(playerColor === "b")
 
     async function promote(promotion: string) {
-        if (!activePiece || !targetSquare) return
+        if (isGameOver || !activePiece || !targetSquare) return
 
         const mv = {
             from: activePiece.square,
@@ -58,8 +61,8 @@ export default function useChessBoard({
         setTargetSquare(null)
         if (isMovesSoundEnabled) {
             const chess = new Chess(fen)
-            const validatedMove = chess.move(mv)
-            playMoveSound(validatedMove, chess.isCheck())
+            const validatedMove = safeMove(chess, mv)
+            if (validatedMove) playMoveSound(validatedMove, chess.isCheck())
         }
         await onMoveEnd?.(mv)
     }
@@ -68,7 +71,7 @@ export default function useChessBoard({
         // clicking a square should only : cancel a move or play a move
 
         if (activePiece && allowedSquares.length > 0) {
-            if (allowedSquares.includes(square)) {
+            if (!isGameOver && allowedSquares.includes(square)) {
                 const isPromotionMove =
                     promotionRank(playerColor) === rank(square) &&
                     activePiece.type === "p"
@@ -83,8 +86,9 @@ export default function useChessBoard({
                     dispatch(move(mv))
                     if (isMovesSoundEnabled) {
                         const chess = new Chess(fen)
-                        const validatedMove = chess.move(mv)
-                        playMoveSound(validatedMove, chess.isCheck())
+                        const validatedMove = safeMove(chess, mv)
+                        if (validatedMove)
+                            playMoveSound(validatedMove, chess.isCheck())
                     }
                     await onMoveEnd?.(mv)
                 }
@@ -108,7 +112,7 @@ export default function useChessBoard({
     }
 
     async function drop(event: DragEndEvent) {
-        if (!activePiece) return
+        if (!activePiece || isGameOver) return
 
         const { over } = event
 
@@ -131,32 +135,34 @@ export default function useChessBoard({
                     dispatch(move(mv))
                     if (isMovesSoundEnabled) {
                         const chess = new Chess(fen)
-                        const validatedMove = chess.move(mv)
-                        playMoveSound(validatedMove, chess.isCheck())
+                        const validatedMove = safeMove(chess, mv)
+                        if (validatedMove)
+                            playMoveSound(validatedMove, chess.isCheck())
                     }
                     await onMoveEnd?.(mv)
                 }
             }
-        } else { // TODO: premoves
-            const isPromotionMove =
-                promotionRank(playerColor) === rank(targetSquare) &&
-                activePiece.type === "p"
-            if (isPromotionMove) {
-                setTargetSquare(targetSquare)
-                setIsPromoting(true)
-            } else {
-                const mv = {
-                    from: activePiece.square,
-                    to: targetSquare,
-                }
-                dispatch(move(mv))
-                if (isMovesSoundEnabled) {
-                    const chess = new Chess(fen)
-                    const validatedMove = chess.move(mv)
-                    playMoveSound(validatedMove, chess.isCheck())
-                }
-                await onMoveEnd?.(mv)
-            }
+        } else {
+            // TODO: premoves
+            // const isPromotionMove =
+            //     promotionRank(playerColor) === rank(targetSquare) &&
+            //     activePiece.type === "p"
+            // if (isPromotionMove) {
+            //     setTargetSquare(targetSquare)
+            //     setIsPromoting(true)
+            // } else {
+            //     const mv = {
+            //         from: activePiece.square,
+            //         to: targetSquare,
+            //     }
+            //     dispatch(move(mv))
+            //     if (isMovesSoundEnabled) {
+            //         const chess = new Chess(fen)
+            //         const validatedMove = chess.move(mv)
+            //         playMoveSound(validatedMove, chess.isCheck())
+            //     }
+            //     await onMoveEnd?.(mv)
+            // }
         }
     }
 
