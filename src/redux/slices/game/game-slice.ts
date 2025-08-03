@@ -191,6 +191,10 @@ const gameSlice = createSlice({
             const piece = action.payload
             state.activePiece = piece
         },
+        unselect: (state) => {
+            state.activePiece = null
+        },
+        
     },
     extraReducers: (builder) => {
         builder
@@ -212,6 +216,7 @@ export const {
     redo,
     undoToStart,
     redoToEnd,
+    unselect
 } = gameSlice.actions
 
 export default gameSlice.reducer

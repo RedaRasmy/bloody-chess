@@ -16,7 +16,7 @@ import getSquares from "../utils/get-squares"
 import { BoardElement, MoveType } from "../types"
 import { promotionRank } from "../utils/promotion-rank"
 import { rank } from "../utils/rank-file"
-import { move, select } from "@/redux/slices/game/game-slice"
+import { move, select, unselect } from "@/redux/slices/game/game-slice"
 import { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { playMoveSound } from "../utils/play-move-sound"
 import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
@@ -94,6 +94,7 @@ export default function useChessBoard({
                 }
             } else {
                 // cancel move , active piece should return to null
+                dispatch(unselect())
             }
         }
     }
