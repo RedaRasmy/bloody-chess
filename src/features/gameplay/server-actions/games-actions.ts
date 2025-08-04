@@ -5,15 +5,14 @@ import { games } from "@/db/schema"
 import { ChessTimerOption } from "@/features/gameplay/types"
 import { eq } from "drizzle-orm"
 import parseTimerOption from "../utils/parse-timer-option"
-import { FullGame, GameStatus, NewGame ,MatchedGame } from "@/db/types"
+import { FullGame, GameStatus, NewGame, MatchedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
 import { getPlayer } from "./player-actions"
 import { Color, Square } from "chess.js"
 
-
-export async function getGameById(id:string) {
+export async function getGameById(id: string) {
     const game = await db.query.games.findFirst({
-        where : (games,{eq}) => eq(games.id,id)
+        where: (games, { eq }) => eq(games.id, id),
     })
     return game
 }
@@ -206,9 +205,6 @@ export async function startGame(gameId: string, playerColor: Color) {
 
         await tx.update(games).set(updates).where(eq(games.id, gameId))
     })
-
-
-
 }
 
 export async function updateGameStatus(gameId: string, status: GameStatus) {
@@ -216,6 +212,17 @@ export async function updateGameStatus(gameId: string, status: GameStatus) {
         .update(games)
         .set({
             status,
+        })
+        .where(eq(games.id, gameId))
+}
+
+export async function drawAction(gameId:string) {
+    await db
+        .update(games)
+        .set({
+            status: "finished",
+            gameOverReason: "Agreement",
+            result: "draw",
         })
         .where(eq(games.id, gameId))
 }

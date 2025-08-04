@@ -1,0 +1,1 @@
+ALTER TYPE "public"."gameover_reason" ADD VALUE 'Agreement';

@@ -10,16 +10,15 @@ import Link from "next/link";
 
 export default function MultiplayerController({
     onResign,
-    // onReplayOffer,
-    // onDrawOffer
+    onRematchOffer,
+    onDrawOffer
 }:{
     onResign?: () => Promise<void>
-    // onReplayOffer?: () => Promise<void>
-    // // onDrawOffer?: () => Promise<void>
+    onRematchOffer?: () => Promise<void>
+    onDrawOffer?: () => Promise<void>
 }) {
     const dispatch = useAppDispatch()
     const isGameOver = useAppSelector(selectIsGameOver)
-    // const { isUndoable, isRedoable } = useAppSelector(selectIsUndoRedoable)
 
     async function handleResign() {
         dispatch(resign())
@@ -28,14 +27,14 @@ export default function MultiplayerController({
 
     const {undo, redo, undoToStart, redoToEnd} = useHistoryController()
     
-    // async function handleReplay() {
-    //     dispatch(resign())
-    //     await onResign?.()
-    // }
-    // async function handleDrawOffer() {
-    //     dispatch(resign())
-    //     await onResign?.()
-    // }
+    async function handleRematch() {
+        await onRematchOffer?.()
+    }
+
+    async function handleDrawOffer() {
+        console.log('click offer draw')
+        await onDrawOffer?.()
+    }
 
     return (
         <div className="bg-gray-300 py-3 lg:py-5 flex flex-col gap-5 lg:gap-8 justify-center items-center landscape:min-w-[20%] landscape:lg:w-[30%] landscape:xl:w-[30%]  portrait:h-full  border-l-1 border-black/30 ">
@@ -52,15 +51,17 @@ export default function MultiplayerController({
                 <Button
                     className="cursor-pointer w-full font-semibold"
                     variant={"outline"}
-                    disabled
+                    onClick={handleRematch}
+                    disabled={!isGameOver}
                 >
                     <RotateCcw />
-                    Replay
+                    Rematch
                 </Button>
                 <Button
                     className="cursor-pointer w-full font-semibold"
                     variant={"outline"}
-                    disabled
+                    onClick={handleDrawOffer}
+                    disabled={isGameOver}
                 >
                     <Handshake />
                     Draw

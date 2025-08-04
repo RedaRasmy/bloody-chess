@@ -25,5 +25,5 @@ export const GAMEOVER_REASONS = [
     "Stalemate",
     "Threefold repetition",
     "Resignation",
-    // To add later : "Agreement"
+    "Agreement"
 ] as const

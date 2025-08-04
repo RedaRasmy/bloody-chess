@@ -10,19 +10,17 @@ import {
 import { Button } from "@/components/ui/button"
 
 export default function RematchDialog({
-    defaultOpen = false,
     isOpen = true ,
     onAccept,
     onReject
 }:{
-    defaultOpen?: boolean
     isOpen?: boolean
     onAccept : () => void
     onReject : () => void
 }) {
 
     if (isOpen) return (
-        <Dialog defaultOpen={defaultOpen} onOpenChange={(open)=>{
+        <Dialog defaultOpen onOpenChange={(open)=>{
             // reject on close
             if (!open) {
                 onReject()
@@ -35,7 +33,7 @@ export default function RematchDialog({
                     </DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
-                <div>
+                <div className="flex items-center justify-center w-full gap-2">
                     <Button
                         onClick={onAccept}
                     >

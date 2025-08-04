@@ -16,7 +16,7 @@ export const selectGameOverData = createSelector(
     (gameOver, playerColor) => ({
         isGameOver: gameOver.isGameOver,
         isDraw: gameOver.isDraw,
-        isWin: gameOver.winner === playerColor,
+        isWin: gameOver.winner ? gameOver.winner === playerColor : null,
         reason: gameOver.reason,
     })
 )

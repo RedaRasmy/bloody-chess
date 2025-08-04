@@ -3,16 +3,14 @@ import { useState, useEffect } from "react"
 
 export default function GameDelayOverlay({
     gameStartedAt,
-    onComplete = () => {},
 }: {
     gameStartedAt: number | null
-    onComplete?: () => void
 }) {
     function getDelay() {
-        return gameStartedAt ? Math.max(0, gameStartedAt - Date.now()) : 0
+        return gameStartedAt ? Math.max(0, gameStartedAt - Date.now() - 300 ) : 0
     }
     const [timeLeftMs, setTimeLeftMs] = useState(getDelay())
-    const [isVisible, setIsVisible] = useState(getDelay()>0)
+    const [isVisible, setIsVisible] = useState(getDelay() > 0)
 
     // Sync with prop changes
     useEffect(() => {
@@ -32,17 +30,15 @@ export default function GameDelayOverlay({
             setTimeLeftMs((prev) => {
                 if (prev <= 100) {
                     setIsVisible(false)
-                    setTimeout(onComplete, 200) // Small delay for exit animation
                     return 0
                 }
                 return prev - 100
             })
-        }, 100) 
+        }, 100)
 
         return () => clearInterval(interval)
-    }, [isVisible, onComplete])
+    }, [isVisible])
 
-    
     const displaySeconds = Math.ceil(timeLeftMs / 1000)
 
     return (
@@ -52,6 +48,9 @@ export default function GameDelayOverlay({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
+                    transition={{
+                        duration: 0.3,
+                    }}
                     className="absolute inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-xs"
                 >
                     <motion.div

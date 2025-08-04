@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { MoveType } from "../../gameplay/types"
 import { setup, sync } from "@/redux/slices/multiplayer/multiplayer-slice"
 import {
@@ -10,6 +10,7 @@ import {
 import { FinishedGame, Game, GameStatus, SMove, StartedGame } from "@/db/types"
 import { makeMove } from "../../gameplay/server-actions/moves-actions"
 import {
+    drawAction,
     getFullGame,
     sendResign,
     sendTimeOut,
@@ -28,134 +29,196 @@ import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-sel
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 import { useSupabaseChannel } from "./use-supabase-channel"
 
-// Flow : setup , subscribe to channel -> ready1 -> ready2 -> delay 3s -> play
-
 export const useMultiplayerGame = (gameId: string) => {
     const dispatch = useAppDispatch()
     const multiplayerState = useAppSelector((state) => state.multiplayer)
     const playerColor = useAppSelector(selectPlayerColor)
     const player = usePlayer()
     const [isLoading, setIsLoading] = useState(true)
-    const [newGame, setNewGame] = useState<Game | null>(null)
-    const [newMove, setNewMove] = useState<SMove | null>(null)
     const [gameStatus, setGameStatus] = useState<GameStatus>("matching")
     const timerOption = useAppSelector(selectTimerOption)
     const isMovesSoundEnabled = useAppSelector(selectIsMovesSoundsEnabled)
     const fen = useAppSelector(selectFEN)
+    const [isOpponentOffersDraw, setIsOpponentOffersDraw] = useState(false)
+    const [isOpponentOffersRematch, setIsOpponentOffersRematch] = useState(false)
 
-    // Setup channel subscription
-    const { isSubscribed, connectionStatus } = useSupabaseChannel({
-        channelName: `game:${gameId}`,
-        subscriptions: [
-            {
-                config: {
-                    event: "UPDATE",
-                    schema: "public",
-                    table: "games",
-                    filter: `id=eq.${gameId}`,
-                },
-                callback: (payload) => {
-                    const newGame = supabaseToTypescript<Game>(payload.new)
-                    console.log("new game update received:", newGame)
-                    setNewGame(newGame)
-                },
-            },
-            {
-                config: {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "moves",
-                    filter: `game_id=eq.${gameId}`,
-                },
-                callback: (payload) => {
-                    console.log("new move received")
-                    const newMove = supabaseToTypescript<SMove>(payload.new)
-                    setNewMove(newMove)
-                },
-            },
-        ],
-        onStatusChange: (status) => {
-            console.log("SUBSCRIPTION STATUS:", status)
-        },
-    })
+    // Use refs to track the latest values without causing re-renders
+    const playerColorRef = useRef(playerColor)
+    const fenRef = useRef(fen)
+    const isMovesSoundEnabledRef = useRef(isMovesSoundEnabled)
+    const isLoadingRef = useRef(isLoading)
+
+    // Update refs when values change
+    useEffect(() => {
+        playerColorRef.current = playerColor
+    }, [playerColor])
 
     useEffect(() => {
-        // only for initial sync ( there is no lastMove ) or resignation/timeout
-        if (newGame && !isLoading) {
+        fenRef.current = fen
+    }, [fen])
+
+    useEffect(() => {
+        isMovesSoundEnabledRef.current = isMovesSoundEnabled
+    }, [isMovesSoundEnabled])
+
+    useEffect(() => {
+        isLoadingRef.current = isLoading
+    }, [isLoading])
+
+    const handleGameUpdate = useCallback((payload: any) => {
+        const newGame = supabaseToTypescript<Game>(payload.new)
+        console.log("new game update received:", newGame)
+        
+        // Only process if not loading to prevent infinite loops
+        if (!isLoadingRef.current) {
             const { status, lastMoveAt, gameOverReason } = newGame
             if (
                 (status === "playing" && lastMoveAt === null) ||
-                (gameOverReason &&
-                    ["Resignation", "Timeout"].includes(gameOverReason))
+                (gameOverReason && ["Resignation", "Timeout","Agreement"].includes(gameOverReason))
             ) {
                 dispatch(sync(newGame as FinishedGame | StartedGame))
             }
         }
-    }, [newGame, isLoading])
+    }, [dispatch])
 
-    useEffect(() => {
-        if (newGame && newMove) {
-            console.log("[✔] Both game + move received.")
-            if (newMove.playerColor !== playerColor) {
-                console.log("run other player move:", newMove)
-                dispatch(
-                    localMove({
-                        from: newMove.from,
-                        to: newMove.to,
-                        promotion: newMove.promotion || undefined,
-                    })
-                )
-                // Move sound
-                if (isMovesSoundEnabled) {
-                    const chess = new Chess(fen)
-                    const validatedMove = chess.move({
-                        from: newMove.from,
-                        to: newMove.to,
-                        promotion: newMove.promotion ?? undefined,
-                    })
-                    playMoveSound(validatedMove, chess.isCheck())
-                }
-                dispatch(sync(newGame as FinishedGame | StartedGame))
+    const handleMoveUpdate = useCallback((payload: any) => {
+        console.log("new move received")
+        const newMove = supabaseToTypescript<SMove>(payload.new)
+        
+        // Process move immediately if it's from opponent
+        if (newMove.playerColor !== playerColorRef.current) {
+            console.log("run other player move:", newMove)
+            dispatch(
+                localMove({
+                    from: newMove.from,
+                    to: newMove.to,
+                    promotion: newMove.promotion || undefined,
+                })
+            )
+            
+            // Move sound
+            if (isMovesSoundEnabledRef.current) {
+                const chess = new Chess(fenRef.current)
+                const validatedMove = chess.move({
+                    from: newMove.from,
+                    to: newMove.to,
+                    promotion: newMove.promotion ?? undefined,
+                })
+                playMoveSound(validatedMove, chess.isCheck())
             }
-            setNewMove(null)
         }
-    }, [newGame, newMove])
+    }, [dispatch])
 
+    const handleDrawOffer = useCallback((payload: any) => {
+        console.log('Draw offer received:', payload)
+        setIsOpponentOffersDraw(true)
+        console.log('the opponent offers draw')
+    }, [])
+
+    const handleRematchOffer = useCallback((payload: any) => {
+        console.log('Rematch offer received:', payload)
+        setIsOpponentOffersRematch(true)
+        console.log('the opponent offers rematch')
+    }, [])
+
+    const subscriptions = useMemo(() => [
+        {
+            type: "postgres_changes" as const,
+            config: {
+                event: "UPDATE" as const,
+                schema: "public",
+                table: "games",
+                filter: `id=eq.${gameId}`,
+            },
+            callback: handleGameUpdate,
+        },
+        {
+            type: "postgres_changes" as const,
+            config: {
+                event: "INSERT" as const,
+                schema: "public",
+                table: "moves",
+                filter: `game_id=eq.${gameId}`,
+            },
+            callback: handleMoveUpdate,
+        },
+        {
+            type: "broadcast" as const,
+            config: {
+                event: 'draw_offer'
+            },
+            callback: handleDrawOffer
+        },
+        {
+            type: "broadcast" as const,
+            config: {
+                event: 'rematch_offer'
+            },
+            callback: handleRematchOffer
+        },
+    ], [gameId, handleGameUpdate, handleMoveUpdate, handleDrawOffer, handleRematchOffer])
+
+    const { isSubscribed, connectionStatus, broadcast } = useSupabaseChannel({
+        channelName: `game:${gameId}`,
+        subscriptions,
+        onStatusChange: (status) => {
+            console.log("SUBSCRIPTION STATUS:", status)
+        }
+    })
+
+    // Initialize game setup - only run once when player is ready and subscribed
     useEffect(() => {
         console.log("player.type =", player.type)
-        if (player.type !== "loading" && isSubscribed) {
+        if (player.type !== "loading" && isSubscribed && isLoading) {
             const { data } = player
             async function setState() {
-                console.log("setting up the game...")
-                const game = await getFullGame(gameId)
-                dispatch(
-                    setup({
-                        game,
-                        playerId: data.id,
-                    })
-                )
-                setIsLoading(false)
-                console.log("setup done")
-                setGameStatus(game.status)
+                try {
+                    console.log("setting up the game...")
+                    const game = await getFullGame(gameId)
+                    dispatch(
+                        setup({
+                            game,
+                            playerId: data.id,
+                        })
+                    )
+                    setIsLoading(false)
+                    setGameStatus(game.status)
+                    console.log("setup done")
+                } catch (error) {
+                    console.error("Failed to setup game:", error)
+                    // Optionally retry or handle error
+                }
             }
             setState()
         }
-    }, [player.type, isSubscribed])
+    }, [player.type, isSubscribed, isLoading, gameId, dispatch])
 
+    // Handle ready state - only run when conditions are met
     useEffect(() => {
-        if (!isLoading && gameStatus === "preparing" && isSubscribed) {
+        if (!isLoading && gameStatus === "preparing" && isSubscribed && playerColor) {
+            let isCancelled = false
+            
             async function ready() {
-                console.log("send ready...")
-                await startGame(gameId, playerColor)
-                console.log("ready sent")
+                try {
+                    console.log("send ready...")
+                    await startGame(gameId, playerColor)
+                    if (!isCancelled) {
+                        console.log("ready sent")
+                    }
+                } catch (error) {
+                    console.error("Failed to send ready:", error)
+                }
             }
             ready()
+            
+            return () => {
+                isCancelled = true
+            }
         }
-    }, [isLoading, isSubscribed,gameStatus])
+    }, [isLoading, isSubscribed, gameStatus, playerColor, gameId])
 
     const move = async (mv: MoveType) => {
         try {
-            // Insert to Supabase
             await makeMove({
                 move: mv,
                 gameId,
@@ -163,14 +226,8 @@ export const useMultiplayerGame = (gameId: string) => {
         } catch (err) {
             console.error(err)
             dispatch(rollback())
-            if (newGame) {
-                const { status } = newGame
-                if (status === "playing" || status === "finished") {
-                    dispatch(sync(newGame as FinishedGame | StartedGame))
-                }
-            } else if (timerOption) {
-                // if there is no newGame so we are still in setup
-                // reset all timings to setup values
+            // Reset timings if needed
+            if (timerOption) {
                 const { base } = parseTimerOption(timerOption)
                 dispatch(
                     updateTimings({
@@ -184,23 +241,59 @@ export const useMultiplayerGame = (gameId: string) => {
         }
     }
 
-    async function resign() {
+    const resign = useCallback(async () => {
         try {
             await sendResign(gameId, playerColor)
         } catch (error) {
             console.error(error)
         }
-    }
+    }, [gameId, playerColor])
 
-    async function timeOut(opponentColor: Color) {
+    const timeOut = useCallback(async (opponentColor: Color) => {
         try {
-            // each client check only their opponent timer
-            // to prevent race conditions
             await sendTimeOut(gameId, opponentColor)
         } catch (error) {
             console.error(error)
         }
-    }
+    }, [gameId])
+
+    const sendDrawOffer = useCallback(async () => {
+        broadcast("draw_offer", {
+            fromPlayer: playerColor,
+            timestamp: Date.now(),
+        })
+    }, [broadcast, playerColor])
+
+    const sendRematchOffer = useCallback(async () => {
+        broadcast("rematch_offer", {
+            fromPlayer: playerColor,
+            timestamp: Date.now(),
+        })
+    }, [broadcast, playerColor])
+
+    const rejectDraw = useCallback(() => {
+        setIsOpponentOffersDraw(false)
+        console.log('reject draw offer')
+    }, [])
+
+    const rejectRematch = useCallback(() => {
+        setIsOpponentOffersRematch(false)
+    }, [])
+
+    const rematch = useCallback(async () => {
+        // Implementation needed
+    }, [])
+
+    const draw = useCallback(async () => {
+        try {
+            await drawAction(gameId)
+            setIsOpponentOffersDraw(false)
+        } catch (error) {
+            console.error("Failed to draw:", error)
+        }
+    }, [gameId])
+
+    console.log('state --- isOpponentOffersDraw :',isOpponentOffersDraw)
 
     return {
         multiplayerState,
@@ -211,5 +304,13 @@ export const useMultiplayerGame = (gameId: string) => {
         timeOut,
         isSubscribed,
         connectionStatus,
+        sendDrawOffer,
+        sendRematchOffer,
+        isOpponentOffersDraw,
+        isOpponentOffersRematch,
+        rejectDraw,
+        rejectRematch,
+        rematch,
+        draw
     }
 }
