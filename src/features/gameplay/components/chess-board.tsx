@@ -46,7 +46,7 @@ export default function ChessBoard({
     const piecesToShow = fen ? getPieces(fen) : pieces
     const lastMoveToShow = move ?? lastMove
 
-    const isIdle = fen !== undefined
+    const isIdle = fen !== undefined || gameStartedAt === null
 
     return (
         <DndContext
