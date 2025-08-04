@@ -57,7 +57,7 @@ export default function Page() {
                         onRematchOffer={sendRematchOffer}
                     />
                 }
-                gameOverPopUp={<MultiplayerGameOverDialog />}
+                gameOverPopUp={<MultiplayerGameOverDialog onRematch={sendDrawOffer} />}
             />
             <DrawDialog
                 onAccept={draw}
