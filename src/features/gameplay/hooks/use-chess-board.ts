@@ -48,7 +48,7 @@ export default function useChessBoard({
     const squares = getSquares(playerColor === "b")
 
     async function promote(promotion: string) {
-        if (isGameOver || !activePiece || !targetSquare) return
+        if (isGameOver || !isPlayerTurn || !activePiece || !targetSquare) return
 
         const mv = {
             from: activePiece.square,
@@ -71,7 +71,7 @@ export default function useChessBoard({
         // clicking a square should only : cancel a move or play a move
 
         if (activePiece && allowedSquares.length > 0) {
-            if (!isGameOver && allowedSquares.includes(square)) {
+            if (isPlayerTurn && !isGameOver && allowedSquares.includes(square) ) {
                 const isPromotionMove =
                     promotionRank(playerColor) === rank(square) &&
                     activePiece.type === "p"
