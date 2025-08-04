@@ -226,3 +226,36 @@ export async function drawAction(gameId:string) {
         })
         .where(eq(games.id, gameId))
 }
+
+export async function rematchAction({
+    whiteId ,
+    blackId ,
+    timerOption,
+    isForGuests,
+
+}:{
+    whiteId : string
+    blackId : string
+    timerOption : ChessTimerOption
+    isForGuests : boolean
+}) {
+
+    const {base} = parseTimerOption(timerOption)
+    const timeLeft = base*1000
+
+    const [newGame] = await db
+        .insert(games)
+        .values({
+
+            isForGuests,
+            timer : timerOption,
+            whiteId : blackId,
+            blackId : whiteId,
+            blackTimeLeft: timeLeft,
+            whiteTimeLeft: timeLeft,
+            status : 'preparing',
+        })
+        .returning()
+
+    return newGame
+}
