@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import StoreProvider from "@/components/providers/store-provider";
 import { getServerSession } from "next-auth";
 import SessionProvider from '@/components/providers/session-provider'
 import NavMenu from "@/components/nav-menu";
 import {NextIntlClientProvider , hasLocale } from 'next-intl';
-// import {getLocale} from 'next-intl/server';
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { ReactScan } from "@/components/react-scan";
