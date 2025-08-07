@@ -1,8 +1,10 @@
+// import { cn } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { ChessTimerOption } from "../types"
 import { TIMER_OPTIONS } from "../utils/constantes"
+import TimerOption from "./timer-option"
 
-type Props =
+type Props = (
     | {
           value: ChessTimerOption | null
           onChange: (option: ChessTimerOption | null) => void
@@ -13,46 +15,43 @@ type Props =
           onChange: (option: ChessTimerOption) => void
           required: true
       }
+) & {
+    className?: string
+}
 
 export default function SelectTimer({
     value,
     onChange,
     required = false,
+    className,
 }: Props) {
     const options = [...TIMER_OPTIONS]
 
-    const handleNoneClick = () => {
-        (onChange as (option: ChessTimerOption | null) => void)(null)
+    function handleClick(op: ChessTimerOption) {
+        if (required) {
+            onChange(op)
+        } else {
+            if (value === op) {
+                // set null if same option clicked twice
+                ;(onChange as (option: ChessTimerOption | null) => void)(null)
+            } else {
+                onChange(op)
+            }
+        }
     }
     return (
-        <div className="flex gap-3 flex-wrap">
-            <h1 className="">Timer : </h1>
-            {required === false && (
-                <div
-                    onClick={handleNoneClick}
-                    className={cn(
-                        "bg-gray-200 px-2 py-1 rounded-md cursor-pointer",
-                        {
-                            "bg-gray-400": value === null,
-                        }
-                    )}
-                >
-                    None
-                </div>
+        <div
+            className={cn(
+                "grid grid-cols-3 grid-rows-3 gap-2 lg:gap-4 ",
+                className
             )}
+        >
             {options.map((op) => (
-                <div
-                    onClick={() => onChange(op)}
-                    className={cn(
-                        "bg-gray-200 px-2 py-1 rounded-md cursor-pointer",
-                        {
-                            "bg-gray-400": value === op,
-                        }
-                    )}
-                    key={op}
-                >
-                    {op.split(" ")[1]}
-                </div>
+                <TimerOption
+                    onClick={() => handleClick(op)}
+                    option={op}
+                    isSelected={value === op}
+                />
             ))}
         </div>
     )
