@@ -18,5 +18,7 @@ export default async function SignInPage() {
     //     : []
 
 
-    return <SignInForm providers={[]} />
+    return <div className="flex justify-center items-center h-full">
+        <SignInForm providers={[]} />
+    </div>
 }

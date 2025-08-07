@@ -52,12 +52,14 @@ export default async function RootLayout({
                         <SessionProvider session={session}>
                             <SidebarProvider>
                                 <AppSidebar />
-                                <main className="w-full">
-                                    <div className="h-10 flex items-center px-2 justify-between">
+                                <main className="w-full flex flex-col h-full">
+                                    <div className="h-10 flex items-center px-2 justify-between sticky">
                                         <SidebarTrigger />
                                         <p className="text-muted-foreground">Welcome back, Player</p>
                                     </div>
-                                    {children}
+                                    <div className="px-3 md:px-5 lg:px-7 h-full">
+                                        {children}
+                                    </div>
                                 </main>
                             </SidebarProvider>
                         </SessionProvider>
