@@ -13,7 +13,7 @@ export default async function Home({
     const isMultiplayerDialogOpen = dialog === 'multiplayer'
 
     return (
-        <div className="flex h-full justify-center items-center bg-gray-200 w-full">
+        <div className="flex h-full justify-center items-center  w-full">
             <div className="flex flex-col gap-2 lg:gap-3 w-[min(90%,400px)]">
                 <MultiplayerOptionsDialog defaultOpen={isMultiplayerDialogOpen}/>
                 <BotOptionsDialog defaultOpen={isBotDialogOpen} />
