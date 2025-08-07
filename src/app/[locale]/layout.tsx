@@ -11,6 +11,7 @@ import { routing } from "@/i18n/routing"
 import { ReactScan } from "@/components/react-scan"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import Header from "@/components/header"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -52,15 +53,12 @@ export default async function RootLayout({
                         <SessionProvider session={session}>
                             <SidebarProvider>
                                 <AppSidebar />
-                                <main className="w-full flex flex-col h-full">
-                                    <div className="h-10 flex items-center px-2 justify-between sticky">
-                                        <SidebarTrigger />
-                                        <p className="text-muted-foreground">Welcome back, Player</p>
-                                    </div>
-                                    <div className="px-3 md:px-5 lg:px-7 h-full">
+                                <div className="w-full flex flex-col ">
+                                    <Header isAuthenticated={!!session?.user}/>
+                                    <main className="px-3 md:px-5 lg:px-7 overflow-auto h-full">
                                         {children}
-                                    </div>
-                                </main>
+                                    </main>
+                                </div>
                             </SidebarProvider>
                         </SessionProvider>
                     </NextIntlClientProvider>
