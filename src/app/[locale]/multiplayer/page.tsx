@@ -1,11 +1,5 @@
 "use client"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Timer, Users } from "lucide-react"
 import SelectTimer from "@/features/gameplay/components/select-timer"
@@ -49,7 +43,7 @@ export default function Multiplayer() {
                 </p>
             </div>
 
-            <Card className="">
+            <Card className="lg:mx-2 xl:mx-5 not-md:-space-y-2">
                 <CardHeader>
                     <div>
                         <h1 className="text-2xl font-semibold flex gap-3 items-center">
@@ -79,7 +73,6 @@ export default function Multiplayer() {
                                 />
                             </div>
                         </div>
-                        <div className="w-full"></div>
                         <div className="flex flex-col lg:flex-row-reverse gap-2">
                             {isSearching && (
                                 <Button

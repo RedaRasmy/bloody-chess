@@ -17,7 +17,7 @@ export default function TimerOption({
 
     const Icon = type === 'bullet' ? Zap : type === 'blitz' ? Clock : Coffee
   return (
-    <div className={cn('rounded-lg border-2 border-accent/50 cursor-pointer w-full lg:min-w-60 max-w-70 flex items-center gap-1 flex-col px-10 py-4 lg:py-6',{
+    <div className={cn('rounded-lg hover:bg-accent/10 px-10 md:px-15 lg:px-10 border-2 border-accent/50  cursor-pointer w-full max-w-70 flex items-center gap-1 flex-col  py-4 lg:py-6',{
         "border-primary bg-primary/30" : isSelected
     })}
         onClick={onClick}

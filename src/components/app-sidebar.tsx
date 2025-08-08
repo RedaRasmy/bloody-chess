@@ -53,9 +53,9 @@ export function AppSidebar() {
         {/* App Header */}
         <div className="p-4 border-b border-sidebar-border bg-background">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+            <div className="size-9 bg-gradient-primary rounded-lg flex items-center justify-center">
               {/* <Crown className="w-5 h-5 text-primary-foreground" /> */}
-              <Image src="/images/red-rook.png" alt="bloody-chess" width={50} height={50}/>
+              <Image src="/images/red-rook.png" alt="bloody-chess" width={100} height={100}/>
             </div>
             {!isCollapsed && (
               <div>
