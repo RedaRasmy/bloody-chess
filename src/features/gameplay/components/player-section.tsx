@@ -24,7 +24,7 @@ export default function PlayerSection({
     const image = undefined // for now
 
     return (
-        <div className="bg-gray-100 rounded-md flex items-center justify-between gap-2 px-2 py-1 h-fit w-full">
+        <div className="bg-accent/70 rounded-sm flex items-center justify-between gap-2 px-2 py-2 h-fit w-full">
             <div className="flex items-center gap-2">
                 <Avatar className="border-2 border-gray-300">
                     <AvatarImage src={image ?? "/images/default-avatar.jpg"} />

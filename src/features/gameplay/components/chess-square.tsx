@@ -24,7 +24,7 @@ export default function ChessSquare({
                 "bg-amber-100 flex justify-center items-center relative w-full h-full",
                 {
                     "bg-amber-100": color === "w",
-                    "bg-red-700": color === "b",
+                    "bg-accent": color === "b",
                     "bg-amber-400": isLastMove && color == "w",
                     "bg-amber-300": isLastMove && color == "b",
                     "bg-red-500/70": isPreMove && color == "w",

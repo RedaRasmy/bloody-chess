@@ -7,6 +7,7 @@ import useBotController from "@/features/bot/hooks/use-bot-controller"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
 import SelectColor from "@/features/gameplay/components/select-color"
+import Link from "next/link"
 
 export default function Multiplayer() {
     // const dispatch = useAppDispatch()
@@ -63,7 +64,9 @@ export default function Multiplayer() {
                                         Your Color
                                     </h1>
                                     <SelectColor
-                                        onChange={(color)=>setOptions({playerColor:color})}
+                                        onChange={(color) =>
+                                            setOptions({ playerColor: color })
+                                        }
                                         value={color}
                                     />
                                 </div>
@@ -72,7 +75,9 @@ export default function Multiplayer() {
                                 <h1 className="text-xl items-center font-semibold mb-4 lg:mb-6 flex gap-2 ">
                                     <Timer />
                                     Time Control
-                                    <span className="text-xs text-muted-foreground">(optional)</span>
+                                    <span className="text-xs text-muted-foreground">
+                                        (optional)
+                                    </span>
                                 </h1>
                                 <div className="flex items-center justify-center w-full flex-col">
                                     <SelectTimer
@@ -90,8 +95,9 @@ export default function Multiplayer() {
                                 className="w-full lg:max-w-xs py-5 cursor-pointer"
                                 onClick={start}
                                 variant={"outline"}
+                                asChild
                             >
-                                Start
+                                <Link href="/play/bot">Start</Link>
                             </Button>
                         </div>
                     </div>

@@ -11,7 +11,7 @@ export default function ChessBoardLayout({
     ChessBoard : ReactNode
 }) {
     return (
-        <div className="flex flex-col w-full max-w-[75vh] gap-1">
+        <div className="flex flex-col w-full max-w-[75vh] gap-2 ">
             {OpponentSection}
             {ChessBoard}
             {PlayerSection}

@@ -16,7 +16,7 @@ export default function BotController() {
     const { undo, redo, undoToStart, redoToEnd } = useHistoryController()
 
     return (
-        <div className="bg-gray-300 py-3 lg:py-5 flex flex-col gap-5 lg:gap-8 justify-center items-center landscape:min-w-[20%] landscape:lg:w-[30%] landscape:xl:w-[30%]  portrait:h-full  border-l-1 border-black/30 ">
+        <div className="bg-secondary py-3 lg:py-5 flex flex-col gap-5 lg:gap-8 justify-center items-center landscape:min-w-[20%] landscape:lg:w-[30%] landscape:xl:w-[30%]  portrait:h-full  border-l-1 border-black/30 ">
             <div className="grid grid-cols-2 px-2 lg:px-4 w-full gap-2 grid-rows-2 ">
                 <Button
                     disabled={isGameOver}
