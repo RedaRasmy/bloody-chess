@@ -25,7 +25,8 @@ export async function getHistory(playerId: string): Promise<PlayedGame[]> {
                 end
             `.as("color"),
         },
-        orderBy : (games,{desc}) => [desc(games.createdAt)]
+        orderBy : (games,{desc}) => [desc(games.createdAt)],
+        limit : 5
     })
 
     return history.map((game) => ({

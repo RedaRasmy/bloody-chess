@@ -54,7 +54,7 @@ export default async function RootLayout({
                             <SidebarProvider>
                                 <AppSidebar />
                                 <div className="w-full flex flex-col ">
-                                    <Header isAuthenticated={!!session?.user}/>
+                                    <Header isAuthenticated={!!session}/>
                                     <main className="px-3 md:px-5 lg:px-7 overflow-auto h-full">
                                         {children}
                                     </main>

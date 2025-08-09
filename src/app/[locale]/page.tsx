@@ -40,7 +40,7 @@ export default function Dashboard() {
                             asChild
                             size="lg"
                             variant="secondary"
-                            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                            className="bg-white/20 hover:bg-white/30 w-45 text-white border-white/30"
                         >
                             <Link href="/multiplayer">
                                 <Users className="w-5 h-5 mr-2" />
@@ -51,7 +51,7 @@ export default function Dashboard() {
                             asChild
                             size="lg"
                             variant="outline"
-                            className="border-white/50 text-white hover:bg-white/10"
+                            className="border-white/50 text-white w-45 hover:bg-white/10"
                         >
                             <Link href="/bot">
                                 <Bot className="w-5 h-5 mr-2" />

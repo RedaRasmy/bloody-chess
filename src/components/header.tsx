@@ -8,7 +8,7 @@ export default function Header({isAuthenticated}:{
     isAuthenticated : boolean
 }) {
     return (
-        <div className="min-h-10 flex items-center px-2 justify-between sticky py-3">
+        <div className="min-h-10 flex items-center pl-2 pr-4 justify-between sticky py-3">
             <SidebarTrigger />
             <div className="flex gap-2 md:gap-4">
                 {/* <LocaleSelect /> */}
