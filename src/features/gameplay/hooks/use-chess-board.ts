@@ -19,7 +19,7 @@ import { rank } from "../utils/rank-file"
 import { move, select, unselect } from "@/redux/slices/game/game-slice"
 import { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { playMoveSound } from "../utils/play-move-sound"
-import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
+import { selectIsMovesAudioEnabled } from "@/redux/slices/settings/settings-selectors"
 import safeMove from "../utils/safe-move"
 
 export default function useChessBoard({
@@ -36,7 +36,7 @@ export default function useChessBoard({
     const pieces = useAppSelector(selectPieces)
     const fen = useAppSelector(selectFEN)
     const isGameOver = useAppSelector(selectIsGameOver)
-    const isMovesSoundEnabled = useAppSelector(selectIsMovesSoundsEnabled)
+    const isMovesSoundEnabled = useAppSelector(selectIsMovesAudioEnabled)
 
     const [isPromoting, setIsPromoting] = useState(false)
     const [targetSquare, setTargetSquare] = useState<Square | null>(null)

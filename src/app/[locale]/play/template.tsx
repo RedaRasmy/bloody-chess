@@ -11,7 +11,7 @@ import {
     // selectGameStartedAt,
 } from "@/redux/slices/game/game-selectors"
 import playSound from "@/features/gameplay/utils/play-sound"
-import { selectIsSoundEnabled } from "@/redux/slices/settings/settings-selectors"
+import { selectIsAudioEnabled } from "@/redux/slices/settings/settings-selectors"
 // import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
 // import { updateTimings } from "@/redux/slices/game/game-slice"
 
@@ -25,8 +25,8 @@ export default function Template({ children }: { children: ReactNode }) {
     // const currentTurn = useAppSelector(selectCurrentPlayer)
     // const lastMoveAt = useAppSelector(selectLastMoveAt)
     const gameStartedAt = useAppSelector(selectGameStartedAt)
-    const gameStart = useAppSelector(selectIsSoundEnabled('gameStart'))
-    const gameEnd = useAppSelector(selectIsSoundEnabled('gameEnd'))
+    const gameStart = useAppSelector(selectIsAudioEnabled('gameStart'))
+    const gameEnd = useAppSelector(selectIsAudioEnabled('gameEnd'))
 
     useEffect(() => {
         if (gameStart && gameStartedAt && gameStartedAt <= Date.now() ) {

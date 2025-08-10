@@ -1,9 +1,9 @@
 "use server"
 
 import { db } from "@/db/drizzle"
-import { games } from "@/db/schema"
+import { games, players } from "@/db/schema"
 import { ChessTimerOption } from "@/features/gameplay/types"
-import { eq } from "drizzle-orm"
+import { eq, inArray, sql } from "drizzle-orm"
 import parseTimerOption from "../utils/parse-timer-option"
 import { FullGame, GameStatus, NewGame, MatchedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
@@ -133,7 +133,7 @@ export async function sendTimeOut(gameId: string, playerColor: Color) {
     /// i should protect this
     const updateData =
         playerColor === "w" ? { whiteTimeLeft: 0 } : { blackTimeLeft: 0 }
-    await db
+    const [{ isForGuests, whiteId, blackId }] = await db
         .update(games)
         .set({
             ...updateData,
@@ -142,12 +142,35 @@ export async function sendTimeOut(gameId: string, playerColor: Color) {
             result: playerColor === "w" ? "black_won" : "white_won",
         })
         .where(eq(games.id, gameId))
+        .returning()
+
+    // update players stats
+    if (!isForGuests) {
+        const winnerId = playerColor === "w" ? (blackId as string) : whiteId
+        const loserId = playerColor === "b" ? (blackId as string) : whiteId
+        // update winner
+        await db
+            .update(players)
+            .set({
+                gamesPlayed: sql`${players.gamesPlayed} +1`,
+                wins: sql`${players.wins} +1`,
+            })
+            .where(eq(players.id, winnerId))
+        // udpate loser
+        await db
+            .update(players)
+            .set({
+                gamesPlayed: sql`${players.gamesPlayed} +1`,
+                losses: sql`${players.losses} +1`,
+            })
+            .where(eq(players.id, loserId))
+    }
 }
 
 export async function sendResign(gameId: string, playerColor: Color) {
     /// i should protect this
 
-    await db
+    const [{ isForGuests, whiteId, blackId }] = await db
         .update(games)
         .set({
             status: "finished",
@@ -155,6 +178,29 @@ export async function sendResign(gameId: string, playerColor: Color) {
             result: playerColor === "w" ? "black_won" : "white_won",
         })
         .where(eq(games.id, gameId))
+        .returning()
+
+    // update players stats
+    if (!isForGuests) {
+        const winnerId = playerColor === "w" ? (blackId as string) : whiteId
+        const loserId = playerColor === "b" ? (blackId as string) : whiteId
+        // update winner
+        await db
+            .update(players)
+            .set({
+                gamesPlayed: sql`${players.gamesPlayed} +1`,
+                wins: sql`${players.wins} +1`,
+            })
+            .where(eq(players.id, winnerId))
+        // udpate loser
+        await db
+            .update(players)
+            .set({
+                gamesPlayed: sql`${players.gamesPlayed} +1`,
+                losses: sql`${players.losses} +1`,
+            })
+            .where(eq(players.id, loserId))
+    }
 }
 
 export async function startGame(gameId: string, playerColor: Color) {
@@ -216,8 +262,8 @@ export async function updateGameStatus(gameId: string, status: GameStatus) {
         .where(eq(games.id, gameId))
 }
 
-export async function drawAction(gameId:string) {
-    await db
+export async function drawAction(gameId: string) {
+    const [{ isForGuests, whiteId, blackId }] = await db
         .update(games)
         .set({
             status: "finished",
@@ -225,35 +271,44 @@ export async function drawAction(gameId:string) {
             result: "draw",
         })
         .where(eq(games.id, gameId))
+        .returning()
+
+    // update players stats
+    if (!isForGuests) {
+        await db
+            .update(players)
+            .set({
+                gamesPlayed: sql`${players.gamesPlayed} +1`,
+                draws: sql`${players.draws} +1`,
+            })
+            .where(inArray(players.id, [whiteId, blackId as string]))
+    }
 }
 
 export async function rematchAction({
-    whiteId ,
-    blackId ,
+    whiteId,
+    blackId,
     timerOption,
     isForGuests,
-
-}:{
-    whiteId : string
-    blackId : string
-    timerOption : ChessTimerOption
-    isForGuests : boolean
+}: {
+    whiteId: string
+    blackId: string
+    timerOption: ChessTimerOption
+    isForGuests: boolean
 }) {
-
-    const {base} = parseTimerOption(timerOption)
-    const timeLeft = base*1000
+    const { base } = parseTimerOption(timerOption)
+    const timeLeft = base * 1000
 
     const [newGame] = await db
         .insert(games)
         .values({
-
             isForGuests,
-            timer : timerOption,
-            whiteId : blackId,
-            blackId : whiteId,
+            timer: timerOption,
+            whiteId: blackId,
+            blackId: whiteId,
             blackTimeLeft: timeLeft,
             whiteTimeLeft: timeLeft,
-            status : 'preparing',
+            status: "preparing",
         })
         .returning()
 

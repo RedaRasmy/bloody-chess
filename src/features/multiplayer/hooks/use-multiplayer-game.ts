@@ -26,7 +26,7 @@ import {
 import { supabaseToTypescript } from "@/utils/snake_to_camel_case"
 import { Chess, Color } from "chess.js"
 import parseTimerOption from "@/features/gameplay/utils/parse-timer-option"
-import { selectIsMovesSoundsEnabled } from "@/redux/slices/settings/settings-selectors"
+import { selectIsMovesAudioEnabled } from "@/redux/slices/settings/settings-selectors"
 import { playMoveSound } from "@/features/gameplay/utils/play-move-sound"
 import { useSupabaseChannel } from "./use-supabase-channel"
 import { useRouter } from "next/navigation"
@@ -39,7 +39,7 @@ export const useMultiplayerGame = (gameId: string) => {
     const [isLoading, setIsLoading] = useState(true)
     const [gameStatus, setGameStatus] = useState<GameStatus>("matching")
     const timerOption = useAppSelector(selectTimerOption)
-    const isMovesSoundEnabled = useAppSelector(selectIsMovesSoundsEnabled)
+    const isMovesSoundEnabled = useAppSelector(selectIsMovesAudioEnabled)
     const fen = useAppSelector(selectFEN)
     const [isOpponentOffersDraw, setIsOpponentOffersDraw] = useState(false)
     const [isOpponentOffersRematch, setIsOpponentOffersRematch] =

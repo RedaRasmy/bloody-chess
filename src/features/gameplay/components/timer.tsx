@@ -3,7 +3,7 @@ import { useChessTimer } from "../hooks/use-chess-timer" // Adjust import path a
 import parseTimerOption from "../utils/parse-timer-option"
 import playSound from "../utils/play-sound"
 import { useEffect, useState } from "react"
-import { selectIsSoundEnabled } from "@/redux/slices/settings/settings-selectors"
+import { selectIsAudioEnabled } from "@/redux/slices/settings/settings-selectors"
 import { useAppSelector } from "@/redux/hooks"
 import { selectPlayerColor } from "@/redux/slices/game/game-selectors"
 
@@ -18,7 +18,7 @@ export default function Timer({ playerColor, onTimeOut }: TimerProps) {
         onTimeOut,
     })
     const clientColor = useAppSelector(selectPlayerColor)
-    const isAlertEnabled = useAppSelector(selectIsSoundEnabled("timeout"))
+    const isAlertEnabled = useAppSelector(selectIsAudioEnabled("timeout"))
 
     const isClient = clientColor === playerColor
 

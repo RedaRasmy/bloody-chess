@@ -32,7 +32,7 @@ export default function ProfileHeader({ username, gamesPlayed, wins }: Props) {
                             <span className="text-xl font-semibold">
                                 {wins === 0 || gamesPlayed === 0
                                     ? 0
-                                    : Math.round(wins / gamesPlayed)}
+                                    : Math.round(wins / gamesPlayed)*100}
                                 %
                             </span>
                         </div>

@@ -1,10 +1,10 @@
 "use server"
 
 import { db } from "@/db/drizzle"
-import { games, moves } from "@/db/schema"
+import { games, moves, players } from "@/db/schema"
 import { MoveType, PromotionPiece } from "../types"
 import { Chess } from "chess.js"
-import { eq } from "drizzle-orm"
+import { eq, inArray, sql } from "drizzle-orm"
 import { calculateTimeLeft } from "../utils/calculate-time-left"
 import { getGameoverCause } from "../utils/get-gameover-cause"
 import parseTimerOption from "../utils/parse-timer-option"
@@ -50,7 +50,6 @@ export async function makeMove({
 
     const { plus } = parseTimerOption(game.timer)
 
-
     const { whiteTimeLeft, blackTimeLeft } = calculateTimeLeft({
         blackTimeLeft: game.blackTimeLeft,
         whiteTimeLeft: game.whiteTimeLeft,
@@ -74,7 +73,7 @@ export async function makeMove({
     const isDraw = chess.isDraw()
 
     // Update game
-    await db
+    const [udpatedGame] = await db
         .update(games)
         .set({
             currentFen: chess.fen(),
@@ -99,6 +98,7 @@ export async function makeMove({
                 : null,
         })
         .where(eq(games.id, gameId))
+        .returning()
 
     /// Insert Move
     const newMoves = await db
@@ -118,6 +118,50 @@ export async function makeMove({
             isCheckmate: chess.isCheckmate(),
         })
         .returning()
+
+    // update players stats
+    if (udpatedGame.status === "finished" && !udpatedGame.isForGuests) {
+        const isDraw = udpatedGame.result === "draw"
+        if (isDraw) {
+            await db
+                .update(players)
+                .set({
+                    gamesPlayed: sql`${players.gamesPlayed} +1`,
+                    draws: sql`${players.draws} +1`,
+                })
+                .where(
+                    inArray(players.id, [
+                        udpatedGame.whiteId,
+                        udpatedGame.blackId as string,
+                    ])
+                )
+        } else {
+            const winnerId =
+                game.result === "white_won"
+                    ? game.whiteId
+                    : (game.blackId as string)
+            const loserId =
+                game.result === "white_won"
+                    ? (game.blackId as string)
+                    : game.whiteId
+            // update winner
+            await db
+                .update(players)
+                .set({
+                    gamesPlayed: sql`${players.gamesPlayed} +1`,
+                    wins: sql`${players.wins} +1`,
+                })
+                .where(eq(players.id, winnerId))
+            // udpate loser
+            await db
+                .update(players)
+                .set({
+                    gamesPlayed: sql`${players.gamesPlayed} +1`,
+                    losses: sql`${players.losses} +1`,
+                })
+                .where(eq(players.id, loserId))
+        }
+    }
 
     return { success: true, newMove: newMoves[0] }
 }
