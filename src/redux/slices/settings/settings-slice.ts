@@ -9,7 +9,7 @@ const initialState = {
             durationMs: 200,
         },
     },
-    sound: {
+    audio: {
         enabled: true as boolean,
         moves: true as boolean,
         gameStart : true as boolean,
@@ -19,7 +19,7 @@ const initialState = {
 } satisfies Settings
 
 
-type Sound = keyof typeof initialState['sound'] 
+type Sound = keyof typeof initialState['audio'] 
 
 const settings = createSlice({
     name: "settings",
@@ -45,7 +45,7 @@ const settings = createSlice({
         ) => {
             const sound = action.payload
 
-            state.sound[sound] = !state.sound[sound]
+            state.audio[sound] = !state.audio[sound]
         },
         reset : () => initialState
     },

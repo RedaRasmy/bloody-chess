@@ -23,11 +23,11 @@ export const selectAnimationSetting =
     (animationKey: SettingValue<"animation">) => (state: RootState) =>
         state.settings.animation[animationKey]
 
-export const selectSoundSettings = (state: RootState) => state.settings
+export const selectAudioSettings = (state: RootState) => state.settings.audio
 
-export const selectIsMovesSoundsEnabled = (state: RootState) =>
-    state.settings.sound.enabled && state.settings.sound.moves
+export const selectIsMovesAudioEnabled = (state: RootState) =>
+    state.settings.audio.enabled && state.settings.audio.moves
 
-export const selectIsSoundEnabled =
+export const selectIsAudioEnabled =
     (sound: SoundSetting) => (state: RootState) =>
-        state.settings.sound[sound]
+        state.settings.audio[sound]

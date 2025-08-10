@@ -1,20 +1,20 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
-import { selectSettings } from "@/redux/slices/settings/settings-selectors"
+import { selectAnimationSettings } from "@/redux/slices/settings/settings-selectors"
 import {
     updateMovesAnimation,
     ToggleSound as ToggleSoundReducer,
-    reset,
+    // reset,
 } from "@/redux/slices/settings/settings-slice"
 import { SoundSetting } from "@/redux/slices/settings/settings-types"
 
-export default function useSettings() {
+export default function useDisplaySettings() {
     const dispatch = useAppDispatch()
-    const { animation, audio } = useAppSelector(selectSettings)
+    const { moves} = useAppSelector(selectAnimationSettings)
 
     function toggleMovesAnimation() {
         dispatch(
             updateMovesAnimation({
-                enabled: !animation.moves.enabled,
+                enabled: !moves.enabled,
             })
         )
     }
@@ -26,21 +26,19 @@ export default function useSettings() {
             })
         )
     }
-    function resetDefaults() {
-        dispatch(reset())
-    }
+    // function resetDefaults() {
+    //     dispatch(reset())
+    // }
 
     function toggleSound(sound: SoundSetting) {
         dispatch(ToggleSoundReducer(sound))
     }
 
     return {
-        movesAnimationEnabled: animation.moves.enabled,
-        movesAnimationDuration: animation.moves.durationMs,
-        audio,
+        movesAnimationEnabled: moves.enabled,
+        movesAnimationDuration: moves.durationMs,
+        
         toggleMovesAnimation,
-        toggleSound,
         changeMovesDuration,
-        resetDefaults,
     }
 }

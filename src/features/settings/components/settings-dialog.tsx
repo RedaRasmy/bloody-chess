@@ -16,7 +16,7 @@ import { Slider } from "@/components/ui/slider"
 export default function SettingsDialog() {
     const {
         resetDefaults,
-        sound : {
+        audio : {
             moves,
             gameStart,
             gameEnd,
