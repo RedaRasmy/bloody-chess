@@ -20,6 +20,7 @@ export default function SelectColor({ value, onChange, className }: Props) {
         >
             {options.map((op) => (
                 <ColorOption
+                    key={op}
                     onClick={() => onChange(op)}
                     option={op}
                     isSelected={value === op}

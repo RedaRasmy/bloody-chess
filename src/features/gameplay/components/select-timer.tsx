@@ -48,6 +48,7 @@ export default function SelectTimer({
         >
             {options.map((op) => (
                 <TimerOption
+                    key={op}
                     onClick={() => handleClick(op)}
                     option={op}
                     isSelected={value === op}
