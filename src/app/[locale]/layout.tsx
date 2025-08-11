@@ -4,12 +4,11 @@ import "../globals.css"
 import StoreProvider from "@/components/providers/store-provider"
 import { getServerSession } from "next-auth"
 import SessionProvider from "@/components/providers/session-provider"
-import NavMenu from "@/components/nav-menu"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 import { notFound } from "next/navigation"
 import { routing } from "@/i18n/routing"
 import { ReactScan } from "@/components/react-scan"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import Header from "@/components/header"
 
@@ -54,7 +53,7 @@ export default async function RootLayout({
                             <SidebarProvider>
                                 <AppSidebar />
                                 <div className="w-full flex flex-col ">
-                                    <Header isAuthenticated={!!session}/>
+                                    <Header />
                                     <main className="px-3 md:px-5 lg:px-7 overflow-auto h-full">
                                         {children}
                                     </main>
