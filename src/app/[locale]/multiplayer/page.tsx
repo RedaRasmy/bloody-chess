@@ -12,7 +12,7 @@ import {
 import useGameSearching from "@/features/multiplayer/hooks/use-game-searching"
 import { useEffect } from "react"
 
-export default function Multiplayer() {
+export default function MultiplayerOptions() {
     const MULTIPLAYER_PATH = "play/multiplayer/"
     const router = useRouter()
     const params = useSearchParams()

@@ -11,12 +11,7 @@ import {
     Users,
     Bot,
     Clock,
-    Crown,
     Play,
-    TrendingUp,
-    Calendar,
-    Target,
-    Zap,
 } from "lucide-react"
 import Link from "next/link"
 

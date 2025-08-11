@@ -2,7 +2,6 @@
 import { 
   Settings as SettingsIcon, 
 } from "lucide-react"
-import { useState } from "react"
 import DisplaySettings from "@/features/settings/components/display-settings"
 import AudioSettings from "@/features/settings/components/audio-settings"
 

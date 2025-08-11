@@ -9,9 +9,7 @@ import { Slider } from "@/components/ui/slider"
 import SelectColor from "@/features/gameplay/components/select-color"
 import Link from "next/link"
 
-export default function Multiplayer() {
-    // const dispatch = useAppDispatch()
-
+export default function BotOptions() {
     const {
         start,
         setOptions,
