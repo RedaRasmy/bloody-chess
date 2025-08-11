@@ -1,24 +1,31 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { signOut } from "next-auth/react"
 import { LogOut } from "lucide-react"
-import {cn} from '@/lib/utils'
+import { cn } from "@/lib/utils"
+import { VariantProps } from "class-variance-authority"
 
-export default function logOutButton({
-    className
-}:{
+export default function LogOutButton({
+    className,
+    variant,
+    size,
+    onlyIcon = false,
+}: {
     className?: string
-}) {
+    onlyIcon?: boolean
+} & VariantProps<typeof buttonVariants>) {
     return (
         <Button
-            size={'sm'}
-            variant={"outline"}
-            className={cn("cursor-pointer flex gap-2 ",className)}
+            variant={onlyIcon ? "outline" : variant}
+            size={onlyIcon ? "icon" : size}
+            className={cn("cursor-pointer flex gap-2 items-center justify-center", className)}
             onClick={() => signOut()}
         >
-            <LogOut />
-            Sign out
+            <>
+                <LogOut size={16}/>
+                {!onlyIcon && "Sign out"}
+            </>
         </Button>
     )
 }

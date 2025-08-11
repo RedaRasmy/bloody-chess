@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { TrendingUp, Trophy } from "lucide-react"
+import LogOutButton from "./log-out-button"
 
 type Props = {
     username: string
@@ -11,8 +12,9 @@ export default function ProfileHeader({ username, gamesPlayed, wins }: Props) {
     return (
         <Card className="lg:mx-2 xl:mx-5 not-md:-space-y-3">
             <CardHeader>
-                <div>
+                <div className="flex gap-5 items-center justify-between">
                     <h1 className="text-2xl  font-semibold">{username}</h1>
+                    <LogOutButton variant={'outline'} size="sm" className="-mb-1"/>
                 </div>
             </CardHeader>
             <CardContent>
