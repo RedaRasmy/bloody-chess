@@ -4,26 +4,12 @@ import { useAppSelector } from "@/redux/hooks"
 import {
     selectGameStartedAt,
     selectIsGameOver,
-    // selectWhitePlayer,
-    // selectBlackPlayer,
-    // selectCurrentPlayer,
-    // selectLastMoveAt,
-    // selectGameStartedAt,
 } from "@/redux/slices/game/game-selectors"
 import playSound from "@/features/gameplay/utils/play-sound"
 import { selectIsAudioEnabled } from "@/redux/slices/settings/settings-selectors"
-// import { calculateTimeLeft } from "@/features/gameplay/utils/calculate-time-left"
-// import { updateTimings } from "@/redux/slices/game/game-slice"
 
 export default function Template({ children }: { children: ReactNode }) {
-    // const dispatch = useAppDispatch()
-    // const isPlayerTurn = useAppSelector(selectIsPlayerTurn)
-    // const preMoves = useAppSelector(selectPreMoves)
     const isGameOver = useAppSelector(selectIsGameOver)
-    // const whitePlayer = useAppSelector(selectWhitePlayer)
-    // const blackPlayer = useAppSelector(selectBlackPlayer)
-    // const currentTurn = useAppSelector(selectCurrentPlayer)
-    // const lastMoveAt = useAppSelector(selectLastMoveAt)
     const gameStartedAt = useAppSelector(selectGameStartedAt)
     const gameStart = useAppSelector(selectIsAudioEnabled('gameStart'))
     const gameEnd = useAppSelector(selectIsAudioEnabled('gameEnd'))
