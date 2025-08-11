@@ -13,12 +13,12 @@ export default function logOutButton({
     return (
         <Button
             size={'sm'}
-            variant={"secondary"}
-            className={cn("cursor-pointer flex gap-2 self-end px-2",className)}
+            variant={"outline"}
+            className={cn("cursor-pointer flex gap-2 ",className)}
             onClick={() => signOut()}
         >
             <LogOut />
-            <p>Sign out</p>
+            Sign out
         </Button>
     )
 }

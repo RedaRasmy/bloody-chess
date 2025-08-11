@@ -10,6 +10,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -20,6 +21,8 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import Image from 'next/image'
+import LogOutButton from "@/features/profile/components/log-out-button"
+import { cn } from "@/lib/utils"
 
 const gameItems = [
   { title: "Play vs Human", url: "/multiplayer", icon: Users },
@@ -46,12 +49,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={isCollapsed ? "w-14" : "w-64"}
+      className={cn(isCollapsed ? "w-14" : "w-64")}
       collapsible="icon"
     >
-      <SidebarContent>
+      <SidebarContent className="bg-background">
         {/* App Header */}
-        <div className="p-4 border-b border-sidebar-border bg-background">
+        <div className="p-4 border-b border-sidebar-border ">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="size-9 bg-gradient-primary rounded-lg flex items-center justify-center">
               {/* <Crown className="w-5 h-5 text-primary-foreground" /> */}
@@ -67,7 +70,7 @@ export function AppSidebar() {
         </div>
 
         {/* Game Section */}
-        <SidebarGroup>
+        <SidebarGroup >
           <SidebarGroupLabel className="flex items-center gap-2">
             <Gamepad2 className="w-4 h-4" />
             {!isCollapsed && "Play Chess"}
@@ -110,6 +113,11 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="bg-background">
+        {/* <div className="flex flex-row-reverse px-2 py-2">
+              <LogOutButton/>
+        </div> */}
+      </SidebarFooter>
     </Sidebar>
   )
 }
