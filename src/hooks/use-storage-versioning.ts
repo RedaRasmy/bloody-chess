@@ -11,8 +11,9 @@ export const useStorageVersioning = () => {
     useEffect(() => {
         const storedVersion = localStorage.getItem(VERSION_KEY)
 
-        // If no stored version, just set current version
+        // If no stored version, clear and set the version
         if (!storedVersion) {
+            localStorage.clear()
             localStorage.setItem(VERSION_KEY, APP_VERSION)
             return
         }
