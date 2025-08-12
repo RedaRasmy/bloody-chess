@@ -30,7 +30,7 @@ const menuItems = [
 ]
 
 export function AppSidebar() {
-    const { state } = useSidebar()
+    const { state, setOpenMobile } = useSidebar()
     const currentPath = location.pathname
 
     const isActive = (path: string) => currentPath === path
@@ -50,6 +50,7 @@ export function AppSidebar() {
                 {/* App Header */}
                 <div className="p-4 border-b border-sidebar-border ">
                     <Link
+                        onClick={() => setOpenMobile(false)}
                         href="/"
                         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                     >
@@ -87,6 +88,7 @@ export function AppSidebar() {
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild>
                                         <Link
+                                            onClick={() => setOpenMobile(false)}
                                             href={item.url}
                                             className={getNavCls({
                                                 isActive: isActive(item.url),
@@ -116,6 +118,7 @@ export function AppSidebar() {
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild>
                                         <Link
+                                            onClick={() => setOpenMobile(false)}
                                             href={item.url}
                                             className={getNavCls({
                                                 isActive: isActive(item.url),
