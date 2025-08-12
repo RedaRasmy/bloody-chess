@@ -54,7 +54,7 @@ export default async function RootLayout({
                                 <AppSidebar />
                                 <div className="w-full flex flex-col ">
                                     <Header />
-                                    <main className="px-3 md:px-5 lg:px-7 overflow-auto h-full">
+                                    <main className="px-3 pb-5 md:px-5 lg:px-7 overflow-auto h-full">
                                         {children}
                                     </main>
                                 </div>

@@ -17,7 +17,7 @@ import Link from "next/link"
 
 export default function Dashboard() {
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in ">
             {/* Hero Section */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-primary p-8 text-primary-foreground">
                 <div className="absolute inset-0 bg-black/20" />
