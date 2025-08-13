@@ -57,7 +57,6 @@ export async function matchGameIfExist({
     }
 }
 
-/// if there is no one waiting for u create new one instead :
 export async function createGame({
     isForGuests,
     timerOption,
@@ -130,9 +129,24 @@ export async function getFullGame(id: string): Promise<FullGame> {
 }
 
 export async function sendTimeOut(gameId: string, playerColor: Color) {
-    /// i should protect this
+    // this is safe enough for now by checking if timeLeft < 1s 
+    // no need to check auth ... at least for now :) 
+
+    const game = await db.query.games.findFirst({
+        where: (games, { eq }) => eq(games.id, gameId),
+    })
+
+    if (!game) throw new Error("Game not found")
+
+    const timeLeft =
+        playerColor === "w" ? game.whiteTimeLeft : game.blackTimeLeft
+
+    // ignore request if timeleft not under 1s or game is not active
+    if (game.status !== "playing" || timeLeft >= 1000) return
+
     const updateData =
         playerColor === "w" ? { whiteTimeLeft: 0 } : { blackTimeLeft: 0 }
+
     const [{ isForGuests, whiteId, blackId }] = await db
         .update(games)
         .set({
