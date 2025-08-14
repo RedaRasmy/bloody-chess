@@ -9,6 +9,9 @@ import { FullGame, GameStatus, NewGame, MatchedGame } from "@/db/types"
 import { getGuest } from "./guest-actions"
 import { getPlayer } from "./player-actions"
 import { Color, Square } from "chess.js"
+import { getServerSession } from "next-auth"
+import getColorName from "../utils/get-color-name"
+import { authOptions } from "@/lib/auth-options"
 
 export async function getGameById(id: string) {
     const game = await db.query.games.findFirst({
@@ -129,8 +132,8 @@ export async function getFullGame(id: string): Promise<FullGame> {
 }
 
 export async function sendTimeOut(gameId: string, playerColor: Color) {
-    // this is safe enough for now by checking if timeLeft < 1s 
-    // no need to check auth ... at least for now :) 
+    // this is safe enough for now by checking if timeLeft < 1s
+    // no need to check auth ... at least for now :)
 
     const game = await db.query.games.findFirst({
         where: (games, { eq }) => eq(games.id, gameId),
@@ -182,7 +185,26 @@ export async function sendTimeOut(gameId: string, playerColor: Color) {
 }
 
 export async function sendResign(gameId: string, playerColor: Color) {
-    /// i should protect this
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user) {
+        throw new Error("Unauthenticated")
+    }
+    const { playerId } = session.user
+
+    const game = await db.query.games.findFirst({
+        where: (games, { eq }) => eq(games.id, gameId),
+    })
+
+    if (!game) throw new Error("Game not found")
+    if (!game.blackId) throw new Error("Game not started yet")
+
+    const resignerId = playerColor === "w" ? game.whiteId : game.blackId
+    if (resignerId !== playerId)
+        throw new Error(
+            "Unauthorized , You are not allowed to resign for " +
+                getColorName(playerColor) +
+                " player"
+        )
 
     const [{ isForGuests, whiteId, blackId }] = await db
         .update(games)
