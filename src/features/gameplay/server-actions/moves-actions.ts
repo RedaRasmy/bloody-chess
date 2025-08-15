@@ -8,6 +8,9 @@ import { eq, inArray, sql } from "drizzle-orm"
 import { calculateTimeLeft } from "../utils/calculate-time-left"
 import { getGameoverCause } from "../utils/get-gameover-cause"
 import parseTimerOption from "../utils/parse-timer-option"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import getColorName from "../utils/get-color-name"
 
 export async function getMoves(gameId: string) {
     const gameMoves = await db.query.moves.findMany({
@@ -24,12 +27,12 @@ export async function makeMove({
     gameId: string
     move: MoveType
 }) {
-    /// Get The Game Before The Move
+    /// Get The Game 
     const game = await db.query.games.findFirst({
         where: (games, { eq }) => eq(games.id, gameId),
     })
 
-    /// Some Checks
+    /// Some Logical Checks
     if (!game) {
         throw new Error("No game found with id: " + gameId)
     } else if (game.status === "matching" || game.status === "preparing") {
@@ -37,10 +40,25 @@ export async function makeMove({
     } else if (game.status === "finished") {
         throw new Error("Unallowed Move : The game already finsihed")
     }
+
+    /// AUTH
+    const session = await getServerSession(authOptions)
+    if (!session) throw new Error("Unauthenticated")
+    const playerId = session.user.playerId
+    const currentPlayerId =
+        game.currentTurn === "w" ? game.whiteId : game.blackId
+
+    if (playerId !== currentPlayerId)
+        throw new Error(
+            "Unauthorized , You are not allowed to make move for " +
+                getColorName(game.currentTurn) +
+                " player"
+        )
+
     const lastMoveAt = game.lastMoveAt || game.gameStartedAt
     if (!lastMoveAt)
         throw new Error(
-            "You cant make a move while game is not started yet : lastMoveAt and gameCreatedAt are null"
+            "You can't make a move while game is not started yet : lastMoveAt and gameCreatedAt are null"
         )
 
     /// Move Logic
@@ -119,7 +137,7 @@ export async function makeMove({
         })
         .returning()
 
-    // update players stats
+    // update players stats if game is finished and is not for guests
     if (udpatedGame.status === "finished" && !udpatedGame.isForGuests) {
         const isDraw = udpatedGame.result === "draw"
         if (isDraw) {
