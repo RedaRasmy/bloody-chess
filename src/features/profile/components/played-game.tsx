@@ -12,7 +12,7 @@ export default function PlayedGame({
         <p>{timerOption}</p>
         <p className={cn('capitalize font-semibold text-green-500',{
           "text-accent" : result === 'lose',
-          "text-orange-500" : result === 'draw'
+          "text-yellow-500" : result === 'draw'
         })}>{result}</p>
     </div>
   )
