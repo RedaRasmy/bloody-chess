@@ -60,7 +60,7 @@ export const useChessTimer = ({ playerColor, onTimeOut }: UseTimerProps) => {
 
     // Only recalculate when the relevant state changes, not on every render
     const timeLeft = useMemo(() => {
-        if (!gameStartedAt || !isMyTurn) {
+        if (!gameStartedAt || !isMyTurn || isGameOver) {
             return player.timeLeft!
         }
 
