@@ -350,3 +350,13 @@ export async function rematchAction({
 
     return newGame
 }
+
+export async function getCurrentGame(playerId: string) {
+    return await db.query.games.findFirst({
+        where: (games, { eq, or, and }) =>
+            and(
+                or(eq(games.whiteId, playerId), eq(games.blackId, playerId)),
+                eq(games.status, "playing")
+            ),
+    })
+}
