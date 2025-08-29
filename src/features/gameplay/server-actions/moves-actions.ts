@@ -27,7 +27,7 @@ export async function makeMove({
     gameId: string
     move: MoveType
 }) {
-    /// Get The Game 
+    /// Get The Current Game State
     const game = await db.query.games.findFirst({
         where: (games, { eq }) => eq(games.id, gameId),
     })
@@ -42,18 +42,20 @@ export async function makeMove({
     }
 
     /// AUTH
-    const session = await getServerSession(authOptions)
-    if (!session) throw new Error("Unauthenticated")
-    const playerId = session.user.playerId
-    const currentPlayerId =
-        game.currentTurn === "w" ? game.whiteId : game.blackId
+    if (!game.isForGuests) {
+        const session = await getServerSession(authOptions)
+        if (!session) throw new Error("Unauthenticated")
+        const playerId = session.user.playerId
+        const currentPlayerId =
+            game.currentTurn === "w" ? game.whiteId : game.blackId
 
-    if (playerId !== currentPlayerId)
-        throw new Error(
-            "Unauthorized , You are not allowed to make move for " +
-                getColorName(game.currentTurn) +
-                " player"
-        )
+        if (playerId !== currentPlayerId)
+            throw new Error(
+                "Unauthorized , You are not allowed to make move for " +
+                    getColorName(game.currentTurn) +
+                    " player"
+            )
+    }
 
     const lastMoveAt = game.lastMoveAt || game.gameStartedAt
     if (!lastMoveAt)
