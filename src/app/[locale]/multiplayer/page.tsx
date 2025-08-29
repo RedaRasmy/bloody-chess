@@ -10,29 +10,31 @@ import {
     selectMultiplayerOptions,
 } from "@/redux/slices/game-options"
 import useGameSearching from "@/features/multiplayer/hooks/use-game-searching"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 export default function MultiplayerOptions() {
     const MULTIPLAYER_PATH = "play/multiplayer/"
     const router = useRouter()
     const params = useSearchParams()
-    const isAutoSearch = params.get("auto-search") === "true"
     const { timer } = useAppSelector(selectMultiplayerOptions)
     const dispatch = useAppDispatch()
-
+    const isAutoSearch = params.get("matching") === "true"
+    
     const { searchTimer, isSearching, startSearch, cancelSearch } =
-        useGameSearching({
-            timerOption: timer,
-            onGameFound: async (game, {}) => {
-                router.push(MULTIPLAYER_PATH + game.id)
-            },
-        })
+    useGameSearching({
+        timerOption: timer,
+        onGameFound: async (game, {}) => {
+            router.push(MULTIPLAYER_PATH + game.id)
+        },
+    })
 
+    const isCanceled = useRef(false)
+    
     useEffect(() => {
-        if (isAutoSearch) {
+        if (isAutoSearch && !isCanceled.current) {
             startSearch()
         }
-    }, [])
+    }, [startSearch])
 
     return (
         <div className="space-y-5 flex flex-col w-full">
@@ -77,7 +79,10 @@ export default function MultiplayerOptions() {
                             {isSearching && (
                                 <Button
                                     variant={"outline"}
-                                    onClick={cancelSearch}
+                                    onClick={()=>{
+                                        cancelSearch()
+                                        isCanceled.current = true
+                                    }}
                                     className="w-full lg:max-w-xs py-5 cursor-pointer"
                                 >
                                     Cancel

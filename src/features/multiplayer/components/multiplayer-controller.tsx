@@ -72,7 +72,7 @@ export default function MultiplayerController({
                     asChild
                     disabled={!isGameOver}
                 >
-                    <Link href="/?dialog=multiplayer">
+                    <Link href="/multiplayer?matching=true">
                         <Plus />
                         New Game
                     </Link>
