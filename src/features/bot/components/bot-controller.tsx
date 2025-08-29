@@ -49,7 +49,7 @@ export default function BotController() {
                     onClick={start}
                     variant={"outline"}
                 >
-                    <Link href="/?dialog=bot">
+                    <Link href="/bot">
                         <Plus />
                         New Game
                     </Link>
