@@ -14,7 +14,11 @@ export default function ProfileHeader({ username, gamesPlayed, wins }: Props) {
             <CardHeader>
                 <div className="flex gap-5 items-center justify-between">
                     <h1 className="text-2xl  font-semibold">{username}</h1>
-                    <LogOutButton variant={'outline'} size="sm" className="-mb-1"/>
+                    <LogOutButton
+                        variant={"outline"}
+                        size="sm"
+                        className="-mb-1"
+                    />
                 </div>
             </CardHeader>
             <CardContent>
@@ -34,8 +38,11 @@ export default function ProfileHeader({ username, gamesPlayed, wins }: Props) {
                             <span className="text-xl font-semibold">
                                 {wins === 0 || gamesPlayed === 0
                                     ? 0
-                                    : Number((wins / gamesPlayed).toFixed(4)) * 100
-                                    }
+                                    : parseFloat(
+                                          ((wins / gamesPlayed) * 100).toFixed(
+                                              2
+                                          )
+                                      )}
                                 %
                             </span>
                         </div>
